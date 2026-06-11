@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart-store";
-import type { Cheese } from "@/data/cheeses";
+import { categoryImage, type Cheese } from "@/data/cheeses";
 
 export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number }) {
   const { add, setOpen } = useCart();
@@ -15,17 +16,30 @@ export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number })
       transition={{ duration: 0.5, delay: (index % 6) * 0.05 }}
       className="group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-[var(--shadow-elegant)]"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--gradient-warm)]">
-        <div className="absolute inset-0 flex items-center justify-center text-7xl opacity-90 transition-transform duration-700 group-hover:scale-110">
-          {cheese.emoji}
-        </div>
+      <Link
+        to="/fromage/$id"
+        params={{ id: cheese.id }}
+        className="relative block aspect-[4/3] overflow-hidden"
+      >
+        <img
+          src={categoryImage[cheese.category]}
+          alt={cheese.name}
+          loading="lazy"
+          width={1600}
+          height={1100}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         <Badge className="absolute left-3 top-3 bg-card text-card-foreground hover:bg-card">
           {cheese.category}
         </Badge>
-      </div>
+        <span className="absolute right-3 top-3 text-2xl drop-shadow">{cheese.emoji}</span>
+      </Link>
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-baseline justify-between gap-2">
-          <h3 className="font-display text-xl font-semibold leading-tight">{cheese.name}</h3>
+          <Link to="/fromage/$id" params={{ id: cheese.id }} className="hover:text-primary transition-colors">
+            <h3 className="font-display text-xl font-semibold leading-tight">{cheese.name}</h3>
+          </Link>
         </div>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
           {cheese.region} · {cheese.milk} · {cheese.age}
