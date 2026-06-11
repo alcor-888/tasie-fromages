@@ -70,7 +70,7 @@ function StatRow({ icon: Icon, label, value }: { icon: typeof Clock; label: stri
 }
 
 function CheeseDetail() {
-  const { cheese } = Route.useLoaderData();
+  const { cheese } = Route.useLoaderData() as { cheese: Cheese };
   const { add, setOpen, count } = useCart();
   const related = cheeses.filter((c) => c.category === cheese.category && c.id !== cheese.id).slice(0, 3);
 
@@ -166,7 +166,7 @@ function CheeseDetail() {
             <h2 className="mt-2 font-display text-3xl font-semibold">En bouche</h2>
             <p className="mt-4 text-muted-foreground">Texture : {cheese.texture.toLowerCase()}.</p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {cheese.tastingNotes.map((n) => (
+              {cheese.tastingNotes.map((n: string) => (
                 <span key={n} className="rounded-full border border-border bg-card px-4 py-1.5 text-sm">
                   {n}
                 </span>
