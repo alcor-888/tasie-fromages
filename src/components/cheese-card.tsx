@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart-store";
-import { categoryImage, type Cheese } from "@/data/cheeses";
+import { getCategoryImage, type Cheese } from "@/data/cheeses";
 
 export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number }) {
   const { add, setOpen } = useCart();
@@ -22,7 +22,7 @@ export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number })
         className="relative block aspect-[4/3] overflow-hidden"
       >
         <img
-          src={categoryImage[cheese.category]}
+          src={getCategoryImage(cheese.category, cheese.milk)}
           alt={cheese.name}
           loading="lazy"
           width={1600}
@@ -30,9 +30,11 @@ export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number })
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        <Badge className="absolute left-3 top-3 bg-card text-card-foreground hover:bg-card">
-          {cheese.category}
-        </Badge>
+        {cheese.category && (
+          <Badge className="absolute left-3 top-3 bg-card text-card-foreground hover:bg-card">
+            {cheese.category}
+          </Badge>
+        )}
         <span className="absolute right-3 top-3 text-2xl drop-shadow">{cheese.emoji}</span>
       </Link>
       <div className="flex flex-1 flex-col gap-3 p-5">
@@ -42,14 +44,16 @@ export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number })
           </Link>
         </div>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
-          {cheese.region} · {cheese.milk} · {cheese.age}
+          {[cheese.region, cheese.milk, cheese.age].filter(Boolean).join(" · ")}
         </p>
-        <p className="text-sm leading-relaxed text-muted-foreground line-clamp-3">
-          {cheese.description}
-        </p>
+        {cheese.description && (
+          <p className="text-sm leading-relaxed text-muted-foreground line-clamp-3">
+            {cheese.description}
+          </p>
+        )}
         <div className="mt-auto flex items-center justify-between pt-3">
           <div className="font-display">
-            <span className="text-2xl font-semibold">{cheese.pricePerKg}€</span>
+            <span className="text-2xl font-semibold">{cheese.priceLabel}</span>
             <span className="ml-1 text-xs text-muted-foreground">{cheese.unit}</span>
           </div>
           <Button
