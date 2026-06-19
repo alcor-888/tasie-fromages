@@ -1,15 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ShoppingBag, Search, MapPin, Phone, Clock } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
-import { cheeses, categories, milks, type CheeseCategory, type Milk } from "@/data/cheeses";
+import type { Cheese } from "@/data/cheeses";
+import { listCheeses } from "@/lib/cheeses.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/lib/cart-store";
+
+const cheesesQuery = queryOptions({
+  queryKey: ["cheeses"],
+  queryFn: () => listCheeses(),
+  staleTime: 5 * 60_000,
+});
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,33 +29,57 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Sélection de fromages d'exception. Réservez en ligne, retirez en boutique." },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(cheesesQuery),
+  pendingComponent: () => (
+    <div className="mx-auto grid max-w-7xl gap-6 px-6 py-24 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} className="h-80 w-full" />
+      ))}
+    </div>
+  ),
+  errorComponent: ({ error }) => (
+    <div className="mx-auto max-w-2xl px-6 py-24 text-center">
+      <p className="font-display text-2xl">Impossible de charger la sélection.</p>
+      <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+    </div>
+  ),
   component: Index,
 });
 
 type SortKey = "name" | "price-asc" | "price-desc" | "age";
 
 function Index() {
+  const { data: cheeses } = useSuspenseQuery(cheesesQuery);
   const { count, setOpen } = useCart();
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<CheeseCategory | "all">("all");
-  const [milk, setMilk] = useState<Milk | "all">("all");
+  const [category, setCategory] = useState<string>("all");
+  const [milk, setMilk] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("name");
 
+  const categories = useMemo(
+    () => Array.from(new Set(cheeses.map((c) => c.category).filter(Boolean) as string[])).sort(),
+    [cheeses],
+  );
+  const milks = useMemo(
+    () => Array.from(new Set(cheeses.map((c) => c.milk).filter(Boolean) as string[])).sort(),
+    [cheeses],
+  );
+
   const filtered = useMemo(() => {
-    let list = cheeses.filter((c) => {
+    let list = cheeses.filter((c: Cheese) => {
       if (category !== "all" && c.category !== category) return false;
       if (milk !== "all" && c.milk !== milk) return false;
-      if (search && !`${c.name} ${c.region} ${c.description}`.toLowerCase().includes(search.toLowerCase())) return false;
+      if (search && !`${c.name} ${c.region ?? ""} ${c.description ?? ""} ${c.producer ?? ""}`.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
     list = [...list].sort((a, b) => {
       if (sort === "price-asc") return a.pricePerKg - b.pricePerKg;
       if (sort === "price-desc") return b.pricePerKg - a.pricePerKg;
-      if (sort === "age") return b.age.localeCompare(a.age);
+      if (sort === "age") return (b.age ?? "").localeCompare(a.age ?? "");
       return a.name.localeCompare(b.name);
     });
     return list;
-  }, [search, category, milk, sort]);
+  }, [cheeses, search, category, milk, sort]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,14 +177,14 @@ function Index() {
                 className="pl-9"
               />
             </div>
-            <Select value={category} onValueChange={(v) => setCategory(v as CheeseCategory | "all")}>
+            <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="md:w-[180px]"><SelectValue placeholder="Catégorie" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toutes catégories</SelectItem>
                 {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={milk} onValueChange={(v) => setMilk(v as Milk | "all")}>
+            <Select value={milk} onValueChange={setMilk}>
               <SelectTrigger className="md:w-[150px]"><SelectValue placeholder="Lait" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous laits</SelectItem>
@@ -179,7 +212,7 @@ function Index() {
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((c, i) => (
+              {filtered.map((c: Cheese, i: number) => (
                 <CheeseCard key={c.id} cheese={c} index={i} />
               ))}
             </div>
