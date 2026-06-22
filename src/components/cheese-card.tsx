@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/lib/cart-store";
 import { getCategoryImage, type Cheese } from "@/data/cheeses";
 
 export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number }) {
+  const { add, setOpen } = useCart();
+  const soldOut = cheese.stock === 0;
   return (
     <motion.article
       initial={{ opacity: 0, y: 24 }}
@@ -54,10 +57,14 @@ export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number })
             <span className="text-2xl font-semibold">{cheese.priceLabel}</span>
             <span className="ml-1 text-xs text-muted-foreground">{cheese.unit}</span>
           </div>
-          <Button size="sm" asChild className="gap-1">
-            <Link to="/fromage/$id" params={{ id: cheese.id }}>
-              Commander <ArrowRight className="h-4 w-4" />
-            </Link>
+          <Button
+            size="sm"
+            disabled={soldOut}
+            onClick={() => { add(cheese); setOpen(true); }}
+            className="gap-1"
+          >
+            <Plus className="h-4 w-4" />
+            {soldOut ? "Épuisé" : "Ajouter"}
           </Button>
         </div>
       </div>

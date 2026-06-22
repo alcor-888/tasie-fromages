@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import type { Cheese } from "@/data/cheeses";
 
 export interface CartItem {
@@ -24,17 +25,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
 
+  const cap = (cheese: Cheese, desired: number) => {
+    const stock = cheese.stock;
+    if (stock == null) return Math.max(1, desired);
+    return Math.max(0, Math.min(desired, stock));
+  };
+
   const add = (cheese: Cheese) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.cheese.id === cheese.id);
-      if (existing) return prev.map((i) => i.cheese.id === cheese.id ? { ...i, quantity: i.quantity + 1 } : i);
-      return [...prev, { cheese, quantity: 1 }];
+      const current = existing?.quantity ?? 0;
+      const next = cap(cheese, current + 1);
+      if (next === current) {
+        toast.error(cheese.stock === 0 ? "Ce fromage est épuisé." : `Stock maximum atteint (${cheese.stock}).`);
+        return prev;
+      }
+      if (existing) return prev.map((i) => i.cheese.id === cheese.id ? { ...i, quantity: next } : i);
+      return [...prev, { cheese, quantity: next }];
     });
   };
   const remove = (id: string) => setItems((p) => p.filter((i) => i.cheese.id !== id));
   const setQty = (id: string, qty: number) => {
-    if (qty <= 0) return remove(id);
-    setItems((p) => p.map((i) => i.cheese.id === id ? { ...i, quantity: qty } : i));
+    setItems((p) => {
+      const item = p.find((i) => i.cheese.id === id);
+      if (!item) return p;
+      const next = cap(item.cheese, qty);
+      if (next <= 0) return p.filter((i) => i.cheese.id !== id);
+      if (qty > next) toast.error(`Stock limité à ${item.cheese.stock}.`);
+      return p.map((i) => i.cheese.id === id ? { ...i, quantity: next } : i);
+    });
   };
   const clear = () => setItems([]);
   const count = items.reduce((s, i) => s + i.quantity, 0);

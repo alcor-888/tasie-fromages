@@ -1,23 +1,63 @@
 import { useState } from "react";
 import { Minus, Plus, Trash2, ShoppingBag, Check } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { useMutation } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
+import { placeOrder } from "@/lib/orders.functions";
+
+type OrderPayload = {
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  pickupDate: string;
+  notes?: string;
+  items: {
+    cheeseId: string;
+    cheeseName: string;
+    unitPrice: number;
+    unitLabel?: string;
+    quantity: number;
+  }[];
+};
 import { toast } from "sonner";
 
 export function OrderSheet() {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
   const [step, setStep] = useState<"cart" | "form" | "done">("cart");
   const [form, setForm] = useState({ name: "", phone: "", email: "", pickup: "", notes: "" });
+  const placeOrderFn = useServerFn(placeOrder);
+  const mutation = useMutation({
+    mutationFn: (payload: OrderPayload) => placeOrderFn({ data: payload }),
+    onSuccess: () => {
+      toast.success("Bon de commande envoyé — nous vous rappelons rapidement.");
+      setStep("done");
+      setTimeout(() => { clear(); setStep("cart"); setOpen(false); setForm({ name: "", phone: "", email: "", pickup: "", notes: "" }); }, 3000);
+    },
+    onError: (e: Error) => toast.error(e.message || "Envoi impossible, réessayez."),
+  });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Commande envoyée — nous vous rappellons rapidement.");
-    setStep("done");
-    setTimeout(() => { clear(); setStep("cart"); setOpen(false); }, 2500);
+    if (items.length === 0) return;
+    mutation.mutate({
+      customerName: form.name,
+      customerPhone: form.phone,
+      customerEmail: form.email || undefined,
+      pickupDate: form.pickup,
+      notes: form.notes || undefined,
+      items: items.map((i) => ({
+        cheeseId: i.cheese.id,
+        cheeseName: i.cheese.name,
+        unitPrice: i.cheese.pricePerKg,
+        unitLabel: i.cheese.unit,
+        quantity: i.quantity,
+      })),
+    });
   };
 
   return (
@@ -121,7 +161,9 @@ export function OrderSheet() {
               </div>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep("cart")}>Retour</Button>
-                <Button type="submit" className="flex-1">Envoyer la commande</Button>
+                <Button type="submit" className="flex-1" disabled={mutation.isPending}>
+                  {mutation.isPending ? "Envoi…" : "Envoyer la commande"}
+                </Button>
               </div>
             </div>
           </form>
