@@ -1,13 +1,17 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, Plus, MapPin, Clock, Droplet, Wheat, Sparkles, Factory, Leaf, Lightbulb } from "lucide-react";
+import { ArrowLeft, Minus, Plus, MapPin, Clock, Droplet, Wheat, Factory, Leaf, Lightbulb, Check, Send } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { getCategoryImage, type Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { CheeseCard } from "@/components/cheese-card";
-import { useCart } from "@/lib/cart-store";
 
 const cheesesQuery = queryOptions({
   queryKey: ["cheeses"],
@@ -50,7 +54,22 @@ function CheeseDetail() {
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
   const cheese = cheeses.find((c: Cheese) => c.id === id);
   if (!cheese) throw notFound();
-  const { add, setOpen, count } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  const [form, setForm] = useState({ name: "", phone: "", email: "", pickup: "", notes: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const unitPrice = cheese.pricePerKg ?? 0;
+  const estimate = unitPrice * quantity;
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.phone || !form.pickup) {
+      toast.error("Merci de remplir nom, téléphone et date de retrait.");
+      return;
+    }
+    toast.success("Commande envoyée — nous vous rappellons rapidement.");
+    setSubmitted(true);
+  };
+
   const related = cheeses
     .filter((c: Cheese) => c.id !== cheese.id && (c.category === cheese.category || c.milk === cheese.milk))
     .slice(0, 3);
@@ -65,9 +84,6 @@ function CheeseDetail() {
             <span className="font-display text-2xl font-semibold">La Cave</span>
             <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Fromagère</span>
           </Link>
-          <Button size="sm" onClick={() => setOpen(true)}>
-            Panier{count > 0 ? ` (${count})` : ""}
-          </Button>
         </div>
       </header>
 
@@ -134,19 +150,100 @@ function CheeseDetail() {
             {cheese.region && <StatRow icon={MapPin} label="Origine" value={cheese.region} />}
           </div>
 
-          <div className="mt-8 flex items-center justify-between rounded-lg border border-border bg-card p-5">
-            <div>
+          <div className="mt-8 rounded-lg border border-border bg-card p-5">
+            <div className="flex items-baseline justify-between">
               <p className="font-display text-3xl font-semibold">{cheese.priceLabel}</p>
               <p className="text-xs text-muted-foreground">{cheese.unit}</p>
             </div>
-            <Button size="lg" onClick={() => { add(cheese); setOpen(true); }} className="gap-2">
-              <Plus className="h-4 w-4" /> Ajouter au panier
-            </Button>
           </div>
-          <p className="mt-3 text-center text-xs text-muted-foreground">
-            Réservation en ligne · paiement et retrait en boutique
-          </p>
         </motion.div>
+      </section>
+
+      {/* Order form */}
+      <section id="commander" className="border-t border-border bg-secondary/30">
+        <div className="mx-auto max-w-3xl px-6 py-16">
+          <p className="text-xs uppercase tracking-[0.3em] text-primary">Réservation</p>
+          <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">
+            Commander ce fromage
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Réservez votre quantité — règlement et retrait en boutique.
+          </p>
+
+          {submitted ? (
+            <div className="mt-10 flex flex-col items-center gap-4 rounded-lg border border-border bg-card p-10 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Check className="h-7 w-7" />
+              </div>
+              <p className="font-display text-2xl">Merci, {form.name.split(" ")[0]} !</p>
+              <p className="text-sm text-muted-foreground">
+                Nous vous contactons sous 24h pour confirmer votre commande de
+                {" "}<strong>{quantity} {cheese.unit}</strong> de {cheese.name}.
+              </p>
+              <Button variant="outline" asChild className="mt-2">
+                <Link to="/">Retour à la sélection</Link>
+              </Button>
+            </div>
+          ) : (
+            <form onSubmit={submit} className="mt-8 grid gap-5 rounded-lg border border-border bg-card p-6 md:p-8">
+              <div className="grid gap-2">
+                <Label>Quantité ({cheese.unit})</Label>
+                <div className="flex items-center gap-3">
+                  <Button type="button" variant="outline" size="icon" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={999}
+                    value={quantity}
+                    onChange={(e) => setQuantity(Math.max(1, Math.min(999, Number(e.target.value) || 1)))}
+                    className="w-24 text-center"
+                  />
+                  <Button type="button" variant="outline" size="icon" onClick={() => setQuantity((q) => Math.min(999, q + 1))}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  {unitPrice > 0 && (
+                    <span className="ml-auto font-display text-xl font-semibold">
+                      ≈ {estimate.toFixed(2)} €
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Nom complet *</Label>
+                  <Input id="name" required maxLength={100} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">Téléphone *</Label>
+                  <Input id="phone" type="tel" required maxLength={30} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" maxLength={255} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="pickup">Date de retrait *</Label>
+                  <Input id="pickup" type="date" required value={form.pickup} onChange={(e) => setForm({ ...form, pickup: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="notes">Notes (découpe, préférences…)</Label>
+                <Textarea id="notes" rows={3} maxLength={500} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+              </div>
+
+              <Button type="submit" size="lg" className="gap-2">
+                <Send className="h-4 w-4" /> Envoyer la demande
+              </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                Aucun paiement en ligne — règlement à la boutique.
+              </p>
+            </form>
+          )}
+        </div>
       </section>
 
       {cheese.conseils && (
