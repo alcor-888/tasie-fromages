@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ShoppingBag, Search, MapPin, Phone, Clock } from "lucide-react";
+import { Search, MapPin, Phone, Clock } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCart } from "@/lib/cart-store";
 
 const cheesesQuery = queryOptions({
   queryKey: ["cheeses"],
@@ -50,7 +49,6 @@ type SortKey = "name" | "price-asc" | "price-desc" | "age";
 
 function Index() {
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
-  const { count, setOpen } = useCart();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [milk, setMilk] = useState<string>("all");
@@ -95,12 +93,8 @@ function Index() {
             <a href="#commander" className="text-muted-foreground transition-colors hover:text-foreground">Commander</a>
             <a href="#visiter" className="text-muted-foreground transition-colors hover:text-foreground">Visiter</a>
           </nav>
-          <Button onClick={() => setOpen(true)} variant="default" size="sm" className="gap-2">
-            <ShoppingBag className="h-4 w-4" />
-            Panier
-            {count > 0 && (
-              <Badge className="ml-1 h-5 min-w-5 rounded-full bg-accent px-1.5 text-accent-foreground">{count}</Badge>
-            )}
+          <Button asChild variant="default" size="sm">
+            <a href="#selection">Voir la sélection</a>
           </Button>
         </div>
       </header>
