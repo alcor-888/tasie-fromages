@@ -1,13 +1,17 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, Plus, MapPin, Clock, Droplet, Wheat, Sparkles, Factory, Leaf, Lightbulb } from "lucide-react";
+import { ArrowLeft, Minus, Plus, MapPin, Clock, Droplet, Wheat, Factory, Leaf, Lightbulb, Check, Send } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { getCategoryImage, type Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { CheeseCard } from "@/components/cheese-card";
-import { useCart } from "@/lib/cart-store";
 
 const cheesesQuery = queryOptions({
   queryKey: ["cheeses"],
