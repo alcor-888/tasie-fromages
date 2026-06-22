@@ -9,6 +9,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
 import { placeOrder } from "@/lib/orders.functions";
+
+type OrderPayload = {
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  pickupDate: string;
+  notes?: string;
+  items: {
+    cheeseId: string;
+    cheeseName: string;
+    unitPrice: number;
+    unitLabel?: string;
+    quantity: number;
+  }[];
+};
 import { toast } from "sonner";
 
 export function OrderSheet() {
@@ -17,8 +32,7 @@ export function OrderSheet() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", pickup: "", notes: "" });
   const placeOrderFn = useServerFn(placeOrder);
   const mutation = useMutation({
-    mutationFn: (payload: Parameters<typeof placeOrderFn>[0]["data"]) =>
-      placeOrderFn({ data: payload }),
+    mutationFn: (payload: OrderPayload) => placeOrderFn({ data: payload }),
     onSuccess: () => {
       toast.success("Bon de commande envoyé — nous vous rappelons rapidement.");
       setStep("done");
