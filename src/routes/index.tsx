@@ -9,7 +9,6 @@ import { listCheeses } from "@/lib/cheeses.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
