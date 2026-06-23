@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import type { Cheese } from "@/data/cheeses";
+
+const CART_STORAGE_KEY = "la-cave-fromagere-cart";
 
 export interface CartItem {
   cheese: Cheese;
@@ -24,6 +26,26 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as CartItem[];
+        if (Array.isArray(parsed)) setItems(parsed.filter((item) => item?.cheese?.id && item.quantity > 0));
+      }
+    } catch {
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+    } finally {
+      setReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  }, [items, ready]);
 
   const cap = (cheese: Cheese, desired: number) => {
     const stock = cheese.stock;
@@ -55,7 +77,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return p.map((i) => i.cheese.id === id ? { ...i, quantity: next } : i);
     });
   };
-  const clear = () => setItems([]);
+  const clear = () => {
+    setItems([]);
+    if (typeof window !== "undefined") window.localStorage.removeItem(CART_STORAGE_KEY);
+  };
   const count = items.reduce((s, i) => s + i.quantity, 0);
   const total = items.reduce((s, i) => s + i.quantity * i.cheese.pricePerKg, 0);
 

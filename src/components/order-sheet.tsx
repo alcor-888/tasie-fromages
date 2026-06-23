@@ -26,6 +26,34 @@ type OrderPayload = {
 };
 import { toast } from "sonner";
 
+export function CartAccessButton() {
+  const { count, total, open, setOpen } = useCart();
+
+  if (open) return null;
+
+  return (
+    <Button
+      type="button"
+      onClick={() => setOpen(true)}
+      className="fixed bottom-4 right-4 z-50 h-14 gap-3 rounded-full px-5 shadow-[var(--shadow-elegant)] sm:bottom-6 sm:right-6"
+      aria-label={`Ouvrir le panier${count > 0 ? `, ${count} article${count > 1 ? "s" : ""}` : ""}`}
+    >
+      <span className="relative inline-flex">
+        <ShoppingBag className="h-5 w-5" />
+        {count > 0 && (
+          <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold text-accent-foreground">
+            {count}
+          </span>
+        )}
+      </span>
+      <span className="flex flex-col items-start leading-none">
+        <span className="text-sm font-medium">Panier</span>
+        {count > 0 && <span className="text-xs opacity-80">{total.toFixed(2)}€</span>}
+      </span>
+    </Button>
+  );
+}
+
 export function OrderSheet() {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
   const [step, setStep] = useState<"cart" | "form" | "done">("cart");
