@@ -57,6 +57,7 @@ export function CartAccessButton() {
 
 export function OrderSheet() {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
+  const navigate = useNavigate();
   const [step, setStep] = useState<"cart" | "form" | "done">("cart");
   const [form, setForm] = useState({ name: "", phone: "", email: "", pickup: "", notes: "" });
   const placeOrderFn = useServerFn(placeOrder);
