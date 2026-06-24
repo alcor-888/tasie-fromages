@@ -93,7 +93,7 @@ function Index() {
             <a href="#visiter" className="text-muted-foreground transition-colors hover:text-foreground">Visiter</a>
           </nav>
           <Button asChild variant="default" size="sm">
-            <a href="#selection">Voir la sélection</a>
+            <a href="#selection">Découvrer ma sélection du moment</a>
           </Button>
         </div>
       </header>
@@ -116,7 +116,7 @@ function Index() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild>
-                <a href="#selection">Explorer la sélection</a>
+                <a href="#selection">Découvrer ma sélection du moment</a>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <a href="#visiter">Nous rendre visite</a>
