@@ -112,7 +112,7 @@ function Index() {
               <span className="italic text-primary">par Rodolphe Bardet</span>
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
-              Une sélection de fromages fermiers AOP affinés dans nos caves, à découvrir, réserver et venir retirer en boutique.
+              Une sélection de fromages, charcuteries et snacks à découvrir, réserver et livrés, lors de ma prochaine visite.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild>
