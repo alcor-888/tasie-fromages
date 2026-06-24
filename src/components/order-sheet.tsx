@@ -151,6 +151,15 @@ export function OrderSheet() {
                   <span className="text-sm text-muted-foreground">Estimation totale</span>
                   <span className="font-display text-2xl font-semibold">{total.toFixed(2)}€</span>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => { setOpen(false); navigate({ to: "/" }); }}
+                >
+                  Continuer les achats
+                </Button>
                 <Button className="w-full" size="lg" onClick={() => setStep("form")}>
                   Continuer la commande
                 </Button>
