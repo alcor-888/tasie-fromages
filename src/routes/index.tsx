@@ -106,7 +106,7 @@ function Index() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 1962</p>
+            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
             <h1 className="font-display text-5xl font-semibold leading-[1.05] md:text-7xl">
               L'art du fromage,<br />
               <span className="italic text-primary">affiné avec patience.</span>
