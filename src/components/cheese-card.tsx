@@ -8,7 +8,6 @@ import { getCategoryImage, type Cheese } from "@/data/cheeses";
 
 export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number }) {
   const { add, setOpen } = useCart();
-  const soldOut = cheese.stock === 0;
   return (
     <motion.article
       initial={{ opacity: 0, y: 24 }}
@@ -59,12 +58,11 @@ export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number })
           </div>
           <Button
             size="sm"
-            disabled={soldOut}
             onClick={() => { add(cheese); setOpen(true); }}
             className="gap-1"
           >
             <Plus className="h-4 w-4" />
-            {soldOut ? "Épuisé" : "Ajouter"}
+            Ajouter
           </Button>
         </div>
       </div>
