@@ -109,7 +109,7 @@ function Index() {
             <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
             <h1 className="font-display text-5xl font-semibold leading-[1.05] md:text-7xl">
               L'art du fromage,<br />
-              <span className="italic text-primary">affiné avec patience.</span>
+              <span className="italic text-primary">par Rodolphe Bardet</span>
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
               Une sélection de fromages fermiers AOP affinés dans nos caves, à découvrir, réserver et venir retirer en boutique.
