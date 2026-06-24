@@ -93,7 +93,7 @@ function Index() {
             <a href="#visiter" className="text-muted-foreground transition-colors hover:text-foreground">Visiter</a>
           </nav>
           <Button asChild variant="default" size="sm">
-            <a href="#selection">Voir la sélection</a>
+            <a href="#selection">Découvrer ma sélection du moment</a>
           </Button>
         </div>
       </header>
