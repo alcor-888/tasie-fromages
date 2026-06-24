@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Minus, Plus, Trash2, ShoppingBag, Check } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
@@ -56,6 +57,7 @@ export function CartAccessButton() {
 
 export function OrderSheet() {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
+  const navigate = useNavigate();
   const [step, setStep] = useState<"cart" | "form" | "done">("cart");
   const [form, setForm] = useState({ name: "", phone: "", email: "", pickup: "", notes: "" });
   const placeOrderFn = useServerFn(placeOrder);
@@ -149,6 +151,15 @@ export function OrderSheet() {
                   <span className="text-sm text-muted-foreground">Estimation totale</span>
                   <span className="font-display text-2xl font-semibold">{total.toFixed(2)}€</span>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => { setOpen(false); navigate({ to: "/" }); }}
+                >
+                  Continuer les achats
+                </Button>
                 <Button className="w-full" size="lg" onClick={() => setStep("form")}>
                   Continuer la commande
                 </Button>
