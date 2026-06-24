@@ -48,9 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, ready]);
 
   const cap = (cheese: Cheese, desired: number) => {
-    const stock = cheese.stock;
-    if (stock == null) return Math.max(1, desired);
-    return Math.max(0, Math.min(desired, stock));
+    return Math.max(0, desired);
   };
 
   const add = (cheese: Cheese) => {
@@ -58,10 +56,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existing = prev.find((i) => i.cheese.id === cheese.id);
       const current = existing?.quantity ?? 0;
       const next = cap(cheese, current + 1);
-      if (next === current) {
-        toast.error(cheese.stock === 0 ? "Ce fromage est épuisé." : `Stock maximum atteint (${cheese.stock}).`);
-        return prev;
-      }
       if (existing) return prev.map((i) => i.cheese.id === cheese.id ? { ...i, quantity: next } : i);
       return [...prev, { cheese, quantity: next }];
     });
@@ -73,7 +67,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (!item) return p;
       const next = cap(item.cheese, qty);
       if (next <= 0) return p.filter((i) => i.cheese.id !== id);
-      if (qty > next) toast.error(`Stock limité à ${item.cheese.stock}.`);
       return p.map((i) => i.cheese.id === id ? { ...i, quantity: next } : i);
     });
   };
