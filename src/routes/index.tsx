@@ -252,7 +252,7 @@ function Index() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} La Cave Fromagère — Aucun paiement en ligne · retrait uniquement en boutique
+        © {new Date().getFullYear()} Tasie Fromages — par Rodolphe Bardet — Aucun paiement en ligne · retrait uniquement en boutique
       </footer>
     </div>
   );
