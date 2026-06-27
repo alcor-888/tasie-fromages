@@ -1,17 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Search, MapPin, Phone, Clock } from "lucide-react";
+import { MapPin, Phone, Clock } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { listCurated } from "@/lib/curated.functions";
+import { useFilters, type ActiveList } from "@/lib/filter-context";
 import { CheeseCard } from "@/components/cheese-card";
+import { SearchFilterBar } from "@/components/search-filter-bar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const cheesesQuery = queryOptions({
@@ -55,17 +55,10 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type SortKey = "name" | "price-asc" | "price-desc" | "age";
-type ActiveList = "all" | "promotion" | "selection";
-
 function Index() {
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
   const { data: curated } = useSuspenseQuery(curatedQuery);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<string>("all");
-  const [milk, setMilk] = useState<string>("all");
-  const [sort, setSort] = useState<SortKey>("name");
-  const [activeList, setActiveList] = useState<ActiveList>("all");
+  const { search, category, milk, sort, activeList, setActiveList } = useFilters();
 
   const promotionIds = useMemo(
     () => new Set(curated.filter((c) => c.list_type === "promotion").map((c) => c.cheese_id)),
@@ -74,15 +67,6 @@ function Index() {
   const selectionIds = useMemo(
     () => new Set(curated.filter((c) => c.list_type === "selection").map((c) => c.cheese_id)),
     [curated],
-  );
-
-  const categories = useMemo(
-    () => Array.from(new Set(cheeses.map((c) => c.category).filter(Boolean) as string[])).sort(),
-    [cheeses],
-  );
-  const milks = useMemo(
-    () => Array.from(new Set(cheeses.map((c) => c.milk).filter(Boolean) as string[])).sort(),
-    [cheeses],
   );
 
   const filtered = useMemo(() => {
@@ -200,40 +184,9 @@ function Index() {
             </p>
           </div>
 
-          {/* Filters */}
-          <div className="mb-8 grid gap-3 rounded-lg border border-border bg-card p-4 md:grid-cols-[1fr_auto_auto_auto]">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un fromage, une région…"
-                className="pl-9"
-              />
-            </div>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="md:w-[180px]"><SelectValue placeholder="Catégorie" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes catégories</SelectItem>
-                {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={milk} onValueChange={setMilk}>
-              <SelectTrigger className="md:w-[150px]"><SelectValue placeholder="Lait" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous laits</SelectItem>
-                {milks.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-              <SelectTrigger className="md:w-[180px]"><SelectValue placeholder="Trier" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Trier : Nom (A→Z)</SelectItem>
-                <SelectItem value="price-asc">Prix croissant</SelectItem>
-                <SelectItem value="price-desc">Prix décroissant</SelectItem>
-                <SelectItem value="age">Affinage</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Filters — sticky so they stay accessible while scrolling */}
+          <div className="sticky top-16 z-30 mb-8">
+            <SearchFilterBar cheeses={cheeses} />
           </div>
 
           <p className="mb-6 text-sm text-muted-foreground">

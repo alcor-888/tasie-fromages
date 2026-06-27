@@ -8,6 +8,7 @@ import { getCategoryImage, type Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
+import { SearchFilterBar } from "@/components/search-filter-bar";
 
 const cheesesQuery = queryOptions({
   queryKey: ["cheeses"],
@@ -71,6 +72,10 @@ function CheeseDetail() {
           </Button>
         </div>
       </header>
+
+      <div className="sticky top-16 z-30 mx-auto max-w-7xl px-6 py-2">
+        <SearchFilterBar cheeses={cheeses} />
+      </div>
 
       <div className="mx-auto max-w-7xl px-6 pt-6">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
