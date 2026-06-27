@@ -55,17 +55,10 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type SortKey = "name" | "price-asc" | "price-desc" | "age";
-type ActiveList = "all" | "promotion" | "selection";
-
 function Index() {
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
   const { data: curated } = useSuspenseQuery(curatedQuery);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<string>("all");
-  const [milk, setMilk] = useState<string>("all");
-  const [sort, setSort] = useState<SortKey>("name");
-  const [activeList, setActiveList] = useState<ActiveList>("all");
+  const { search, category, milk, sort, activeList, setActiveList } = useFilters();
 
   const promotionIds = useMemo(
     () => new Set(curated.filter((c) => c.list_type === "promotion").map((c) => c.cheese_id)),
@@ -74,15 +67,6 @@ function Index() {
   const selectionIds = useMemo(
     () => new Set(curated.filter((c) => c.list_type === "selection").map((c) => c.cheese_id)),
     [curated],
-  );
-
-  const categories = useMemo(
-    () => Array.from(new Set(cheeses.map((c) => c.category).filter(Boolean) as string[])).sort(),
-    [cheeses],
-  );
-  const milks = useMemo(
-    () => Array.from(new Set(cheeses.map((c) => c.milk).filter(Boolean) as string[])).sort(),
-    [cheeses],
   );
 
   const filtered = useMemo(() => {
