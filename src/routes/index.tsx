@@ -1,17 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Search, MapPin, Phone, Clock } from "lucide-react";
+import { MapPin, Phone, Clock } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { listCurated } from "@/lib/curated.functions";
+import { useFilters, type ActiveList } from "@/lib/filter-context";
 import { CheeseCard } from "@/components/cheese-card";
+import { SearchFilterBar } from "@/components/search-filter-bar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const cheesesQuery = queryOptions({
