@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Clock, Lock } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
