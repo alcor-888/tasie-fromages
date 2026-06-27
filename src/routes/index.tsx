@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Lock, Mail } from "lucide-react";
 
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
@@ -248,29 +248,6 @@ function Index() {
         </div>
       </section>
 
-      {/* Visiter */}
-      <section id="visiter" className="border-t border-border bg-primary text-primary-foreground">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 md:grid-cols-2 md:items-center">
-          <div>
-            
-            <h2 className="font-display text-4xl font-semibold md:text-5xl">Venez nous voir.</h2>
-            <p className="mt-4 max-w-md opacity-80">
-              Dégustez, échangez avec nos affineurs, repartez avec vos fromages préparés le jour même.
-            </p>
-          </div>
-          <div className="grid gap-5">
-            <div className="flex gap-4"><MapPin className="h-5 w-5 flex-none opacity-70" />
-              <div><p className="font-medium">Sainte Anastasie sur Issole</p><p className="text-sm opacity-70">89136 (Centre Var)</p></div>
-            </div>
-            <div className="flex gap-4"><Phone className="h-5 w-5 flex-none opacity-70" />
-              <div><p className="font-medium">06 47 83 15 79</p><p className="text-sm opacity-70">Pour toute question ou commande spéciale</p></div>
-            </div>
-            <div className="flex gap-4"><Clock className="h-5 w-5 flex-none opacity-70" />
-              <div><p className="font-medium">Mardi — Samedi · 9h — 19h30</p><p className="text-sm opacity-70">Dimanche matin · 9h — 13h</p></div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <footer className="border-t border-border bg-background">
         <div className="mx-auto max-w-7xl px-6 py-16">
