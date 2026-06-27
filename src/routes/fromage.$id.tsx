@@ -1,8 +1,7 @@
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft, Plus, MapPin, Clock, Droplet, Wheat, Factory, Leaf, Lightbulb, ShoppingBag } from "lucide-react";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getCategoryImage, type Cheese } from "@/data/cheeses";
@@ -10,7 +9,6 @@ import { listCheeses } from "@/lib/cheeses.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
 import { SearchFilterBar } from "@/components/search-filter-bar";
-import { useFilters } from "@/lib/filter-context";
 
 const cheesesQuery = queryOptions({
   queryKey: ["cheeses"],
