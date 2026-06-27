@@ -54,17 +54,11 @@ function CheeseDetail() {
   const cheese = cheeses.find((c: Cheese) => c.id === id);
   if (!cheese) throw notFound();
   const { add, setOpen, count } = useCart();
-  const navigate = useNavigate();
-  const { search, category, milk, sort, activeList } = useFilters();
   const soldOut = cheese.stock === 0;
   const related = cheeses
     .filter((c: Cheese) => c.id !== cheese.id && (c.category === cheese.category || c.milk === cheese.milk))
     .slice(0, 3);
   const image = getCategoryImage(cheese.category, cheese.milk);
-
-  useEffect(() => {
-    navigate({ to: "/" });
-  }, [search, category, milk, sort, activeList]);
 
   return (
     <div className="min-h-screen bg-background">
