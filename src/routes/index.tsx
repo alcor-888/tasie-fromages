@@ -84,9 +84,8 @@ function Index() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <a href="#top" className="flex items-baseline gap-2">
-            <span className="font-display text-2xl font-semibold">La Cave</span>
-            <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Fromagère</span>
+          <a href="#top" className="flex items-center">
+            <img src={logoAsset.url} alt="Tasie Fromages" className="h-10 w-auto" />
           </a>
           <nav className="hidden gap-8 text-sm md:flex">
             <a href="#selection" className="text-muted-foreground transition-colors hover:text-foreground">Sélection</a>
