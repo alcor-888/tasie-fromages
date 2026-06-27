@@ -4,6 +4,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Search, MapPin, Phone, Clock } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
+import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { CheeseCard } from "@/components/cheese-card";
@@ -83,9 +84,8 @@ function Index() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <a href="#top" className="flex items-baseline gap-2">
-            <span className="font-display text-2xl font-semibold">La Cave</span>
-            <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Fromagère</span>
+          <a href="#top" className="flex items-center">
+            <img src={logoAsset.url} alt="Tasie Fromages" className="h-10 w-auto" />
           </a>
           <nav className="hidden gap-8 text-sm md:flex">
             <a href="#selection" className="text-muted-foreground transition-colors hover:text-foreground">Sélection</a>
@@ -107,12 +107,9 @@ function Index() {
             transition={{ duration: 0.7 }}
           >
             <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
-            <h1 className="font-display text-5xl font-semibold leading-[1.05] md:text-7xl">
-              L'art du fromage,<br />
-              <span className="italic text-primary">par Rodolphe Bardet</span>
-            </h1>
+            <img src={logoAsset.url} alt="Tasie Fromages par Rodolphe Bardet" className="mx-auto w-full max-w-md md:max-w-lg" />
             <p className="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
-              Une sélection de fromages, charcuteries et snacks à découvrir, réserver et livrés, lors de ma prochaine visite.
+              Une sélection de fromages et charcuteries à découvrir.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild>
@@ -123,7 +120,7 @@ function Index() {
               </Button>
             </div>
             <div className="mt-10 flex gap-8 border-t border-border pt-6 text-sm">
-              <div><span className="font-display text-2xl font-semibold">62</span><p className="text-xs uppercase tracking-wider text-muted-foreground">Ans d'affinage</p></div>
+              <div><span className="font-display text-2xl font-semibold">300+</span><p className="text-xs uppercase tracking-wider text-muted-foreground">Produits de qualité PREMIUM</p></div>
               <div><span className="font-display text-2xl font-semibold">120+</span><p className="text-xs uppercase tracking-wider text-muted-foreground">Producteurs</p></div>
               <div><span className="font-display text-2xl font-semibold">AOP</span><p className="text-xs uppercase tracking-wider text-muted-foreground">Garantis</p></div>
             </div>
@@ -255,7 +252,7 @@ function Index() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} La Cave Fromagère — Aucun paiement en ligne · retrait uniquement en boutique
+        © {new Date().getFullYear()} Tasie Fromages — par Rodolphe Bardet — Aucun paiement en ligne · retrait uniquement en boutique
       </footer>
     </div>
   );
