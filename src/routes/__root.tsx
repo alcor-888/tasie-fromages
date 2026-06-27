@@ -139,6 +139,7 @@ function RootComponent() {
           <Outlet />
           <OrderSheet />
           <CartAccessButton />
+          <ScrollToTop />
           <Toaster richColors position="top-center" />
         </FilterProvider>
       </CartProvider>
