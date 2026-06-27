@@ -162,7 +162,7 @@ function Index() {
                 <a href="#selection">Découvrer ma sélection du moment</a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="#visiter">Nous rendre visite</a>
+                <Link to="/promotions">Accès aux promotions</Link>
               </Button>
             </div>
             <div className="mt-10 flex gap-8 border-t border-border pt-6 text-sm">
