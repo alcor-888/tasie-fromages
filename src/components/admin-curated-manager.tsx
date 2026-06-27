@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useMutation, useQueryClient, useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
 import { Trash2, Plus, Search } from "lucide-react";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { listCurated, addToList, removeFromList, type ListType } from "@/lib/curated.functions";
@@ -12,7 +12,7 @@ const cheesesQ = queryOptions({ queryKey: ["cheeses"], queryFn: () => listCheese
 const curatedQ = queryOptions({ queryKey: ["curated-lists"], queryFn: () => listCurated(), staleTime: 60_000 });
 
 export function CuratedManager({ listType, title }: { listType: ListType; title: string }) {
-  const { data: cheeses } = useSuspenseQuery(cheesesQ);
+  const { data: cheeses = [] } = useQuery(cheesesQ);
   const { data: curated } = useQuery(curatedQ);
   const qc = useQueryClient();
   const add = useServerFn(addToList);
