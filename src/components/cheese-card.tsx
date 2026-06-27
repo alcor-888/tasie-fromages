@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, Tag } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart-store";
 import { getCategoryImage, type Cheese } from "@/data/cheeses";
 
-export function CheeseCard({ cheese, index }: { cheese: Cheese; index: number }) {
+export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index: number; promotion?: boolean }) {
   const { add, setOpen } = useCart();
   return (
     <motion.article
