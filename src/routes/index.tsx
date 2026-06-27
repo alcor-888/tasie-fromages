@@ -103,6 +103,11 @@ function Index() {
     return list;
   }, [cheeses, search, category, milk, sort, activeList, promotionIds, selectionIds]);
 
+  const scrollToSelection = (list: ActiveList) => {
+    setActiveList(list);
+    document.getElementById("selection")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -111,11 +116,25 @@ function Index() {
           <a href="#top" className="flex items-center">
             <img src={logoAsset.url} alt="Tasie Fromages" className="h-10 w-auto" />
           </a>
-          <nav className="hidden gap-8 text-sm md:flex">
-            <a href="#selection" className="text-muted-foreground transition-colors hover:text-foreground">Sélection</a>
-            <a href="#commander" className="text-muted-foreground transition-colors hover:text-foreground">Commander</a>
-            <a href="#visiter" className="text-muted-foreground transition-colors hover:text-foreground">Visiter</a>
-          </nav>
+          <div className="hidden flex-wrap items-center justify-center gap-2 md:flex">
+            {([
+              { v: "all" as const, label: "Liste générale" },
+              { v: "promotion" as const, label: "Promotions" },
+              { v: "selection" as const, label: "Sélection du moment" },
+            ]).map((t) => (
+              <button
+                key={t.v}
+                onClick={() => scrollToSelection(t.v)}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+                  activeList === t.v
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-card text-foreground hover:bg-accent border border-border"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
           <Button asChild variant="default" size="sm">
             <a href="#selection">Découvrer ma sélection du moment</a>
           </Button>
@@ -170,26 +189,6 @@ function Index() {
       {/* Selection */}
       <section id="selection" className="border-t border-border bg-secondary/30">
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-24">
-          {/* Floating list switcher */}
-          <div className="mb-8 flex flex-wrap justify-center gap-2">
-            {([
-              { v: "all", label: "Liste générale" },
-              { v: "promotion", label: "Promotions" },
-              { v: "selection", label: "Sélection du moment" },
-            ] as { v: ActiveList; label: string }[]).map((t) => (
-              <button
-                key={t.v}
-                onClick={() => setActiveList(t.v)}
-                className={`rounded-full px-5 py-2 text-sm font-medium shadow-sm transition-all ${
-                  activeList === t.v
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card text-foreground hover:bg-accent border border-border"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
 
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
