@@ -1,0 +1,1 @@
+ALTER TABLE public.orders ALTER COLUMN pickup_date DROP NOT NULL;
