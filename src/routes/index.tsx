@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Clock } from "lucide-react";
+import { MapPin, Phone, Clock, Lock } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
@@ -119,9 +119,14 @@ function Index() {
               </button>
             ))}
           </div>
-          <Button asChild variant="default" size="sm">
-            <a href="#selection">Découvrer ma sélection du moment</a>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <Link to="/admin"><Lock className="h-3.5 w-3.5" /> Admin</Link>
+            </Button>
+            <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
+              <a href="#selection">Découvrer ma sélection du moment</a>
+            </Button>
+          </div>
         </div>
       </header>
 
