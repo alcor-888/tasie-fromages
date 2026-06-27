@@ -152,7 +152,7 @@ function Index() {
               <h2 className="font-display text-4xl font-semibold md:text-5xl">Le plateau du moment</h2>
             </div>
             <p className="max-w-md text-sm text-muted-foreground">
-              Triez, filtrez et composez votre commande. Nous préparons vos fromages le jour de votre retrait.
+              Découvrez de nouveaux produits, triez, filtrez et composez votre prochaine commande. Vos clients méritent le meilleur. Tasie Fromages à votre service. Rodolphe
             </p>
           </div>
 
