@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CuratedManager } from "@/components/admin-curated-manager";
+import { AdminImport } from "@/components/admin-import";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -84,6 +85,7 @@ function AdminPage() {
             <TabsTrigger value="orders">Commandes</TabsTrigger>
             <TabsTrigger value="promotion">Promotions</TabsTrigger>
             <TabsTrigger value="selection">Sélection du moment</TabsTrigger>
+            <TabsTrigger value="import">Import produits</TabsTrigger>
           </TabsList>
 
           <TabsContent value="orders" className="mt-6">
@@ -151,6 +153,9 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="selection" className="mt-6">
             <CuratedManager listType="selection" title="Sélection du moment" />
+          </TabsContent>
+          <TabsContent value="import" className="mt-6">
+            <AdminImport />
           </TabsContent>
         </Tabs>
       </main>
