@@ -98,9 +98,7 @@ export function OrderSheet() {
             {step === "done" ? "Merci !" : step === "form" ? "Vos coordonnées" : "Votre commande"}
           </SheetTitle>
           <SheetDescription>
-            {step === "done"
-              ? "Votre demande a bien été transmise."
-              : "Réservez vos fromages — règlement et retrait en boutique."}
+            {step === "done" ? "Votre demande a bien été transmise." : "Votre bon de commande"}
           </SheetDescription>
         </SheetHeader>
 
@@ -161,7 +159,7 @@ export function OrderSheet() {
                   Continuer les achats
                 </Button>
                 <Button className="w-full" size="lg" onClick={() => setStep("form")}>
-                  Continuer la commande
+                  COMMANDER
                 </Button>
                 <p className="text-center text-xs text-muted-foreground">
                   Aucun paiement en ligne — règlement à la boutique.
@@ -186,11 +184,7 @@ export function OrderSheet() {
               <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="pickup">Date de retrait souhaitée</Label>
-              <Input id="pickup" type="date" required value={form.pickup} onChange={(e) => setForm({ ...form, pickup: e.target.value })} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="notes">Notes (allergies, préférences…)</Label>
+              <Label htmlFor="notes">Notes (préférences…)</Label>
               <Textarea id="notes" rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
             <div className="mt-auto flex flex-col gap-2 border-t pt-4">
