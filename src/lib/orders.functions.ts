@@ -64,7 +64,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         customerName: data.customerName,
         customerPhone: data.customerPhone,
         customerEmail: data.customerEmail || null,
-        pickupDate: data.pickupDate,
+        pickupDate: data.pickupDate || null,
         notes: data.notes || null,
         totalEstimate,
         items: data.items,
