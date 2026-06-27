@@ -14,7 +14,7 @@ interface NotifyPayload {
   customerName: string;
   customerPhone: string;
   customerEmail: string | null;
-  pickupDate: string;
+  pickupDate: string | null;
   notes: string | null;
   totalEstimate: number;
   items: {
@@ -38,7 +38,7 @@ function renderHtml(p: NotifyPayload) {
   return `<div style="font-family:system-ui,sans-serif;max-width:600px;margin:auto;color:#222">
     <h2 style="font-family:Georgia,serif">Nouveau bon de commande</h2>
     <p><strong>${escape(p.customerName)}</strong> · ${escape(p.customerPhone)}${p.customerEmail ? ` · ${escape(p.customerEmail)}` : ""}</p>
-    <p>Retrait souhaité le <strong>${escape(p.pickupDate)}</strong></p>
+    ${p.pickupDate ? `<p>Retrait souhaité le <strong>${escape(p.pickupDate)}</strong></p>` : ""}
     ${p.notes ? `<p><em>Notes :</em> ${escape(p.notes)}</p>` : ""}
     <table style="border-collapse:collapse;width:100%;margin-top:12px">
       <thead><tr style="background:#f6f4ef;text-align:left">
