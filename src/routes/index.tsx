@@ -4,6 +4,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Search, MapPin, Phone, Clock } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
+import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { CheeseCard } from "@/components/cheese-card";
