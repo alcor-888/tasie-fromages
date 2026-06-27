@@ -99,7 +99,7 @@ function Index() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <a href="#top" className="flex items-center">
-            <img src={logoAsset.url} alt="Tasie Fromages" className="h-14 w-auto" />
+            <img src={logoAsset.url} alt="Tasie Fromages" className="h-28 w-auto" />
           </a>
           <div className="hidden flex-wrap items-center justify-center gap-2 md:flex">
             <button
@@ -152,8 +152,8 @@ function Index() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
-            <img src={logoAsset.url} alt="Tasie Fromages par Rodolphe Bardet" className="mx-auto w-full max-w-xs md:max-w-sm" />
+            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">fondée en 2008</p>
+            <img src={logoAsset.url} alt="Tasie Fromages par Rodolphe Bardet" className="mx-auto w-full max-w-xs md:max-w-lg" />
             <p className="-mt-8 text-lg leading-relaxed text-muted-foreground whitespace-nowrap">
               Une sélection de fromages et charcuteries à découvrir.
             </p>
@@ -275,9 +275,9 @@ function Index() {
       <footer className="border-t border-border bg-background">
         <div className="mx-auto max-w-7xl px-6 py-16">
           <div className="flex flex-col items-center gap-8 text-center">
-            <img src={logoAsset.url} alt="Tasie Fromages" className="h-20 w-auto" />
+            <img src={logoAsset.url} alt="Tasie Fromages" className="h-40 w-auto" />
             <div className="space-y-1">
-              <p className="text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
+              <p className="text-xs uppercase tracking-[0.4em] text-primary">fondée en 2008</p>
               <p className="text-lg leading-relaxed text-muted-foreground">
                 Une sélection de fromages et charcuteries à découvrir.
               </p>
