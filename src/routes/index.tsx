@@ -234,20 +234,17 @@ function Index() {
         </div>
       </section>
 
-      {/* Commander */}
+      {/* Message */}
       <section id="commander" className="border-t border-border">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 md:grid-cols-3">
-          {[
-            { n: "01", t: "Composez", d: "Sélectionnez vos fromages dans la vitrine et ajustez les quantités." },
-            { n: "02", t: "Réservez", d: "Indiquez la date de retrait. Aucun paiement en ligne, tout se fait en boutique." },
-            { n: "03", t: "Retirez", d: "Vos fromages sont préparés à l'instant et prêts à votre arrivée." },
-          ].map((s) => (
-            <div key={s.n} className="border-t-2 border-primary pt-6">
-              <p className="font-display text-5xl font-semibold text-primary">{s.n}</p>
-              <h3 className="mt-4 font-display text-2xl font-semibold">{s.t}</h3>
-              <p className="mt-2 text-muted-foreground">{s.d}</p>
-            </div>
-          ))}
+        <div className="mx-auto max-w-3xl px-6 py-20 text-center">
+          <p className="text-lg leading-relaxed text-foreground">
+            Mes très chers clientes et clients, merci d'avoir parcouru notre vitrine de produits.
+            Rien de plus simple que de réserver vos produits habituels et de découvrir notre sélection
+            et surtout profiter de nos promotions. Découvrez d'autres, games, d'autres saveurs,
+            d'autres terroirs ... Vos client vous en seront gré. Vous pouvez nous poser vos questions,
+            nous informer d'éléments particuliers sur l'espace "notes" du bon de commande.
+            Tasie Fromage est à votre écoute et à votre service. Bien à vous. Rodolphe Bardet
+          </p>
         </div>
       </section>
 
