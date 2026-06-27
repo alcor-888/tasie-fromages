@@ -73,6 +73,10 @@ function CheeseDetail() {
         </div>
       </header>
 
+      <div className="sticky top-16 z-30 mx-auto max-w-7xl px-6 py-2">
+        <SearchFilterBar cheeses={cheeses} />
+      </div>
+
       <div className="mx-auto max-w-7xl px-6 pt-6">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Retour à la sélection
