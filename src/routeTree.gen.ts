@@ -9,18 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PromotionsRouteImport } from './routes/promotions'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as FromageIdRouteImport } from './routes/fromage.$id'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedPromotionsRouteImport } from './routes/_authenticated/promotions'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedFromageIdRouteImport } from './routes/_authenticated/fromage.$id'
 
-const PromotionsRoute = PromotionsRouteImport.update({
-  id: '/promotions',
-  path: '/promotions',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -30,77 +25,72 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const FromageIdRoute = FromageIdRouteImport.update({
-  id: '/fromage/$id',
-  path: '/fromage/$id',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedPromotionsRoute = AuthenticatedPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFromageIdRoute = AuthenticatedFromageIdRouteImport.update({
+  id: '/fromage/$id',
+  path: '/fromage/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
-  '/promotions': typeof PromotionsRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/fromage/$id': typeof FromageIdRoute
+  '/promotions': typeof AuthenticatedPromotionsRoute
+  '/fromage/$id': typeof AuthenticatedFromageIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/promotions': typeof PromotionsRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/fromage/$id': typeof FromageIdRoute
+  '/promotions': typeof AuthenticatedPromotionsRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/fromage/$id': typeof AuthenticatedFromageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/promotions': typeof PromotionsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
-  '/fromage/$id': typeof FromageIdRoute
+  '/_authenticated/promotions': typeof AuthenticatedPromotionsRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/fromage/$id': typeof AuthenticatedFromageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/promotions' | '/admin' | '/fromage/$id'
+  fullPaths: '/' | '/auth' | '/admin' | '/promotions' | '/fromage/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/promotions' | '/admin' | '/fromage/$id'
+  to: '/auth' | '/admin' | '/promotions' | '/' | '/fromage/$id'
   id:
     | '__root__'
-    | '/'
     | '/_authenticated'
     | '/auth'
-    | '/promotions'
     | '/_authenticated/admin'
-    | '/fromage/$id'
+    | '/_authenticated/promotions'
+    | '/_authenticated/'
+    | '/_authenticated/fromage/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  PromotionsRoute: typeof PromotionsRoute
-  FromageIdRoute: typeof FromageIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/promotions': {
-      id: '/promotions'
-      path: '/promotions'
-      fullPath: '/promotions'
-      preLoaderRoute: typeof PromotionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -115,19 +105,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/fromage/$id': {
-      id: '/fromage/$id'
-      path: '/fromage/$id'
-      fullPath: '/fromage/$id'
-      preLoaderRoute: typeof FromageIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/promotions': {
+      id: '/_authenticated/promotions'
+      path: '/promotions'
+      fullPath: '/promotions'
+      preLoaderRoute: typeof AuthenticatedPromotionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
@@ -136,26 +126,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/fromage/$id': {
+      id: '/_authenticated/fromage/$id'
+      path: '/fromage/$id'
+      fullPath: '/fromage/$id'
+      preLoaderRoute: typeof AuthenticatedFromageIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedPromotionsRoute: typeof AuthenticatedPromotionsRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedFromageIdRoute: typeof AuthenticatedFromageIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedPromotionsRoute: AuthenticatedPromotionsRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedFromageIdRoute: AuthenticatedFromageIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  PromotionsRoute: PromotionsRoute,
-  FromageIdRoute: FromageIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
