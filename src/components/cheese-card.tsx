@@ -30,7 +30,13 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        {cheese.category && (
+        {promotion && (
+          <Badge className="absolute left-3 top-3 gap-1 bg-destructive text-destructive-foreground hover:bg-destructive shadow-md">
+            <Tag className="h-3 w-3" />
+            Promotion
+          </Badge>
+        )}
+        {!promotion && cheese.category && (
           <Badge className="absolute left-3 top-3 bg-card text-card-foreground hover:bg-card">
             {cheese.category}
           </Badge>
