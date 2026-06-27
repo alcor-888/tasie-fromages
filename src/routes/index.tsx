@@ -107,12 +107,9 @@ function Index() {
             transition={{ duration: 0.7 }}
           >
             <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
-            <h1 className="font-display text-5xl font-semibold leading-[1.05] md:text-7xl">
-              L'art du fromage,<br />
-              <span className="italic text-primary">par Rodolphe Bardet</span>
-            </h1>
+            <img src={logoAsset.url} alt="Tasie Fromages par Rodolphe Bardet" className="mx-auto w-full max-w-md md:max-w-lg" />
             <p className="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
-              Une sélection de fromages, charcuteries et snacks à découvrir, réserver et livrés, lors de ma prochaine visite.
+              Une sélection de fromages et charcuteries à découvrir.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild>
