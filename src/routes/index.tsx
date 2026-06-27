@@ -252,7 +252,7 @@ function Index() {
       <section id="visiter" className="border-t border-border bg-primary text-primary-foreground">
         <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 md:grid-cols-2 md:items-center">
           <div>
-            <p className="mb-3 text-xs uppercase tracking-[0.3em] opacity-70">Boutique & cave d'affinage</p>
+            
             <h2 className="font-display text-4xl font-semibold md:text-5xl">Venez nous voir.</h2>
             <p className="mt-4 max-w-md opacity-80">
               Dégustez, échangez avec nos affineurs, repartez avec vos fromages préparés le jour même.
