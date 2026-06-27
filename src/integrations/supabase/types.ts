@@ -90,7 +90,7 @@ export type Database = {
           customer_phone: string
           id: string
           notes: string | null
-          pickup_date: string
+          pickup_date: string | null
           status: string
           total_estimate: number
           updated_at: string
@@ -102,7 +102,7 @@ export type Database = {
           customer_phone: string
           id?: string
           notes?: string | null
-          pickup_date: string
+          pickup_date?: string | null
           status?: string
           total_estimate?: number
           updated_at?: string
@@ -114,7 +114,7 @@ export type Database = {
           customer_phone?: string
           id?: string
           notes?: string | null
-          pickup_date?: string
+          pickup_date?: string | null
           status?: string
           total_estimate?: number
           updated_at?: string
