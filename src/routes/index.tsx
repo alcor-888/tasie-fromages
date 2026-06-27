@@ -6,6 +6,7 @@ import { MapPin, Phone, Lock, Mail } from "lucide-react";
 
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
+import logoSeal from "@/assets/logo-seal.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { listCurated } from "@/lib/curated.functions";
@@ -258,7 +259,7 @@ function Index() {
       <footer className="border-t border-border bg-background">
         <div className="mx-auto max-w-7xl px-6 py-16">
           <div className="flex flex-col items-center gap-8 text-center">
-            <img src={logoAsset.url} alt="Tasie Fromages" className="h-40 w-auto" />
+            <img src={logoSeal.url} alt="Tasie Fromages" className="h-52 w-auto" />
             <div className="space-y-1">
               <p className="text-xs uppercase tracking-[0.4em] text-primary">fondée en 2008</p>
               <p className="text-lg leading-relaxed text-muted-foreground">
