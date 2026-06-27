@@ -28,7 +28,7 @@ const curatedQuery = queryOptions({
   staleTime: 60_000,
 });
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "La Cave Fromagère — Sélection artisanale & commande en ligne" },

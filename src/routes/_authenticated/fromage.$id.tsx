@@ -16,7 +16,7 @@ const cheesesQuery = queryOptions({
   staleTime: 5 * 60_000,
 });
 
-export const Route = createFileRoute("/fromage/$id")({
+export const Route = createFileRoute("/_authenticated/fromage/$id")({
   loader: ({ context }) => context.queryClient.ensureQueryData(cheesesQuery),
   component: CheeseDetail,
   notFoundComponent: () => (

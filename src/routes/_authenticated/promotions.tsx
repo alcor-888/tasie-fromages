@@ -25,7 +25,7 @@ const curatedQuery = queryOptions({
   staleTime: 60_000,
 });
 
-export const Route = createFileRoute("/promotions")({
+export const Route = createFileRoute("/_authenticated/promotions")({
   head: () => ({
     meta: [
       { title: "Promotions du moment — Tasie Fromages" },
