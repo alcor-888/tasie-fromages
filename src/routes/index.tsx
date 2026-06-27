@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Clock, Lock } from "lucide-react";
+import { MapPin, Phone, Clock, Lock, Mail } from "lucide-react";
 
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
@@ -99,7 +99,7 @@ function Index() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <a href="#top" className="flex items-center">
-            <img src={logoAsset.url} alt="Tasie Fromages" className="h-10 w-auto" />
+            <img src={logoAsset.url} alt="Tasie Fromages" className="h-14 w-auto" />
           </a>
           <div className="hidden flex-wrap items-center justify-center gap-2 md:flex">
             <button
@@ -275,7 +275,7 @@ function Index() {
       <footer className="border-t border-border bg-background">
         <div className="mx-auto max-w-7xl px-6 py-16">
           <div className="flex flex-col items-center gap-8 text-center">
-            <img src={logoAsset.url} alt="Tasie Fromages" className="h-16 w-auto" />
+            <img src={logoAsset.url} alt="Tasie Fromages" className="h-20 w-auto" />
             <div className="space-y-1">
               <p className="text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
               <p className="text-lg leading-relaxed text-muted-foreground">
@@ -283,22 +283,25 @@ function Index() {
               </p>
             </div>
             <div className="grid gap-6 sm:grid-cols-3 sm:gap-12">
-              <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-foreground">Adresse</p>
+              <div className="flex flex-col items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground">Adresse</p>
                 <p className="text-sm text-muted-foreground">Sainte Anastasie sur Issole</p>
                 <p className="text-sm text-muted-foreground">89136 (Centre Var)</p>
               </div>
-              <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-foreground">Téléphone</p>
+              <div className="flex flex-col items-center gap-2">
+                <Phone className="h-5 w-5 text-primary" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground">Téléphone</p>
                 <p className="text-sm text-muted-foreground">06 47 83 15 79</p>
               </div>
-              <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-foreground">Courriel</p>
+              <div className="flex flex-col items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground">Courriel</p>
                 <p className="text-sm text-muted-foreground">bardet.rodolphe@gmail.com</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} Tasie Fromages — par Rodolphe Bardet — Aucun paiement en ligne · retrait uniquement en boutique
+              © {new Date().getFullYear()} Tasie Fromages — par Rodolphe Bardet — Aucun paiement en ligne
             </p>
           </div>
         </div>
