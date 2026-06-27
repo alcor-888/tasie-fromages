@@ -235,16 +235,22 @@ function Index() {
       </section>
 
       {/* Message */}
-      <section id="commander" className="border-t border-border">
-        <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-          <p className="text-lg leading-relaxed text-foreground">
-            Mes très chers clientes et clients, merci d'avoir parcouru notre vitrine de produits.
-            Rien de plus simple que de réserver vos produits habituels et de découvrir notre sélection
-            et surtout profiter de nos promotions. Découvrez d'autres, games, d'autres saveurs,
-            d'autres terroirs ... Vos client vous en seront gré. Vous pouvez nous poser vos questions,
-            nous informer d'éléments particuliers sur l'espace "notes" du bon de commande.
-            Tasie Fromage est à votre écoute et à votre service. Bien à vous. Rodolphe Bardet
-          </p>
+      <section id="commander" className="border-t border-border bg-secondary/20">
+        <div className="mx-auto max-w-3xl px-6 py-24 text-center">
+          <blockquote className="relative">
+            <span className="absolute -top-6 left-1/2 -translate-x-1/2 font-display text-6xl text-primary/20 select-none" aria-hidden="true">"</span>
+            <p className="text-xl font-medium leading-[1.8] text-foreground md:text-2xl">
+              Mes très chers clientes et clients, merci d'avoir parcouru notre vitrine de produits.
+              Rien de plus simple que de réserver vos produits habituels et de découvrir notre sélection
+              et surtout profiter de nos promotions. Découvrez d'autres fromages, d'autres saveurs,
+              d'autres terroirs… Vos clients vous en seront gré. Vous pouvez nous poser vos questions,
+              nous informer d'éléments particuliers sur l'espace "notes" du bon de commande.
+              Tasie Fromages est à votre écoute et à votre service.
+            </p>
+            <footer className="mt-8 text-sm font-semibold uppercase tracking-widest text-primary">
+              Bien à vous — Rodolphe Bardet
+            </footer>
+          </blockquote>
         </div>
       </section>
 
