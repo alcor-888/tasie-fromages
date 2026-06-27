@@ -181,11 +181,19 @@ function Index() {
 
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="mb-2 text-xs uppercase tracking-[0.3em] text-primary">Notre sélection</p>
-              <h2 className="font-display text-4xl font-semibold md:text-5xl">Le plateau du moment</h2>
+              <p className="mb-2 text-xs uppercase tracking-[0.3em] text-primary">
+                {activeList === "promotion" ? "Offres spéciales" : activeList === "all" ? "Notre catalogue" : "Notre sélection"}
+              </p>
+              <h2 className="font-display text-4xl font-semibold md:text-5xl">
+                {activeList === "promotion" ? "Promotions du moment" : activeList === "all" ? "Tous nos produits, liste générale" : "Le plateau du moment"}
+              </h2>
             </div>
             <p className="max-w-md text-sm text-muted-foreground">
-              Découvrez de nouveaux produits, triez, filtrez et composez votre prochaine commande. Vos clients méritent le meilleur. Tasie Fromages à votre service. Rodolphe
+              {activeList === "promotion"
+                ? "Découvrez les dernières promotions pour faire de bonnes affaires. Triez, filtrez et composez votre prochaine commande. Vos clients méritent le meilleur. Tasie Fromages à votre service. Rodolphe"
+                : activeList === "all"
+                ? "Découvrez tous nouveaux produits, triez, filtrez et composez votre prochaine commande. Vos clients méritent le meilleur. Tasie Fromages à votre service. Rodolphe"
+                : "Découvrez de nouveaux produits, triez, filtrez et composez votre prochaine commande. Vos clients méritent le meilleur. Tasie Fromages à votre service. Rodolphe"}
             </p>
           </div>
 
