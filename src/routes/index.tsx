@@ -152,8 +152,8 @@ function Index() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
-            <img src={logoAsset.url} alt="Tasie Fromages par Rodolphe Bardet" className="mx-auto w-full max-w-xs md:max-w-sm" />
+            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-primary">fondée en 2008</p>
+            <img src={logoAsset.url} alt="Tasie Fromages par Rodolphe Bardet" className="mx-auto w-full max-w-xs md:max-w-lg" />
             <p className="-mt-8 text-lg leading-relaxed text-muted-foreground whitespace-nowrap">
               Une sélection de fromages et charcuteries à découvrir.
             </p>
