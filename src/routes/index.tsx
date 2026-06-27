@@ -275,9 +275,9 @@ function Index() {
       <footer className="border-t border-border bg-background">
         <div className="mx-auto max-w-7xl px-6 py-16">
           <div className="flex flex-col items-center gap-8 text-center">
-            <img src={logoAsset.url} alt="Tasie Fromages" className="h-20 w-auto" />
+            <img src={logoAsset.url} alt="Tasie Fromages" className="h-40 w-auto" />
             <div className="space-y-1">
-              <p className="text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
+              <p className="text-xs uppercase tracking-[0.4em] text-primary">fondée en 2008</p>
               <p className="text-lg leading-relaxed text-muted-foreground">
                 Une sélection de fromages et charcuteries à découvrir.
               </p>
