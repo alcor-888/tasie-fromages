@@ -113,8 +113,8 @@ function Index() {
             >
               Liste générale
             </button>
-            <Link
-              to="/promotions"
+            <button
+              onClick={() => scrollToSelection("promotion")}
               className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
                 activeList === "promotion"
                   ? "bg-primary text-primary-foreground shadow-md"
@@ -122,7 +122,7 @@ function Index() {
               }`}
             >
               Promotions
-            </Link>
+            </button>
             <button
               onClick={() => scrollToSelection("selection")}
               className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
