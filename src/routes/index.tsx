@@ -260,10 +260,10 @@ function Index() {
           </div>
           <div className="grid gap-5">
             <div className="flex gap-4"><MapPin className="h-5 w-5 flex-none opacity-70" />
-              <div><p className="font-medium">12 rue des Fromagers</p><p className="text-sm opacity-70">75011 Paris</p></div>
+              <div><p className="font-medium">Sainte Anastasie sur Issole</p><p className="text-sm opacity-70">89136 (Centre Var)</p></div>
             </div>
             <div className="flex gap-4"><Phone className="h-5 w-5 flex-none opacity-70" />
-              <div><p className="font-medium">01 42 00 00 00</p><p className="text-sm opacity-70">Pour toute question ou commande spéciale</p></div>
+              <div><p className="font-medium">06 47 83 15 79</p><p className="text-sm opacity-70">Pour toute question ou commande spéciale</p></div>
             </div>
             <div className="flex gap-4"><Clock className="h-5 w-5 flex-none opacity-70" />
               <div><p className="font-medium">Mardi — Samedi · 9h — 19h30</p><p className="text-sm opacity-70">Dimanche matin · 9h — 13h</p></div>
@@ -272,8 +272,36 @@ function Index() {
         </div>
       </section>
 
-      <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Tasie Fromages — par Rodolphe Bardet — Aucun paiement en ligne · retrait uniquement en boutique
+      <footer className="border-t border-border bg-background">
+        <div className="mx-auto max-w-7xl px-6 py-16">
+          <div className="flex flex-col items-center gap-8 text-center">
+            <img src={logoAsset.url} alt="Tasie Fromages" className="h-16 w-auto" />
+            <div className="space-y-1">
+              <p className="text-xs uppercase tracking-[0.4em] text-primary">Maison fondée en 2008</p>
+              <p className="text-lg leading-relaxed text-muted-foreground">
+                Une sélection de fromages et charcuteries à découvrir.
+              </p>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-3 sm:gap-12">
+              <div>
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-foreground">Adresse</p>
+                <p className="text-sm text-muted-foreground">Sainte Anastasie sur Issole</p>
+                <p className="text-sm text-muted-foreground">89136 (Centre Var)</p>
+              </div>
+              <div>
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-foreground">Téléphone</p>
+                <p className="text-sm text-muted-foreground">06 47 83 15 79</p>
+              </div>
+              <div>
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-foreground">Courriel</p>
+                <p className="text-sm text-muted-foreground">bardet.rodolphe@gmail.com</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Tasie Fromages — par Rodolphe Bardet — Aucun paiement en ligne · retrait uniquement en boutique
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   );
