@@ -102,23 +102,36 @@ function Index() {
             <img src={logoAsset.url} alt="Tasie Fromages" className="h-10 w-auto" />
           </a>
           <div className="hidden flex-wrap items-center justify-center gap-2 md:flex">
-            {([
-              { v: "all" as const, label: "Liste générale" },
-              { v: "promotion" as const, label: "Promotions" },
-              { v: "selection" as const, label: "Sélection du moment" },
-            ]).map((t) => (
-              <button
-                key={t.v}
-                onClick={() => scrollToSelection(t.v)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
-                  activeList === t.v
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card text-foreground hover:bg-accent border border-border"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
+            <button
+              onClick={() => scrollToSelection("all")}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+                activeList === "all"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-card text-foreground hover:bg-accent border border-border"
+              }`}
+            >
+              Liste générale
+            </button>
+            <Link
+              to="/promotions"
+              className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+                activeList === "promotion"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-card text-foreground hover:bg-accent border border-border"
+              }`}
+            >
+              Promotions
+            </Link>
+            <button
+              onClick={() => scrollToSelection("selection")}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+                activeList === "selection"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "bg-card text-foreground hover:bg-accent border border-border"
+              }`}
+            >
+              Sélection du moment
+            </button>
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" size="sm" className="gap-1.5">
