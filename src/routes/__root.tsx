@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart-store";
+import { FilterProvider } from "@/lib/filter-context";
 import { CartAccessButton, OrderSheet } from "@/components/order-sheet";
 import { Toaster } from "@/components/ui/sonner";
 
