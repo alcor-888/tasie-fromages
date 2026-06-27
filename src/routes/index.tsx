@@ -6,6 +6,7 @@ import { MapPin, Phone, Lock, Mail } from "lucide-react";
 
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
+import logoSeal from "@/assets/logo-seal.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { listCurated } from "@/lib/curated.functions";
