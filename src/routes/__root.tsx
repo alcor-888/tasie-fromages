@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart-store";
 import { FilterProvider } from "@/lib/filter-context";
 import { CartAccessButton, OrderSheet } from "@/components/order-sheet";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -138,6 +139,7 @@ function RootComponent() {
           <Outlet />
           <OrderSheet />
           <CartAccessButton />
+          <ScrollToTop />
           <Toaster richColors position="top-center" />
         </FilterProvider>
       </CartProvider>
