@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CuratedManager } from "@/components/admin-curated-manager";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -74,9 +76,17 @@ function AdminPage() {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-10">
-        <h1 className="font-display text-4xl font-semibold">Bons de commande</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Toutes les commandes passées via la boutique en ligne.</p>
+        <h1 className="font-display text-4xl font-semibold">Back office</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Commandes et gestion des listes produits.</p>
 
+        <Tabs defaultValue="orders" className="mt-8">
+          <TabsList>
+            <TabsTrigger value="orders">Commandes</TabsTrigger>
+            <TabsTrigger value="promotion">Promotions</TabsTrigger>
+            <TabsTrigger value="selection">Sélection du moment</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="orders" className="mt-6">
         {isLoading && <p className="mt-10 text-muted-foreground">Chargement…</p>}
         {error && <p className="mt-10 text-destructive">{(error as Error).message}</p>}
 
@@ -134,6 +144,15 @@ function AdminPage() {
             </article>
           ))}
         </div>
+          </TabsContent>
+
+          <TabsContent value="promotion" className="mt-6">
+            <CuratedManager listType="promotion" title="Promotions" />
+          </TabsContent>
+          <TabsContent value="selection" className="mt-6">
+            <CuratedManager listType="selection" title="Sélection du moment" />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

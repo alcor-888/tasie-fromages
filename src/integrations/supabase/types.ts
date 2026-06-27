@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      cheese_lists: {
+        Row: {
+          cheese_id: string
+          cheese_name: string | null
+          created_at: string
+          list_type: string
+          position: number
+        }
+        Insert: {
+          cheese_id: string
+          cheese_name?: string | null
+          created_at?: string
+          list_type: string
+          position?: number
+        }
+        Update: {
+          cheese_id?: string
+          cheese_name?: string | null
+          created_at?: string
+          list_type?: string
+          position?: number
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           cheese_id: string

@@ -7,6 +7,7 @@ import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
+import { listCurated } from "@/lib/curated.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,12 @@ const cheesesQuery = queryOptions({
   staleTime: 5 * 60_000,
 });
 
+const curatedQuery = queryOptions({
+  queryKey: ["curated-lists"],
+  queryFn: () => listCurated(),
+  staleTime: 60_000,
+});
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -28,7 +35,10 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Sélection de fromages d'exception. Réservez en ligne, retirez en boutique." },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(cheesesQuery),
+  loader: ({ context }) => Promise.all([
+    context.queryClient.ensureQueryData(cheesesQuery),
+    context.queryClient.ensureQueryData(curatedQuery),
+  ]),
   pendingComponent: () => (
     <div className="mx-auto grid max-w-7xl gap-6 px-6 py-24 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
@@ -46,13 +56,25 @@ export const Route = createFileRoute("/")({
 });
 
 type SortKey = "name" | "price-asc" | "price-desc" | "age";
+type ActiveList = "all" | "promotion" | "selection";
 
 function Index() {
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
+  const { data: curated } = useSuspenseQuery(curatedQuery);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [milk, setMilk] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("name");
+  const [activeList, setActiveList] = useState<ActiveList>("all");
+
+  const promotionIds = useMemo(
+    () => new Set(curated.filter((c) => c.list_type === "promotion").map((c) => c.cheese_id)),
+    [curated],
+  );
+  const selectionIds = useMemo(
+    () => new Set(curated.filter((c) => c.list_type === "selection").map((c) => c.cheese_id)),
+    [curated],
+  );
 
   const categories = useMemo(
     () => Array.from(new Set(cheeses.map((c) => c.category).filter(Boolean) as string[])).sort(),
@@ -65,6 +87,8 @@ function Index() {
 
   const filtered = useMemo(() => {
     let list = cheeses.filter((c: Cheese) => {
+      if (activeList === "promotion" && !promotionIds.has(c.id)) return false;
+      if (activeList === "selection" && !selectionIds.has(c.id)) return false;
       if (category !== "all" && c.category !== category) return false;
       if (milk !== "all" && c.milk !== milk) return false;
       if (search && !`${c.name} ${c.region ?? ""} ${c.description ?? ""} ${c.producer ?? ""}`.toLowerCase().includes(search.toLowerCase())) return false;
@@ -77,7 +101,7 @@ function Index() {
       return a.name.localeCompare(b.name);
     });
     return list;
-  }, [cheeses, search, category, milk, sort]);
+  }, [cheeses, search, category, milk, sort, activeList, promotionIds, selectionIds]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -146,6 +170,27 @@ function Index() {
       {/* Selection */}
       <section id="selection" className="border-t border-border bg-secondary/30">
         <div className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+          {/* Floating list switcher */}
+          <div className="mb-8 flex flex-wrap justify-center gap-2">
+            {([
+              { v: "all", label: "Liste générale" },
+              { v: "promotion", label: "Promotions" },
+              { v: "selection", label: "Sélection du moment" },
+            ] as { v: ActiveList; label: string }[]).map((t) => (
+              <button
+                key={t.v}
+                onClick={() => setActiveList(t.v)}
+                className={`rounded-full px-5 py-2 text-sm font-medium shadow-sm transition-all ${
+                  activeList === t.v
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-card text-foreground hover:bg-accent border border-border"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="mb-2 text-xs uppercase tracking-[0.3em] text-primary">Notre sélection</p>
