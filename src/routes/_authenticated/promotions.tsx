@@ -5,23 +5,16 @@ import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
 import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
-import { listCheeses } from "@/lib/cheeses.functions";
-import { listCurated } from "@/lib/curated.functions";
+import { listPromotions } from "@/lib/promotions.functions";
 import { useFilters } from "@/lib/filter-context";
 import { CheeseCard } from "@/components/cheese-card";
 import { SearchFilterBar } from "@/components/search-filter-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const cheesesQuery = queryOptions({
-  queryKey: ["cheeses"],
-  queryFn: () => listCheeses(),
-  staleTime: 5 * 60_000,
-});
-
-const curatedQuery = queryOptions({
-  queryKey: ["curated-lists"],
-  queryFn: () => listCurated(),
+const promotionsQuery = queryOptions({
+  queryKey: ["promotions-sheet"],
+  queryFn: () => listPromotions(),
   staleTime: 60_000,
 });
 
@@ -34,10 +27,7 @@ export const Route = createFileRoute("/_authenticated/promotions")({
       { property: "og:description", content: "Découvrez les promotions en cours sur notre sélection de fromages et charcuteries premium." },
     ],
   }),
-  loader: ({ context }) => Promise.all([
-    context.queryClient.ensureQueryData(cheesesQuery),
-    context.queryClient.ensureQueryData(curatedQuery),
-  ]),
+  loader: ({ context }) => context.queryClient.ensureQueryData(promotionsQuery),
   pendingComponent: () => (
     <div className="mx-auto grid max-w-7xl gap-6 px-6 py-24 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
@@ -55,18 +45,11 @@ export const Route = createFileRoute("/_authenticated/promotions")({
 });
 
 function PromotionsPage() {
-  const { data: cheeses } = useSuspenseQuery(cheesesQuery);
-  const { data: curated } = useSuspenseQuery(curatedQuery);
+  const { data: promotions } = useSuspenseQuery(promotionsQuery);
   const { search, category, milk, sort } = useFilters();
 
-  const promotionIds = useMemo(
-    () => new Set(curated.filter((c) => c.list_type === "promotion").map((c) => c.cheese_id)),
-    [curated],
-  );
-
   const filtered = useMemo(() => {
-    let list = cheeses.filter((c: Cheese) => {
-      if (!promotionIds.has(c.id)) return false;
+    let list = promotions.filter((c: Cheese) => {
       if (category !== "all" && c.category !== category) return false;
       if (milk !== "all" && c.milk !== milk) return false;
       if (search && !`${c.name} ${c.region ?? ""} ${c.description ?? ""} ${c.producer ?? ""}`.toLowerCase().includes(search.toLowerCase())) return false;
@@ -79,7 +62,7 @@ function PromotionsPage() {
       return a.name.localeCompare(b.name);
     });
     return list;
-  }, [cheeses, search, category, milk, sort, promotionIds]);
+  }, [promotions, search, category, milk, sort]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,7 +100,7 @@ function PromotionsPage() {
       {/* Products */}
       <section className="mx-auto max-w-7xl px-6 py-10 md:py-16">
         <div className="sticky top-16 z-30 mb-8">
-          <SearchFilterBar cheeses={cheeses} />
+          <SearchFilterBar cheeses={promotions} />
         </div>
 
         <p className="mb-6 text-sm text-muted-foreground">
