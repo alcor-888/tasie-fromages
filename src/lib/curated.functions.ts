@@ -38,7 +38,8 @@ export const addToList = createServerFn({ method: "POST" })
   .inputValidator((i: { cheese_id: string; cheese_name: string; list_type: ListType }) => i)
   .handler(async ({ data, context }) => {
     if (!(await isAdminUser(context.userId))) throw new Error("Accès refusé.");
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("cheese_lists")
       .upsert({ cheese_id: data.cheese_id, cheese_name: data.cheese_name, list_type: data.list_type });
     if (error) throw new Error(error.message);
@@ -50,7 +51,8 @@ export const removeFromList = createServerFn({ method: "POST" })
   .inputValidator((i: { cheese_id: string; list_type: ListType }) => i)
   .handler(async ({ data, context }) => {
     if (!(await isAdminUser(context.userId))) throw new Error("Accès refusé.");
-    const { error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
       .from("cheese_lists")
       .delete()
       .eq("cheese_id", data.cheese_id)
