@@ -222,9 +222,14 @@ function Index() {
             <SearchFilterBar cheeses={cheeses} />
           </div>
 
-          <p className="mb-6 text-sm text-muted-foreground">
-            {filtered.length} fromage{filtered.length > 1 ? "s" : ""} {filtered.length !== cheeses.length ? `sur ${cheeses.length}` : "disponibles"}
-          </p>
+          {(() => {
+            const total = activeList === "promotion" ? promotions.length : cheeses.length;
+            return (
+              <p className="mb-6 text-sm text-muted-foreground">
+                {filtered.length} produit{filtered.length > 1 ? "s" : ""} {filtered.length !== total ? `sur ${total}` : "disponibles"}
+              </p>
+            );
+          })()}
 
           {filtered.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border bg-card p-16 text-center text-muted-foreground">
