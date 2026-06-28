@@ -10,6 +10,7 @@ import logoSeal from "@/assets/logo-seal.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listCheeses } from "@/lib/cheeses.functions";
 import { listCurated } from "@/lib/curated.functions";
+import { listPromotions } from "@/lib/promotions.functions";
 import { useFilters, type ActiveList } from "@/lib/filter-context";
 import { CheeseCard } from "@/components/cheese-card";
 import { SearchFilterBar } from "@/components/search-filter-bar";
@@ -28,6 +29,12 @@ const curatedQuery = queryOptions({
   staleTime: 60_000,
 });
 
+const promotionsQuery = queryOptions({
+  queryKey: ["promotions-sheet"],
+  queryFn: () => listPromotions(),
+  staleTime: 60_000,
+});
+
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
@@ -40,6 +47,7 @@ export const Route = createFileRoute("/_authenticated/")({
   loader: ({ context }) => Promise.all([
     context.queryClient.ensureQueryData(cheesesQuery),
     context.queryClient.ensureQueryData(curatedQuery),
+    context.queryClient.ensureQueryData(promotionsQuery),
   ]),
   pendingComponent: () => (
     <div className="mx-auto grid max-w-7xl gap-6 px-6 py-24 sm:grid-cols-2 lg:grid-cols-3">
@@ -60,20 +68,17 @@ export const Route = createFileRoute("/_authenticated/")({
 function Index() {
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
   const { data: curated } = useSuspenseQuery(curatedQuery);
+  const { data: promotions } = useSuspenseQuery(promotionsQuery);
   const { search, category, milk, sort, activeList, setActiveList } = useFilters();
 
-  const promotionIds = useMemo(
-    () => new Set(curated.filter((c) => c.list_type === "promotion").map((c) => c.cheese_id)),
-    [curated],
-  );
   const selectionIds = useMemo(
     () => new Set(curated.filter((c) => c.list_type === "selection").map((c) => c.cheese_id)),
     [curated],
   );
 
   const filtered = useMemo(() => {
-    let list = cheeses.filter((c: Cheese) => {
-      if (activeList === "promotion" && !promotionIds.has(c.id)) return false;
+    const source: Cheese[] = activeList === "promotion" ? promotions : cheeses;
+    let list = source.filter((c: Cheese) => {
       if (activeList === "selection" && !selectionIds.has(c.id)) return false;
       if (category !== "all" && c.category !== category) return false;
       if (milk !== "all" && c.milk !== milk) return false;
@@ -87,7 +92,7 @@ function Index() {
       return a.name.localeCompare(b.name);
     });
     return list;
-  }, [cheeses, search, category, milk, sort, activeList, promotionIds, selectionIds]);
+  }, [cheeses, promotions, search, category, milk, sort, activeList, selectionIds]);
 
   const scrollToSelection = (list: ActiveList) => {
     setActiveList(list);
@@ -217,9 +222,14 @@ function Index() {
             <SearchFilterBar cheeses={cheeses} />
           </div>
 
-          <p className="mb-6 text-sm text-muted-foreground">
-            {filtered.length} fromage{filtered.length > 1 ? "s" : ""} {filtered.length !== cheeses.length ? `sur ${cheeses.length}` : "disponibles"}
-          </p>
+          {(() => {
+            const total = activeList === "promotion" ? promotions.length : cheeses.length;
+            return (
+              <p className="mb-6 text-sm text-muted-foreground">
+                {filtered.length} produit{filtered.length > 1 ? "s" : ""} {filtered.length !== total ? `sur ${total}` : "disponibles"}
+              </p>
+            );
+          })()}
 
           {filtered.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border bg-card p-16 text-center text-muted-foreground">
