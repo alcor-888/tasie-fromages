@@ -1,14 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+async function isAdminUser(userId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { count } = await supabaseAdmin
+    .from("user_roles")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("role", "admin");
+  return (count ?? 0) > 0;
+}
+
 export const listOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (!isAdmin) {
+    if (!(await isAdminUser(context.userId))) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { count } = await supabaseAdmin
         .from("user_roles")
@@ -35,10 +41,7 @@ export const setOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string; status: "new" | "confirmed" | "ready" | "done" | "cancelled" }) => input)
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId, _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Accès refusé.");
+    if (!(await isAdminUser(context.userId))) throw new Error("Accès refusé.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("orders").update({ status: data.status }).eq("id", data.id);
     if (error) throw new Error(error.message);
