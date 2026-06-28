@@ -42,10 +42,14 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/30 px-6">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-[var(--shadow-elegant)]">
-        <h1 className="font-display text-3xl font-semibold">Espace privé</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <div className="mb-4 flex justify-center">
+          <img src={logoSeal.url} alt="Tasie Fromages" className="h-32 w-auto" />
+        </div>
+        <h1 className="font-display text-3xl font-semibold text-center">Espace privé pour les professionnel</h1>
+        <p className="mt-2 text-sm text-muted-foreground text-center">
           Connectez-vous avec les identifiants fournis par Tasie Fromages.
         </p>
+
         <form onSubmit={submit} className="mt-6 grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
