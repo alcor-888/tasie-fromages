@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Lock, Mail } from "lucide-react";
@@ -69,9 +69,9 @@ function Index() {
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
   const { data: curated } = useSuspenseQuery(curatedQuery);
   const { data: promotions } = useSuspenseQuery(promotionsQuery);
-  const { search, category, milk, sort, activeList, setActiveList } = useFilters();
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const { search, category, milk, sort, activeList, setActiveList, page, setPage } = useFilters();
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const visibleCount = page * PAGE_SIZE;
 
   const filtered = useMemo(() => {
     const source: Cheese[] =
@@ -91,11 +91,6 @@ function Index() {
     return list;
   }, [cheeses, promotions, curated, search, category, milk, sort, activeList]);
 
-  // Reset pagination when filters/list change
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [search, category, milk, sort, activeList]);
-
   const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
   const hasMore = visibleCount < filtered.length;
 
@@ -107,14 +102,14 @@ function Index() {
     const io = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
-          setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length));
+          setPage(page + 1);
         }
       },
       { rootMargin: "600px 0px" },
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [hasMore, filtered.length]);
+  }, [hasMore, filtered.length, page, setPage]);
 
   const scrollToSelection = (list: ActiveList) => {
     setActiveList(list);
@@ -276,7 +271,7 @@ function Index() {
                   </div>
                   <Button
                     variant="outline"
-                    onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length))}
+                    onClick={() => setPage(page + 1)}
                   >
                     Afficher plus ({filtered.length - visibleCount} restants)
                   </Button>
