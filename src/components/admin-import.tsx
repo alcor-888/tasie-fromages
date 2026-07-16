@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { importProducts, type ImportRow } from "@/lib/import-products.functions";
 import type { ListType } from "@/lib/products.functions";
 import { toast } from "sonner";
+import { extractInCellImages } from "@/lib/excel-images";
 
 const EXPECTED_FIELDS = [
-  "Libellé", "Origine", "Type de pate", "Type de lait", "Prix",
-  "Poids ou pièce", "Poids", "Temps d'affinage", "Saveur", "Conseils",
-  "Fabrication", "Saisonnalité", "Producteur", "Stock",
+  "Ref", "Nom", "Type", "Fabriquant", "Ville", "Département",
+  "Poids de la pièce", "Lait", "Fabrication", "Pâte", "Affinage",
+  "Matière grasse", "Prix texte", "Prix article", "Nbre ou Poids",
+  "Colissage", "Nombre ou poids réel", "Photo",
 ];
 
 type Row = Record<string, string | number | undefined>;
@@ -72,8 +74,34 @@ function ImportZone({ listType }: { listType: ListType }) {
         const buf = await file.arrayBuffer();
         const wb = XLSX.read(buf, { type: "array" });
         const sheet = wb.Sheets[wb.SheetNames[0]];
+        // Ligne d'en-tête = ligne 1 → première donnée ligne 2 (rowNumber)
         const json = XLSX.utils.sheet_to_json<Row>(sheet, { defval: "" });
-        ingest(json);
+        // Extraction des photos "dans la cellule" (Excel Rich Value)
+        let images = new Map<number, string>();
+        if (ext === "xlsx") {
+          try {
+            // Trouver l'index de la colonne "Photo"
+            const headers = Object.keys(json[0] ?? {});
+            const photoIdx = headers.findIndex((h) => /^photo$|^image$/i.test(h.trim()));
+            // Colonne 1 = A. Par défaut R (col 18) sinon calcul depuis header.
+            const colLetter =
+              photoIdx >= 0 ? colIndexToLetter(photoIdx + 1) : "R";
+            images = await extractInCellImages(buf, { targetColLetter: colLetter });
+          } catch (e) {
+            console.warn("Extraction images échouée", e);
+          }
+        }
+        // Attacher l'image (data URL) à chaque ligne : row Excel = index+2 (header à la ligne 1)
+        const enriched = json.map((row, i) => {
+          const excelRow = i + 2;
+          const dataUrl = images.get(excelRow);
+          if (dataUrl) return { ...row, Photo: dataUrl };
+          return row;
+        });
+        ingest(enriched);
+        if (images.size > 0) {
+          toast.success(`${images.size} photo(s) extraite(s) du fichier`);
+        }
       } else {
         setError(`Format .${ext} non supporté. Utilisez .xlsx, .csv, .tsv, .ods ou .json`);
       }
@@ -84,10 +112,23 @@ function ImportZone({ listType }: { listType: ListType }) {
 
   function ingest(data: Row[]) {
     if (!data.length) { setError("Fichier vide"); return; }
-    const hs = Array.from(new Set(data.flatMap((r) => Object.keys(r))));
+    // Filtre les lignes vides
+    const filtered = data.filter((r) => Object.values(r).some((v) => v != null && String(v).trim() !== ""));
+    if (!filtered.length) { setError("Aucune ligne exploitable"); return; }
+    const hs = Array.from(new Set(filtered.flatMap((r) => Object.keys(r))));
     setHeaders(hs);
-    setRows(data);
+    setRows(filtered);
   }
+
+function colIndexToLetter(n: number): string {
+  let s = "";
+  while (n > 0) {
+    const m = (n - 1) % 26;
+    s = String.fromCharCode(65 + m) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
 
   function doImport() {
     const payload: ImportRow[] = rows.map((r) => {
