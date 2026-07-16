@@ -38,9 +38,9 @@ const promotionsQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
-      { title: "La Cave Tasie Fromages — Sélection artisanale & commande en ligne" },
+      { title: "Tasie Fromages — Sélection artisanale & commande en ligne" },
       { name: "description", content: "Vitrine de fromages artisanaux : trouvez, triez et réservez vos fromages préférés. Retrait en boutique, sans paiement en ligne." },
-      { property: "og:title", content: "La Cave Tasie Fromages" },
+      { property: "og:title", content: "Tasie Fromages" },
       { property: "og:description", content: "Sélection de fromages d'exception. Réservez en ligne, retirez en boutique." },
     ],
   }),
