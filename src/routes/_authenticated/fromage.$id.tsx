@@ -69,7 +69,9 @@ function CheeseDetail() {
   const related = cheeses
     .filter((c: Cheese) => c.id !== cheese.id && (c.category === cheese.category || c.milk === cheese.milk))
     .slice(0, 3);
-  const image = getCategoryImage(cheese.category, cheese.milk);
+  const image = cheese.imageUrl || getCategoryImage(cheese.category, cheese.milk);
+  const hasRealPhoto = Boolean(cheese.imageUrl);
+  const origin = [cheese.ville, cheese.department || cheese.region].filter(Boolean).join(", ");
 
   return (
     <div className="min-h-screen bg-background">
