@@ -76,26 +76,43 @@ export const importProducts = createServerFn({ method: "POST" })
     const rows = data.rows
       .map((r, idx) => {
         const f = r.fields ?? {};
-        const name = s(pick(f, ["Libellé", "Libelle", "Nom", "Name"]));
+        const name = s(pick(f, ["Nom", "Libellé", "Libelle", "Name"]));
         if (!name) return null;
-        const price = n(pick(f, ["Prix", "Price"])) ?? 0;
+        // "Prix article" = prix unitaire utilisé au panier (colonne N)
+        const priceArticle = n(pick(f, ["Prix article", "Prix", "Price"])) ?? 0;
+        const priceText = s(pick(f, ["Prix texte", "Prix affiché"]));
+        const priceTextNum = n(pick(f, ["Prix texte", "Prix affiché"]));
+        const packagingUnit = s(pick(f, ["Nbre ou Poids", "Nbre / Poids", "Unité", "Unite"]));
+        const priceLabel = priceText
+          ? (priceTextNum != null ? `${priceTextNum.toFixed(2)} €` : priceText)
+          : `${priceArticle.toFixed(2)} €`;
         return {
           list_type: data.listType,
           position: idx,
           name,
-          region: s(pick(f, ["Origine", "Region", "Région"])),
-          category: s(pick(f, ["Type de pate", "Type de pâte", "Catégorie", "Categorie", "Category"])),
-          milk: s(pick(f, ["Type de lait", "Lait", "Milk"])),
-          price_label: s(pick(f, ["Prix", "Price"])) ?? `${price.toFixed(2)} €`,
-          price_per_kg: price,
-          unit: normalizeUnit(s(pick(f, ["Poids ou pièce", "Poids ou piece", "Unité", "Unite"]))),
-          weight: s(pick(f, ["Poids", "Weight"])),
-          age: s(pick(f, ["Temps d'affinage", "Affinage", "Age"])),
+          ref: i(pick(f, ["Ref", "Réf", "Reference"])),
+          region: s(pick(f, ["Département", "Departement", "Origine", "Region", "Région"])),
+          department: s(pick(f, ["Département", "Departement"])),
+          ville: s(pick(f, ["Ville"])),
+          category: s(pick(f, ["Pâte", "Pate", "Type de pate", "Catégorie", "Categorie"])),
+          type_desc: s(pick(f, ["Type", "Description", "Type de fromage"])),
+          milk: s(pick(f, ["Lait", "Type de lait", "Milk"])),
+          price_label: priceLabel,
+          price_per_kg: priceArticle,
+          unit: normalizeUnit(packagingUnit),
+          packaging_unit: packagingUnit,
+          weight: s(pick(f, ["Poids de la pièce", "Poids de la piece", "Poids", "Weight"])),
+          age: s(pick(f, ["Affinage", "Temps d'affinage", "Age"])),
+          matiere_grasse: s(pick(f, ["Matière grasse", "Matiere grasse", "MG"])),
+          fabrication: s(pick(f, ["Fabrication"])),
+          fabriquant: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
+          producer: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
+          colissage: n(pick(f, ["Colissage"])),
+          nombre_poids_reel: n(pick(f, ["Nombre ou poids réel", "Nombre ou poids reel", "Nombre/poids réel"])),
+          image_url: s(pick(f, ["Photo", "Image", "Image URL"])),
           saveur: s(pick(f, ["Saveur", "Flavor"])),
           conseils: s(pick(f, ["Conseils", "Conseil", "Notes"])),
-          fabrication: s(pick(f, ["Fabrication"])),
           season: s(pick(f, ["Saisonnalité", "Saisonnalite", "Saison"])),
-          producer: s(pick(f, ["Producteur", "Producer"])),
           stock: i(pick(f, ["Stock", "Quantité", "Quantite"])),
         };
       })

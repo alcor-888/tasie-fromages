@@ -22,12 +22,12 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
         className="relative block aspect-[4/3] overflow-hidden"
       >
         <img
-          src={getCategoryImage(cheese.category, cheese.milk)}
+          src={cheese.imageUrl || getCategoryImage(cheese.category, cheese.milk)}
           alt={cheese.name}
           loading="lazy"
           width={1600}
           height={1100}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className={`h-full w-full transition-transform duration-700 group-hover:scale-105 ${cheese.imageUrl ? "object-contain bg-secondary/40" : "object-cover"}`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         {promotion && (

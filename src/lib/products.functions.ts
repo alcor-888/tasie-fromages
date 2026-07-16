@@ -38,12 +38,24 @@ interface Row {
   season: string | null;
   producer: string | null;
   stock: number | null;
+  ref: number | null;
+  type_desc: string | null;
+  fabriquant: string | null;
+  ville: string | null;
+  department: string | null;
+  matiere_grasse: string | null;
+  colissage: number | string | null;
+  nombre_poids_reel: number | string | null;
+  image_url: string | null;
+  packaging_unit: string | null;
 }
 
 function toCheese(r: Row): Cheese {
   const price = typeof r.price_per_kg === "number" ? r.price_per_kg : parseFloat(String(r.price_per_kg ?? "0")) || 0;
   const saveur = r.saveur ?? undefined;
   const conseils = r.conseils ?? undefined;
+  const colissage = r.colissage == null ? undefined : Number(r.colissage) || undefined;
+  const npr = r.nombre_poids_reel == null ? undefined : Number(r.nombre_poids_reel) || undefined;
   return {
     id: r.id,
     name: r.name,
@@ -55,14 +67,24 @@ function toCheese(r: Row): Cheese {
     unit: r.unit ?? "/ pièce",
     weight: r.weight ?? undefined,
     age: r.age ?? undefined,
-    description: saveur ?? conseils,
+    description: r.type_desc ?? saveur ?? conseils,
     emoji: getCheeseEmoji(r.milk ?? undefined),
     fabrication: r.fabrication ?? undefined,
     saveur,
     season: r.season ?? undefined,
-    producer: r.producer ?? undefined,
+    producer: r.producer ?? r.fabriquant ?? undefined,
     conseils,
     stock: r.stock ?? undefined,
+    ref: r.ref ?? undefined,
+    typeDesc: r.type_desc ?? undefined,
+    fabriquant: r.fabriquant ?? undefined,
+    ville: r.ville ?? undefined,
+    department: r.department ?? undefined,
+    matiereGrasse: r.matiere_grasse ?? undefined,
+    colissage,
+    nombrePoidsReel: npr,
+    imageUrl: r.image_url ?? undefined,
+    packagingUnit: r.packaging_unit ?? undefined,
   };
 }
 
@@ -74,7 +96,7 @@ export const listProducts = createServerFn({ method: "GET" })
     const sb = publicClient();
     const { data: rows, error } = await sb
       .from("products")
-      .select("id,name,region,category,milk,price_label,price_per_kg,unit,weight,age,saveur,conseils,fabrication,season,producer,stock,position")
+      .select("id,name,region,category,milk,price_label,price_per_kg,unit,weight,age,saveur,conseils,fabrication,season,producer,stock,position,ref,type_desc,fabriquant,ville,department,matiere_grasse,colissage,nombre_poids_reel,image_url,packaging_unit")
       .eq("list_type", data.listType)
       .order("position", { ascending: true })
       .order("name", { ascending: true });

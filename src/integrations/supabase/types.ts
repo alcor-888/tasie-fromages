@@ -125,67 +125,97 @@ export type Database = {
         Row: {
           age: string | null
           category: string | null
+          colissage: number | null
           conseils: string | null
           created_at: string
+          department: string | null
           fabrication: string | null
+          fabriquant: string | null
           id: string
+          image_url: string | null
           list_type: Database["public"]["Enums"]["product_list"]
+          matiere_grasse: string | null
           milk: string | null
           name: string
+          nombre_poids_reel: number | null
+          packaging_unit: string | null
           position: number
           price_label: string | null
           price_per_kg: number
           producer: string | null
+          ref: number | null
           region: string | null
           saveur: string | null
           season: string | null
           stock: number | null
+          type_desc: string | null
           unit: string | null
           updated_at: string
+          ville: string | null
           weight: string | null
         }
         Insert: {
           age?: string | null
           category?: string | null
+          colissage?: number | null
           conseils?: string | null
           created_at?: string
+          department?: string | null
           fabrication?: string | null
+          fabriquant?: string | null
           id?: string
+          image_url?: string | null
           list_type: Database["public"]["Enums"]["product_list"]
+          matiere_grasse?: string | null
           milk?: string | null
           name: string
+          nombre_poids_reel?: number | null
+          packaging_unit?: string | null
           position?: number
           price_label?: string | null
           price_per_kg?: number
           producer?: string | null
+          ref?: number | null
           region?: string | null
           saveur?: string | null
           season?: string | null
           stock?: number | null
+          type_desc?: string | null
           unit?: string | null
           updated_at?: string
+          ville?: string | null
           weight?: string | null
         }
         Update: {
           age?: string | null
           category?: string | null
+          colissage?: number | null
           conseils?: string | null
           created_at?: string
+          department?: string | null
           fabrication?: string | null
+          fabriquant?: string | null
           id?: string
+          image_url?: string | null
           list_type?: Database["public"]["Enums"]["product_list"]
+          matiere_grasse?: string | null
           milk?: string | null
           name?: string
+          nombre_poids_reel?: number | null
+          packaging_unit?: string | null
           position?: number
           price_label?: string | null
           price_per_kg?: number
           producer?: string | null
+          ref?: number | null
           region?: string | null
           saveur?: string | null
           season?: string | null
           stock?: number | null
+          type_desc?: string | null
           unit?: string | null
           updated_at?: string
+          ville?: string | null
           weight?: string | null
         }
         Relationships: []
