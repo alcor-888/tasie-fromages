@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useEffect, useRef } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Lock, Mail } from "lucide-react";
+import { MapPin, Phone, Lock, Mail, Sparkles } from "lucide-react";
 
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
