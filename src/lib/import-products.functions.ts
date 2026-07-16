@@ -12,6 +12,19 @@ export interface ImportResult {
   errors: string[];
 }
 
+const rowsSchema = z
+  .array(z.object({ fields: z.record(z.union([z.string(), z.number(), z.null()]).optional()) }))
+  .min(1)
+  .max(200);
+
+const chunkSchema = z.object({
+  listType: z.enum(["all", "curated", "promotions"]),
+  startPosition: z.number().int().min(0),
+  rows: rowsSchema,
+});
+
+const clearSchema = z.object({ listType: z.enum(["all", "curated", "promotions"]) });
+
 const schema = z.object({
   listType: z.enum(["all", "curated", "promotions"]),
   rows: z
@@ -56,6 +69,96 @@ function pick(f: Record<string, unknown>, keys: string[]): unknown {
   }
   return undefined;
 }
+
+function mapRow(
+  fields: Record<string, string | number | undefined | null>,
+  listType: "all" | "curated" | "promotions",
+  position: number,
+) {
+  const f = fields ?? {};
+  const name = s(pick(f, ["Nom", "Libellé", "Libelle", "Name"]));
+  if (!name) return null;
+  const priceArticle = n(pick(f, ["Prix article", "Prix", "Price"])) ?? 0;
+  const priceText = s(pick(f, ["Prix pièce ou Kg", "Prix piece ou Kg", "Prix texte", "Prix affiché"]));
+  const priceTextNum = n(pick(f, ["Prix pièce ou Kg", "Prix piece ou Kg", "Prix texte", "Prix affiché"]));
+  const packagingUnit = s(pick(f, ["Nbre ou Poids", "Nbre / Poids", "Unité", "Unite"]));
+  const priceLabel = priceText
+    ? (priceTextNum != null ? `${priceTextNum.toFixed(2)} €` : priceText)
+    : `${priceArticle.toFixed(2)} €`;
+  return {
+    list_type: listType,
+    position,
+    name,
+    ref: i(pick(f, ["Ref", "Réf", "Reference"])),
+    region: s(pick(f, ["Département", "Departement", "Origine", "Region", "Région"])),
+    department: s(pick(f, ["Département", "Departement"])),
+    ville: s(pick(f, ["Ville"])),
+    category: s(pick(f, ["Pâte", "Pate", "Type de pate", "Catégorie", "Categorie"])),
+    type_desc: s(pick(f, ["Type", "Description", "Type de fromage"])),
+    milk: s(pick(f, ["Lait", "Type de lait", "Milk"])),
+    price_label: priceLabel,
+    price_per_kg: priceArticle,
+    unit: normalizeUnit(packagingUnit),
+    packaging_unit: packagingUnit,
+    weight: s(pick(f, ["Poids de la pièce", "Poids de la piece", "Poids", "Weight"])),
+    age: s(pick(f, ["Affinage", "Temps d'affinage", "Age"])),
+    matiere_grasse: s(pick(f, ["Matière grasse", "Matiere grasse", "MG"])),
+    fabrication: s(pick(f, ["Fabrication"])),
+    fabriquant: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
+    producer: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
+    colissage: n(pick(f, ["Colisage", "Colissage"])),
+    nombre_poids_reel: n(pick(f, ["Nombre ou poids réel", "Nombre ou poids reel", "Nombre/poids réel"])),
+    image_url: s(pick(f, ["Photo", "Image", "Image URL"])),
+    saveur: s(pick(f, ["Saveur", "Flavor"])),
+    conseils: s(pick(f, ["Conseils", "Conseil", "Notes"])),
+    season: s(pick(f, ["Saisonnalité", "Saisonnalite", "Saison"])),
+    stock: i(pick(f, ["Stock", "Quantité", "Quantite"])),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertAdmin(context: any) {
+  const { data: isAdmin } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "admin",
+  });
+  if (!isAdmin) throw new Error("Accès refusé.");
+}
+
+/** Clears all rows for a list. Called once before streaming chunks. */
+export const clearProductList = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => clearSchema.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const del = await supabaseAdmin.from("products").delete().eq("list_type", data.listType);
+    if (del.error) throw new Error(del.error.message);
+    return { ok: true };
+  });
+
+/** Inserts a single chunk of rows. Called repeatedly from the client for progress. */
+export const insertProductsChunk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => chunkSchema.parse(input))
+  .handler(async ({ data, context }): Promise<{ inserted: number; failed: number; error?: string }> => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const mapped = data.rows
+      .map((r, idx) => mapRow(r.fields ?? {}, data.listType, data.startPosition + idx))
+      .filter((r): r is NonNullable<typeof r> => r !== null);
+    if (!mapped.length) return { inserted: 0, failed: 0 };
+    let attempt = 0;
+    let lastErr: string | null = null;
+    while (attempt < 3) {
+      const ins = await supabaseAdmin.from("products").insert(mapped);
+      if (!ins.error) return { inserted: mapped.length, failed: 0 };
+      lastErr = ins.error.message;
+      attempt++;
+      await new Promise((r) => setTimeout(r, 500 * attempt));
+    }
+    return { inserted: 0, failed: mapped.length, error: lastErr ?? "insert error" };
+  });
 
 export const importProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
