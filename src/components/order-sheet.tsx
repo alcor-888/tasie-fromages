@@ -162,7 +162,7 @@ export function OrderSheet() {
                   COMMANDER
                 </Button>
                 <p className="text-center text-xs text-muted-foreground">
-                  Aucun paiement en ligne — règlement à la boutique.
+                  Aucun paiement en ligne.
                 </p>
               </SheetFooter>
             )}
