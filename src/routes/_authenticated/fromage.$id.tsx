@@ -5,21 +5,20 @@ import { ArrowLeft, Plus, MapPin, Clock, Droplet, Wheat, Factory, Leaf, Lightbul
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getCategoryImage, type Cheese } from "@/data/cheeses";
-import { listCheeses } from "@/lib/cheeses.functions";
-import { listPromotions } from "@/lib/promotions.functions";
+import { listProducts } from "@/lib/products.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
 import { SearchFilterBar } from "@/components/search-filter-bar";
 
 const cheesesQuery = queryOptions({
-  queryKey: ["cheeses"],
-  queryFn: () => listCheeses(),
-  staleTime: 5 * 60_000,
+  queryKey: ["products-all"],
+  queryFn: () => listProducts({ data: { listType: "all" } }),
+  staleTime: 60_000,
 });
 
 const promotionsQuery = queryOptions({
-  queryKey: ["promotions-sheet"],
-  queryFn: () => listPromotions(),
+  queryKey: ["products-promotions"],
+  queryFn: () => listProducts({ data: { listType: "promotions" } }),
   staleTime: 60_000,
 });
 
