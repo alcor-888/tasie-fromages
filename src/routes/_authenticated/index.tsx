@@ -271,7 +271,7 @@ function Index() {
                   </div>
                   <Button
                     variant="outline"
-                    onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length))}
+                    onClick={() => setPage(page + 1)}
                   >
                     Afficher plus ({filtered.length - visibleCount} restants)
                   </Button>
