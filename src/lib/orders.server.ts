@@ -76,7 +76,7 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
       "X-Connection-Api-Key": RESEND_API_KEY,
     },
     body: JSON.stringify({
-      from: "La Cave Tasie Fromages <onboarding@resend.dev>",
+      from: "Tasie Fromages <onboarding@resend.dev>",
       to: ADMIN_EMAILS,
       reply_to: payload.customerEmail || undefined,
       subject,

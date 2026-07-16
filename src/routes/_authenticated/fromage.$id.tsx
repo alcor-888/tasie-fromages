@@ -248,7 +248,7 @@ function CheeseDetail() {
       )}
 
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} La Cave Tasie Fromages
+        © {new Date().getFullYear()} Tasie Fromages
       </footer>
     </div>
   );
