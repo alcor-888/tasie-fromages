@@ -65,9 +65,25 @@ function CheeseDetail() {
   if (!cheese) throw notFound();
   const { add, setOpen, count } = useCart();
   const soldOut = cheese.stock === 0;
-  const related = cheeses
-    .filter((c: Cheese) => c.id !== cheese.id && (c.category === cheese.category || c.milk === cheese.milk))
-    .slice(0, 3);
+  const related = (() => {
+    const scored = cheeses
+      .filter((c: Cheese) => c.id !== cheese.id)
+      .map((c: Cheese) => {
+        let score = 0;
+        if (c.category && c.category === cheese.category) score += 4;
+        if (c.milk && c.milk === cheese.milk) score += 3;
+        if (c.fabrication && c.fabrication === cheese.fabrication) score += 2;
+        if (c.region && c.region === cheese.region) score += 2;
+        if (c.department && c.department === cheese.department) score += 1;
+        if (c.fabriquant && c.fabriquant === cheese.fabriquant) score += 2;
+        const priceDelta = Math.abs((c.pricePerKg || 0) - (cheese.pricePerKg || 0));
+        if (priceDelta < 5) score += 1;
+        return { c, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
+    return scored.slice(0, 4).map((x) => x.c);
+  })();
   const image = cheese.imageUrl || getCategoryImage(cheese.category, cheese.milk);
   const hasRealPhoto = Boolean(cheese.imageUrl);
   const origin = [cheese.ville, cheese.department || cheese.region].filter(Boolean).join(", ");
@@ -222,7 +238,7 @@ function CheeseDetail() {
         <section className="border-t border-border bg-secondary/30">
           <div className="mx-auto max-w-7xl px-6 py-16">
             <h2 className="mb-8 font-display text-3xl font-semibold">À découvrir aussi</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((c: Cheese, i: number) => (
                 <CheeseCard key={c.id} cheese={c} index={i} />
               ))}
