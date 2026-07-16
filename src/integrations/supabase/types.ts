@@ -121,6 +121,75 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          age: string | null
+          category: string | null
+          conseils: string | null
+          created_at: string
+          fabrication: string | null
+          id: string
+          list_type: Database["public"]["Enums"]["product_list"]
+          milk: string | null
+          name: string
+          position: number
+          price_label: string | null
+          price_per_kg: number
+          producer: string | null
+          region: string | null
+          saveur: string | null
+          season: string | null
+          stock: number | null
+          unit: string | null
+          updated_at: string
+          weight: string | null
+        }
+        Insert: {
+          age?: string | null
+          category?: string | null
+          conseils?: string | null
+          created_at?: string
+          fabrication?: string | null
+          id?: string
+          list_type: Database["public"]["Enums"]["product_list"]
+          milk?: string | null
+          name: string
+          position?: number
+          price_label?: string | null
+          price_per_kg?: number
+          producer?: string | null
+          region?: string | null
+          saveur?: string | null
+          season?: string | null
+          stock?: number | null
+          unit?: string | null
+          updated_at?: string
+          weight?: string | null
+        }
+        Update: {
+          age?: string | null
+          category?: string | null
+          conseils?: string | null
+          created_at?: string
+          fabrication?: string | null
+          id?: string
+          list_type?: Database["public"]["Enums"]["product_list"]
+          milk?: string | null
+          name?: string
+          position?: number
+          price_label?: string | null
+          price_per_kg?: number
+          producer?: string | null
+          region?: string | null
+          saveur?: string | null
+          season?: string | null
+          stock?: number | null
+          unit?: string | null
+          updated_at?: string
+          weight?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -157,6 +226,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      product_list: "all" | "curated" | "promotions"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -285,6 +355,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      product_list: ["all", "curated", "promotions"],
     },
   },
 } as const

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
 import logoAsset from "@/assets/logo.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
-import { listPromotions } from "@/lib/promotions.functions";
+import { listProducts } from "@/lib/products.functions";
 import { useFilters } from "@/lib/filter-context";
 import { CheeseCard } from "@/components/cheese-card";
 import { SearchFilterBar } from "@/components/search-filter-bar";
@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const promotionsQuery = queryOptions({
-  queryKey: ["promotions-sheet"],
-  queryFn: () => listPromotions(),
+  queryKey: ["products-promotions"],
+  queryFn: () => listProducts({ data: { listType: "promotions" } }),
   staleTime: 60_000,
 });
 

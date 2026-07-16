@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { CuratedManager } from "@/components/admin-curated-manager";
 import { AdminImport } from "@/components/admin-import";
 import { AdminPassword } from "@/components/admin-password";
 import { AdminClients } from "@/components/admin-clients";
@@ -85,8 +84,6 @@ function AdminPage() {
         <Tabs defaultValue="orders" className="mt-8">
           <TabsList>
             <TabsTrigger value="orders">Commandes</TabsTrigger>
-            <TabsTrigger value="promotion">Promotions</TabsTrigger>
-            <TabsTrigger value="selection">Sélection du moment</TabsTrigger>
             <TabsTrigger value="import">Import produits</TabsTrigger>
             <TabsTrigger value="clients">Clients</TabsTrigger>
             <TabsTrigger value="password">Mot de passe</TabsTrigger>
@@ -152,12 +149,6 @@ function AdminPage() {
         </div>
           </TabsContent>
 
-          <TabsContent value="promotion" className="mt-6">
-            <CuratedManager listType="promotion" title="Promotions" />
-          </TabsContent>
-          <TabsContent value="selection" className="mt-6">
-            <CuratedManager listType="selection" title="Sélection du moment" />
-          </TabsContent>
           <TabsContent value="import" className="mt-6">
             <AdminImport />
           </TabsContent>

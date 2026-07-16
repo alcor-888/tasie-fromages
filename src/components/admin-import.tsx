@@ -5,7 +5,8 @@ import * as XLSX from "xlsx";
 import Papa from "papaparse";
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { importCheeses, type ImportRow } from "@/lib/import-cheeses.functions";
+import { importProducts, type ImportRow } from "@/lib/import-products.functions";
+import type { ListType } from "@/lib/products.functions";
 import { toast } from "sonner";
 
 const EXPECTED_FIELDS = [
@@ -16,20 +17,39 @@ const EXPECTED_FIELDS = [
 
 type Row = Record<string, string | number | undefined>;
 
-export function AdminImport() {
+const LIST_META: Record<ListType, { title: string; desc: string; queryKey: string }> = {
+  all: {
+    title: "Base de tous les produits",
+    desc: "Fichier principal — remplace intégralement le catalogue général.",
+    queryKey: "products-all",
+  },
+  curated: {
+    title: "Sélection du moment",
+    desc: "Fichier pour la sélection mise en avant — remplace la sélection actuelle.",
+    queryKey: "products-curated",
+  },
+  promotions: {
+    title: "Produits en promotion",
+    desc: "Fichier des promotions — remplace la liste des promotions.",
+    queryKey: "products-promotions",
+  },
+};
+
+function ImportZone({ listType }: { listType: ListType }) {
+  const meta = LIST_META[listType];
   const [fileName, setFileName] = useState<string>("");
   const [rows, setRows] = useState<Row[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
-  const send = useServerFn(importCheeses);
+  const send = useServerFn(importProducts);
   const qc = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (payload: { rows: ImportRow[] }) => send({ data: payload }),
+    mutationFn: (payload: { listType: ListType; rows: ImportRow[] }) => send({ data: payload }),
     onSuccess: (res) => {
-      toast.success(`${res.created} ligne(s) importée(s)${res.failed ? `, ${res.failed} en échec` : ""}`);
+      toast.success(`${meta.title} : ${res.created} ligne(s) importée(s)${res.failed ? `, ${res.failed} en échec` : ""}`);
       if (res.errors.length) console.warn("Import errors:", res.errors);
-      qc.invalidateQueries({ queryKey: ["cheeses"] });
+      qc.invalidateQueries({ queryKey: [meta.queryKey] });
       setRows([]); setHeaders([]); setFileName("");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -79,21 +99,19 @@ export function AdminImport() {
       }
       return { fields };
     });
-    mutation.mutate({ rows: payload });
+    mutation.mutate({ listType, rows: payload });
   }
 
   const unknownHeaders = headers.filter((h) => !EXPECTED_FIELDS.includes(h));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 rounded-lg border border-border bg-card p-6">
       <div>
-        <h3 className="font-display text-2xl font-semibold">Importer un catalogue</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Chargez un fichier Excel (.xlsx), CSV, TSV, ODS ou JSON. Les lignes seront ajoutées à votre base produits.
-        </p>
+        <h3 className="font-display text-xl font-semibold">{meta.title}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{meta.desc}</p>
       </div>
 
-      <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
+      <div className="rounded-lg border border-dashed border-border bg-background p-6 text-center">
         <FileSpreadsheet className="mx-auto h-10 w-10 text-muted-foreground" />
         <label className="mt-4 inline-block cursor-pointer">
           <input
@@ -106,19 +124,9 @@ export function AdminImport() {
             <Upload className="h-4 w-4" /> Choisir un fichier
           </span>
         </label>
-        <p className="mt-2 text-xs text-muted-foreground">.xlsx · .csv · .tsv · .ods · .json (max 1000 lignes)</p>
+        <p className="mt-2 text-xs text-muted-foreground">.xlsx · .csv · .tsv · .ods · .json (max 2000 lignes)</p>
         {fileName && <p className="mt-3 text-sm">{fileName}</p>}
       </div>
-
-      <details className="rounded-lg border border-border bg-card p-4 text-sm">
-        <summary className="cursor-pointer font-medium">Colonnes attendues</summary>
-        <ul className="mt-3 grid grid-cols-2 gap-1 text-xs text-muted-foreground md:grid-cols-3">
-          {EXPECTED_FIELDS.map((f) => <li key={f}>• {f}</li>)}
-        </ul>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Les colonnes non reconnues seront ignorées par l'affichage public.
-        </p>
-      </details>
 
       {error && (
         <div className="flex items-start gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -127,41 +135,50 @@ export function AdminImport() {
       )}
 
       {rows.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm">
               <CheckCircle2 className="h-4 w-4 text-primary" />
               {rows.length} ligne(s) prêtes à importer
               {unknownHeaders.length > 0 && (
-                <span className="text-amber-600">· {unknownHeaders.length} colonne(s) non standard : {unknownHeaders.slice(0, 3).join(", ")}{unknownHeaders.length > 3 ? "…" : ""}</span>
+                <span className="text-amber-600">· {unknownHeaders.length} colonne(s) ignorée(s)</span>
               )}
             </div>
             <Button onClick={doImport} disabled={mutation.isPending}>
-              {mutation.isPending ? "Import en cours…" : `Importer ${rows.length} ligne(s)`}
+              {mutation.isPending ? "Import en cours…" : `Remplacer par ${rows.length} ligne(s)`}
             </Button>
-          </div>
-
-          <div className="max-h-96 overflow-auto rounded-lg border border-border">
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-muted">
-                <tr>{headers.map((h) => <th key={h} className="px-3 py-2 text-left font-medium">{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {rows.slice(0, 20).map((r, i) => (
-                  <tr key={i} className="border-t border-border">
-                    {headers.map((h) => <td key={h} className="px-3 py-2 align-top">{String(r[h] ?? "")}</td>)}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {rows.length > 20 && (
-              <p className="border-t border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-                Aperçu des 20 premières lignes sur {rows.length}.
-              </p>
-            )}
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+export function AdminImport() {
+  return (
+    <div className="space-y-8">
+      <div>
+        <h3 className="font-display text-2xl font-semibold">Import des 3 catalogues</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Un fichier Excel par liste. Chaque import remplace intégralement la liste correspondante.
+        </p>
+      </div>
+
+      <details className="rounded-lg border border-border bg-card p-4 text-sm">
+        <summary className="cursor-pointer font-medium">Colonnes attendues</summary>
+        <ul className="mt-3 grid grid-cols-2 gap-1 text-xs text-muted-foreground md:grid-cols-3">
+          {EXPECTED_FIELDS.map((f) => <li key={f}>• {f}</li>)}
+        </ul>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Les 3 fichiers utilisent les mêmes colonnes. Les colonnes non reconnues sont ignorées.
+        </p>
+      </details>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <ImportZone listType="all" />
+        <ImportZone listType="curated" />
+        <ImportZone listType="promotions" />
+      </div>
     </div>
   );
 }
