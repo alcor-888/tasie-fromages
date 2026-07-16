@@ -158,3 +158,21 @@
     letter-spacing: -0.02em;
   }
 }
+
+@keyframes promo-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 oklch(0.62 0.24 27 / 0.55); }
+  50% { transform: scale(1.04); box-shadow: 0 0 0 12px oklch(0.62 0.24 27 / 0); }
+}
+
+@keyframes promo-sheen {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%) skewX(-20deg); }
+}
+
+@utility promo-badge {
+  animation: promo-pulse 2.2s ease-in-out infinite;
+}
+
+@utility promo-sheen {
+  animation: promo-sheen 2.6s ease-in-out infinite;
+}
