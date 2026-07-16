@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Plus, Tag } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PromoBadge } from "@/components/promo-badge";
 import { useCart } from "@/lib/cart-store";
 import { getCategoryImage, type Cheese } from "@/data/cheeses";
 
@@ -30,12 +31,7 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
           className={`h-full w-full transition-transform duration-700 group-hover:scale-105 ${cheese.imageUrl ? "object-contain bg-secondary/40" : "object-cover"}`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        {promotion && (
-          <Badge className="absolute left-3 top-3 gap-1 bg-destructive text-destructive-foreground hover:bg-destructive shadow-md">
-            <Tag className="h-3 w-3" />
-            Promotion
-          </Badge>
-        )}
+        {promotion && <PromoBadge className="absolute left-3 top-3" />}
         {!promotion && cheese.category && (
           <Badge className="absolute left-3 top-3 bg-card text-card-foreground hover:bg-card">
             {cheese.category}
