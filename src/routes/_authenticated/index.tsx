@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Lock, Mail } from "lucide-react";
@@ -14,6 +14,8 @@ import { CheeseCard } from "@/components/cheese-card";
 import { SearchFilterBar } from "@/components/search-filter-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const PAGE_SIZE = 24;
 
 const cheesesQuery = queryOptions({
   queryKey: ["products-all"],
@@ -68,6 +70,8 @@ function Index() {
   const { data: curated } = useSuspenseQuery(curatedQuery);
   const { data: promotions } = useSuspenseQuery(promotionsQuery);
   const { search, category, milk, sort, activeList, setActiveList } = useFilters();
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const filtered = useMemo(() => {
     const source: Cheese[] =
@@ -86,6 +90,31 @@ function Index() {
     });
     return list;
   }, [cheeses, promotions, curated, search, category, milk, sort, activeList]);
+
+  // Reset pagination when filters/list change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, category, milk, sort, activeList]);
+
+  const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const hasMore = visibleCount < filtered.length;
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length));
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, filtered.length]);
 
   const scrollToSelection = (list: ActiveList) => {
     setActiveList(list);
@@ -232,11 +261,28 @@ function Index() {
               Aucun fromage ne correspond à vos critères.
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((c: Cheese, i: number) => (
-                <CheeseCard key={c.id} cheese={c} index={i} />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {visible.map((c: Cheese, i: number) => (
+                  <CheeseCard key={c.id} cheese={c} index={i} />
+                ))}
+              </div>
+              {hasMore && (
+                <div ref={sentinelRef} className="mt-10 flex flex-col items-center gap-4">
+                  <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: Math.min(3, filtered.length - visibleCount) }).map((_, i) => (
+                      <Skeleton key={i} className="h-80 w-full" />
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length))}
+                  >
+                    Afficher plus ({filtered.length - visibleCount} restants)
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
