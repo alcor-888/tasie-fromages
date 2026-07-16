@@ -118,7 +118,22 @@ export const listProducts = createServerFn({ method: "GET" })
       .order("position", { ascending: true })
       .order("name", { ascending: true });
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r) => toCheese(r as unknown as Row));
+
+    const baseRows = (rows ?? []) as unknown as Row[];
+    const { data: imageRows } = await sb
+      .from("products")
+      .select("id,image_url")
+      .eq("list_type", data.listType)
+      .not("image_url", "is", null)
+      .not("image_url", "like", "data:%");
+
+    const images = new Map<string, string>();
+    for (const img of imageRows ?? []) {
+      const resolved = await resolveImageUrl((img as { image_url: string | null }).image_url);
+      if (resolved) images.set((img as { id: string }).id, resolved);
+    }
+
+    return baseRows.map((r) => toCheese({ ...r, image_url: images.get(r.id) ?? null }));
   });
 
 export const getProductById = createServerFn({ method: "GET" })
