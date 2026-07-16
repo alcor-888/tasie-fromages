@@ -198,7 +198,11 @@ export const insertProductsChunk = createServerFn({ method: "POST" })
     let lastErr: string | null = null;
     while (attempt < 3) {
       const ins = await supabaseAdmin.from("products").insert(mapped);
-      if (!ins.error) return { inserted: mapped.length, failed: 0, error: warnings[0] };
+      if (!ins.error) {
+        return warnings[0]
+          ? { inserted: mapped.length, failed: 0, error: warnings[0] }
+          : { inserted: mapped.length, failed: 0 };
+      }
       lastErr = ins.error.message;
       attempt++;
       await new Promise((r) => setTimeout(r, 500 * attempt));
