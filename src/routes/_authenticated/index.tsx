@@ -261,10 +261,37 @@ function Index() {
               activeList === "promotion" ? promotions.length
               : activeList === "selection" ? curated.length
               : cheeses.length;
+            const hasActiveFilters =
+              search.trim() !== "" || category !== "all" || milk !== "all";
             return (
-              <p className="mb-6 text-sm text-muted-foreground">
-                {filtered.length} produit{filtered.length > 1 ? "s" : ""} {filtered.length !== total ? `sur ${total}` : "disponibles"}
-              </p>
+              <div id="results" className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 scroll-mt-32">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-display text-lg font-semibold text-foreground">
+                    {filtered.length}
+                  </span>{" "}
+                  résultat{filtered.length > 1 ? "s" : ""}{" "}
+                  {filtered.length !== total ? `sur ${total}` : "disponibles"}
+                </p>
+                {hasActiveFilters && (
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    {search.trim() && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-primary">
+                        « {search.trim()} »
+                      </span>
+                    )}
+                    {category !== "all" && (
+                      <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-secondary-foreground">
+                        {category}
+                      </span>
+                    )}
+                    {milk !== "all" && (
+                      <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-secondary-foreground">
+                        {milk}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             );
           })()}
 

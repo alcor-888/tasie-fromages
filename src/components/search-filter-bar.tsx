@@ -1,6 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useFilters } from "@/lib/filter-context";
 import type { Cheese } from "@/data/cheeses";
@@ -68,8 +69,22 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
     setOpen(false);
   };
 
+  const runSearch = () => {
+    setOpen(false);
+    // Scroll to results so the confirmed search is visible.
+    if (typeof document !== "undefined") {
+      document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
-    <div className="grid gap-3 rounded-lg border border-border bg-card p-4 md:grid-cols-[1fr_auto_auto_auto]">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        runSearch();
+      }}
+      className="grid gap-3 rounded-lg border border-border bg-card p-4 md:grid-cols-[1fr_auto_auto_auto_auto]"
+    >
       <div className="relative" ref={wrapperRef}>
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -90,16 +105,30 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
             } else if (e.key === "Enter") {
               e.preventDefault();
               commit(suggestions[highlight]);
+              runSearch();
             } else if (e.key === "Escape") {
               setOpen(false);
             }
           }}
           placeholder="Rechercher un fromage, une région…"
-          className="pl-9"
+          className="pl-9 pr-9"
           role="combobox"
           aria-expanded={open && suggestions.length > 0}
           aria-autocomplete="list"
         />
+        {search && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setOpen(false);
+            }}
+            aria-label="Effacer la recherche"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
         {open && suggestions.length > 0 && (
           <ul
             role="listbox"
@@ -162,6 +191,10 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
           <SelectItem value="age">Affinage</SelectItem>
         </SelectContent>
       </Select>
-    </div>
+      <Button type="submit" className="gap-1.5">
+        <Search className="h-4 w-4" />
+        Rechercher
+      </Button>
+    </form>
   );
 }
