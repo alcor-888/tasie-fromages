@@ -23,6 +23,16 @@ export interface Cheese {
   producer?: string;
   conseils?: string;
   stock?: number;
+  ref?: number;
+  typeDesc?: string;
+  fabriquant?: string;
+  ville?: string;
+  department?: string;
+  matiereGrasse?: string;
+  colissage?: number;
+  nombrePoidsReel?: number;
+  imageUrl?: string;
+  packagingUnit?: string;
 }
 
 const FALLBACK_IMG = presseImg;
