@@ -119,13 +119,21 @@ export const importProducts = createServerFn({ method: "POST" })
       .filter((r): r is NonNullable<typeof r> => r !== null);
 
     const result: ImportResult = { created: 0, failed: 0, errors: [] };
-    const BATCH = 500;
+    const BATCH = 50;
     for (let k = 0; k < rows.length; k += BATCH) {
       const chunk = rows.slice(k, k + BATCH);
-      const ins = await supabaseAdmin.from("products").insert(chunk);
-      if (ins.error) {
+      let attempt = 0;
+      let lastErr: string | null = null;
+      while (attempt < 3) {
+        const ins = await supabaseAdmin.from("products").insert(chunk);
+        if (!ins.error) { lastErr = null; break; }
+        lastErr = ins.error.message;
+        attempt++;
+        await new Promise((r) => setTimeout(r, 500 * attempt));
+      }
+      if (lastErr) {
         result.failed += chunk.length;
-        result.errors.push(ins.error.message);
+        result.errors.push(`Lot ${k}-${k + chunk.length}: ${lastErr.slice(0, 200)}`);
       } else {
         result.created += chunk.length;
       }
