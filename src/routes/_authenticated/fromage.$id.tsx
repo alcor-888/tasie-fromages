@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getCategoryImage, type Cheese } from "@/data/cheeses";
-import { listProducts } from "@/lib/products.functions";
+import { getProductById, listProducts } from "@/lib/products.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
 import { SearchFilterBar } from "@/components/search-filter-bar";
@@ -19,16 +19,16 @@ const cheesesQuery = queryOptions({
   staleTime: 60_000,
 });
 
-const promotionsQuery = queryOptions({
-  queryKey: ["products-promotions"],
-  queryFn: () => listProducts({ data: { listType: "promotions" } }),
+const productQuery = (id: string) => queryOptions({
+  queryKey: ["product-detail", id],
+  queryFn: () => getProductById({ data: { id } }),
   staleTime: 60_000,
 });
 
 export const Route = createFileRoute("/_authenticated/fromage/$id")({
-  loader: ({ context }) => Promise.all([
+  loader: ({ context, params }) => Promise.all([
     context.queryClient.ensureQueryData(cheesesQuery),
-    context.queryClient.ensureQueryData(promotionsQuery),
+    context.queryClient.ensureQueryData(productQuery(params.id)),
   ]),
   component: CheeseDetail,
   notFoundComponent: () => (
@@ -61,8 +61,7 @@ function StatRow({ icon: Icon, label, value }: { icon: typeof Clock; label: stri
 function CheeseDetail() {
   const { id } = Route.useParams();
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
-  const { data: promotions } = useSuspenseQuery(promotionsQuery);
-  const cheese = cheeses.find((c: Cheese) => c.id === id) ?? promotions.find((c: Cheese) => c.id === id);
+  const { data: cheese } = useSuspenseQuery(productQuery(id));
   if (!cheese) throw notFound();
   const { add, setOpen, count } = useCart();
   const soldOut = cheese.stock === 0;

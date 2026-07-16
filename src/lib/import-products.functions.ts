@@ -58,6 +58,45 @@ function normalizeUnit(raw: string | null): string {
   return raw.toLowerCase().startsWith("kg") ? "/ kg" : "/ pièce";
 }
 
+function slugify(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 60) || "produit";
+}
+
+function parseImageDataUrl(value: string | null) {
+  if (!value?.startsWith("data:image/")) return null;
+  const match = /^data:(image\/(png|jpe?g|webp|gif));base64,([\s\S]+)$/i.exec(value);
+  if (!match) return null;
+  const mime = match[1].toLowerCase().replace("image/jpg", "image/jpeg");
+  const ext = mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : mime === "image/gif" ? "gif" : "jpg";
+  return { mime, ext, bytes: Buffer.from(match[3], "base64") };
+}
+
+async function uploadProductPhoto(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseAdmin: any,
+  value: string | null,
+  listType: "all" | "curated" | "promotions",
+  name: string,
+  position: number,
+) {
+  const parsed = parseImageDataUrl(value);
+  if (!parsed) return { url: value, warning: null as string | null };
+
+  const path = `${listType}/${Date.now()}-${position}-${slugify(name)}.${parsed.ext}`;
+  const { error } = await supabaseAdmin.storage
+    .from("product-photos")
+    .upload(path, parsed.bytes, { contentType: parsed.mime, upsert: true });
+
+  if (error) return { url: null, warning: `${name} : photo non importée (${error.message})` };
+  return { url: path, warning: null };
+}
+
 /** Match a field with several possible header spellings (case/accent-insensitive). */
 function pick(f: Record<string, unknown>, keys: string[]): unknown {
   const norm = (s: string) =>
@@ -144,15 +183,26 @@ export const insertProductsChunk = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ inserted: number; failed: number; error?: string }> => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const mapped = data.rows
-      .map((r, idx) => mapRow(r.fields ?? {}, data.listType, data.startPosition + idx))
-      .filter((r): r is NonNullable<typeof r> => r !== null);
+    const mapped: NonNullable<ReturnType<typeof mapRow>>[] = [];
+    const warnings: string[] = [];
+    for (let idx = 0; idx < data.rows.length; idx++) {
+      const row = mapRow(data.rows[idx].fields ?? {}, data.listType, data.startPosition + idx);
+      if (!row) continue;
+      const uploaded = await uploadProductPhoto(supabaseAdmin, row.image_url, data.listType, row.name, row.position);
+      row.image_url = uploaded.url;
+      if (uploaded.warning) warnings.push(uploaded.warning);
+      mapped.push(row);
+    }
     if (!mapped.length) return { inserted: 0, failed: 0 };
     let attempt = 0;
     let lastErr: string | null = null;
     while (attempt < 3) {
       const ins = await supabaseAdmin.from("products").insert(mapped);
-      if (!ins.error) return { inserted: mapped.length, failed: 0 };
+      if (!ins.error) {
+        return warnings[0]
+          ? { inserted: mapped.length, failed: 0, error: warnings[0] }
+          : { inserted: mapped.length, failed: 0 };
+      }
       lastErr = ins.error.message;
       attempt++;
       await new Promise((r) => setTimeout(r, 500 * attempt));
@@ -176,52 +226,17 @@ export const importProducts = createServerFn({ method: "POST" })
     const del = await supabaseAdmin.from("products").delete().eq("list_type", data.listType);
     if (del.error) throw new Error(del.error.message);
 
+    const result: ImportResult = { created: 0, failed: 0, errors: [] };
     const rows = data.rows
-      .map((r, idx) => {
-        const f = r.fields ?? {};
-        const name = s(pick(f, ["Nom", "Libellé", "Libelle", "Name"]));
-        if (!name) return null;
-        // "Prix article" = prix unitaire utilisé au panier (colonne N)
-        const priceArticle = n(pick(f, ["Prix article", "Prix", "Price"])) ?? 0;
-        const priceText = s(pick(f, ["Prix pièce ou Kg", "Prix piece ou Kg", "Prix texte", "Prix affiché"]));
-        const priceTextNum = n(pick(f, ["Prix pièce ou Kg", "Prix piece ou Kg", "Prix texte", "Prix affiché"]));
-        const packagingUnit = s(pick(f, ["Nbre ou Poids", "Nbre / Poids", "Unité", "Unite"]));
-        const priceLabel = priceText
-          ? (priceTextNum != null ? `${priceTextNum.toFixed(2)} €` : priceText)
-          : `${priceArticle.toFixed(2)} €`;
-        return {
-          list_type: data.listType,
-          position: idx,
-          name,
-          ref: i(pick(f, ["Ref", "Réf", "Reference"])),
-          region: s(pick(f, ["Département", "Departement", "Origine", "Region", "Région"])),
-          department: s(pick(f, ["Département", "Departement"])),
-          ville: s(pick(f, ["Ville"])),
-          category: s(pick(f, ["Pâte", "Pate", "Type de pate", "Catégorie", "Categorie"])),
-          type_desc: s(pick(f, ["Type", "Description", "Type de fromage"])),
-          milk: s(pick(f, ["Lait", "Type de lait", "Milk"])),
-          price_label: priceLabel,
-          price_per_kg: priceArticle,
-          unit: normalizeUnit(packagingUnit),
-          packaging_unit: packagingUnit,
-          weight: s(pick(f, ["Poids de la pièce", "Poids de la piece", "Poids", "Weight"])),
-          age: s(pick(f, ["Affinage", "Temps d'affinage", "Age"])),
-          matiere_grasse: s(pick(f, ["Matière grasse", "Matiere grasse", "MG"])),
-          fabrication: s(pick(f, ["Fabrication"])),
-          fabriquant: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
-          producer: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
-          colissage: n(pick(f, ["Colisage", "Colissage"])),
-          nombre_poids_reel: n(pick(f, ["Nombre ou poids réel", "Nombre ou poids reel", "Nombre/poids réel"])),
-          image_url: s(pick(f, ["Photo", "Image", "Image URL"])),
-          saveur: s(pick(f, ["Saveur", "Flavor"])),
-          conseils: s(pick(f, ["Conseils", "Conseil", "Notes"])),
-          season: s(pick(f, ["Saisonnalité", "Saisonnalite", "Saison"])),
-          stock: i(pick(f, ["Stock", "Quantité", "Quantite"])),
-        };
-      })
+      .map((r, idx) => mapRow(r.fields ?? {}, data.listType, idx))
       .filter((r): r is NonNullable<typeof r> => r !== null);
 
-    const result: ImportResult = { created: 0, failed: 0, errors: [] };
+    for (const row of rows) {
+      const uploaded = await uploadProductPhoto(supabaseAdmin, row.image_url, data.listType, row.name, row.position);
+      row.image_url = uploaded.url;
+      if (uploaded.warning) result.errors.push(uploaded.warning);
+    }
+
     const BATCH = 50;
     for (let k = 0; k < rows.length; k += BATCH) {
       const chunk = rows.slice(k, k + BATCH);
