@@ -222,6 +222,7 @@ export const importProducts = createServerFn({ method: "POST" })
     const del = await supabaseAdmin.from("products").delete().eq("list_type", data.listType);
     if (del.error) throw new Error(del.error.message);
 
+    const result: ImportResult = { created: 0, failed: 0, errors: [] };
     const rows = data.rows
       .map((r, idx) => mapRow(r.fields ?? {}, data.listType, idx))
       .filter((r): r is NonNullable<typeof r> => r !== null);
@@ -232,7 +233,6 @@ export const importProducts = createServerFn({ method: "POST" })
       if (uploaded.warning) result.errors.push(uploaded.warning);
     }
 
-    const result: ImportResult = { created: 0, failed: 0, errors: [] };
     const BATCH = 50;
     for (let k = 0; k < rows.length; k += BATCH) {
       const chunk = rows.slice(k, k + BATCH);
