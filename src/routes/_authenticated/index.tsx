@@ -73,6 +73,11 @@ function Index() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const visibleCount = page * PAGE_SIZE;
 
+  const promoIds = useMemo(
+    () => new Set(promotions.map((p: Cheese) => p.id)),
+    [promotions],
+  );
+
   const filtered = useMemo(() => {
     const source: Cheese[] =
       activeList === "promotion" ? promotions : activeList === "selection" ? curated : cheeses;
@@ -184,8 +189,20 @@ function Index() {
               <Button size="lg" asChild>
                 <a href="#selection">Découvrer ma sélection du moment</a>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/promotions">Accès aux promotions</Link>
+              <Button
+                size="lg"
+                asChild
+                className="relative overflow-hidden border-0 font-display font-bold uppercase tracking-[0.18em] text-[color:var(--promo-foreground)] shadow-[var(--shadow-promo)] ring-1 ring-white/25 hover:opacity-95"
+                style={{ background: "var(--gradient-promo)" }}
+              >
+                <Link to="/promotions" className="gap-2">
+                  <Sparkles className="h-4 w-4 drop-shadow" strokeWidth={2.5} />
+                  Accès aux promotions
+                  <span
+                    aria-hidden
+                    className="promo-sheen pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-white/50 to-transparent mix-blend-overlay"
+                  />
+                </Link>
               </Button>
             </div>
             <div className="mt-10 flex gap-8 border-t border-border pt-6 text-sm">
@@ -259,7 +276,7 @@ function Index() {
             <>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((c: Cheese, i: number) => (
-                  <CheeseCard key={c.id} cheese={c} index={i} promotion={activeList === "promotion"} />
+                  <CheeseCard key={c.id} cheese={c} index={i} promotion={promoIds.has(c.id)} />
                 ))}
               </div>
               {hasMore && (
