@@ -128,10 +128,10 @@ export const listProducts = createServerFn({ method: "GET" })
       .not("image_url", "like", "data:%");
 
     const images = new Map<string, string>();
-    for (const img of imageRows ?? []) {
+    await Promise.all((imageRows ?? []).map(async (img) => {
       const resolved = await resolveImageUrl((img as { image_url: string | null }).image_url);
       if (resolved) images.set((img as { id: string }).id, resolved);
-    }
+    }));
 
     return baseRows.map((r) => toCheese({ ...r, image_url: images.get(r.id) ?? null }));
   });
