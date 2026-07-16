@@ -81,6 +81,9 @@ function Index() {
   const filtered = useMemo(() => {
     const source: Cheese[] =
       activeList === "promotion" ? promotions : activeList === "selection" ? curated : cheeses;
+    const norm = (s: string) =>
+      s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const q = norm(search.trim());
     let list = source.filter((c: Cheese) => {
       if (category !== "all" && c.category !== category) return false;
       if (milk !== "all" && c.milk !== milk) return false;
@@ -88,6 +91,19 @@ function Index() {
       return true;
     });
     list = [...list].sort((a, b) => {
+      if (q) {
+        const rank = (c: Cheese) => {
+          const name = norm(c.name);
+          if (name === q) return 0;
+          if (name.startsWith(q)) return 1;
+          if (name.split(/\s+/).some((w) => w.startsWith(q))) return 2;
+          if (name.includes(q)) return 3;
+          return 4;
+        };
+        const ra = rank(a);
+        const rb = rank(b);
+        if (ra !== rb) return ra - rb;
+      }
       if (sort === "price-asc") return a.pricePerKg - b.pricePerKg;
       if (sort === "price-desc") return b.pricePerKg - a.pricePerKg;
       if (sort === "age") return (b.age ?? "").localeCompare(a.age ?? "");
