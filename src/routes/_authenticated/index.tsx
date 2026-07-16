@@ -259,7 +259,7 @@ function Index() {
             <>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((c: Cheese, i: number) => (
-                  <CheeseCard key={c.id} cheese={c} index={i} />
+                  <CheeseCard key={c.id} cheese={c} index={i} promotion={activeList === "promotion"} />
                 ))}
               </div>
               {hasMore && (
