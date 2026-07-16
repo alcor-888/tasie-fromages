@@ -80,8 +80,8 @@ export const importProducts = createServerFn({ method: "POST" })
         if (!name) return null;
         // "Prix article" = prix unitaire utilisé au panier (colonne N)
         const priceArticle = n(pick(f, ["Prix article", "Prix", "Price"])) ?? 0;
-        const priceText = s(pick(f, ["Prix texte", "Prix affiché"]));
-        const priceTextNum = n(pick(f, ["Prix texte", "Prix affiché"]));
+        const priceText = s(pick(f, ["Prix pièce ou Kg", "Prix piece ou Kg", "Prix texte", "Prix affiché"]));
+        const priceTextNum = n(pick(f, ["Prix pièce ou Kg", "Prix piece ou Kg", "Prix texte", "Prix affiché"]));
         const packagingUnit = s(pick(f, ["Nbre ou Poids", "Nbre / Poids", "Unité", "Unite"]));
         const priceLabel = priceText
           ? (priceTextNum != null ? `${priceTextNum.toFixed(2)} €` : priceText)
@@ -107,7 +107,7 @@ export const importProducts = createServerFn({ method: "POST" })
           fabrication: s(pick(f, ["Fabrication"])),
           fabriquant: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
           producer: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
-          colissage: n(pick(f, ["Colissage"])),
+          colissage: n(pick(f, ["Colisage", "Colissage"])),
           nombre_poids_reel: n(pick(f, ["Nombre ou poids réel", "Nombre ou poids reel", "Nombre/poids réel"])),
           image_url: s(pick(f, ["Photo", "Image", "Image URL"])),
           saveur: s(pick(f, ["Saveur", "Flavor"])),
