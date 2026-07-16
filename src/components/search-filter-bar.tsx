@@ -1,5 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { Search, X } from "lucide-react";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -11,6 +12,8 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const categories = useMemo(
     () => Array.from(new Set(cheeses.map((c) => c.category).filter(Boolean) as string[])).sort(),
@@ -71,7 +74,11 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
 
   const runSearch = () => {
     setOpen(false);
-    // Scroll to results so the confirmed search is visible.
+    // If we are not on the listing page, go there so results are visible.
+    if (pathname !== "/") {
+      navigate({ to: "/", hash: "results" });
+      return;
+    }
     if (typeof document !== "undefined") {
       document.getElementById("results")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
