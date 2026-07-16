@@ -62,6 +62,28 @@ function ImportZone({ listType }: { listType: ListType }) {
   });
   const isRunning = progress.phase === "clearing" || progress.phase === "inserting";
 
+  function makeImportChunks(payload: ImportRow[]) {
+    const chunks: ImportRow[][] = [];
+    let current: ImportRow[] = [];
+    let currentSize = 0;
+    const MAX_ROWS = 25;
+    const MAX_CHARS = 8_000_000;
+
+    for (const row of payload) {
+      const rowSize = JSON.stringify(row).length;
+      if (current.length > 0 && (current.length >= MAX_ROWS || currentSize + rowSize > MAX_CHARS)) {
+        chunks.push(current);
+        current = [];
+        currentSize = 0;
+      }
+      current.push(row);
+      currentSize += rowSize;
+    }
+
+    if (current.length > 0) chunks.push(current);
+    return chunks;
+  }
+
   async function handleFile(file: File) {
     setError("");
     setFileName(file.name);
@@ -145,8 +167,8 @@ function colIndexToLetter(n: number): string {
       }
       return { fields };
     });
-    const CHUNK = 25;
-    const totalBatches = Math.ceil(payload.length / CHUNK);
+    const chunks = makeImportChunks(payload);
+    const totalBatches = chunks.length;
     setProgress({
       phase: "clearing", total: payload.length, processed: 0, imported: 0, failed: 0,
       batchIndex: 0, totalBatches, errors: [],
@@ -163,11 +185,11 @@ function colIndexToLetter(n: number): string {
     let imported = 0;
     let failed = 0;
     const errors: string[] = [];
-    for (let k = 0; k < payload.length; k += CHUNK) {
-      const chunk = payload.slice(k, k + CHUNK);
-      const batchIndex = Math.floor(k / CHUNK) + 1;
+    let startPosition = 0;
+    for (const [chunkIndex, chunk] of chunks.entries()) {
+      const batchIndex = chunkIndex + 1;
       try {
-        const res = await insertChunk({ data: { listType, startPosition: k, rows: chunk } });
+        const res = await insertChunk({ data: { listType, startPosition, rows: chunk } });
         imported += res.inserted;
         failed += res.failed;
         if (res.error) errors.push(`Lot ${batchIndex}/${totalBatches} : ${res.error.slice(0, 200)}`);
@@ -177,12 +199,13 @@ function colIndexToLetter(n: number): string {
       }
       setProgress((p) => ({
         ...p,
-        processed: Math.min(p.total, k + chunk.length),
+        processed: Math.min(p.total, startPosition + chunk.length),
         imported,
         failed,
         batchIndex,
         errors,
       }));
+      startPosition += chunk.length;
     }
     setProgress((p) => ({ ...p, phase: "done" }));
     qc.invalidateQueries({ queryKey: [meta.queryKey] });
