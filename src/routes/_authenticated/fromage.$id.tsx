@@ -99,33 +99,41 @@ function CheeseDetail() {
       </div>
 
       {/* Hero detail */}
-      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-10 md:grid-cols-2 md:py-16">
+      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-10 md:grid-cols-5 md:py-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
-          className="relative"
+          className="relative md:col-span-2"
         >
           <div className="absolute -inset-4 rounded-2xl bg-[var(--gradient-warm)] opacity-20 blur-2xl" />
-          <img
-            src={image}
-            alt={cheese.name}
-            width={1600}
-            height={1100}
-            className="relative aspect-[4/5] w-full rounded-xl object-cover shadow-[var(--shadow-elegant)] md:aspect-[4/5]"
-          />
-          <span className="absolute right-6 top-6 text-5xl drop-shadow-lg">{cheese.emoji}</span>
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-secondary/30 shadow-[var(--shadow-elegant)] ring-1 ring-border">
+            <img
+              src={image}
+              alt={cheese.name}
+              width={1600}
+              height={1600}
+              className={`h-full w-full ${hasRealPhoto ? "object-contain p-6" : "object-cover"}`}
+            />
+            <span className="absolute right-5 top-5 text-4xl drop-shadow-lg">{cheese.emoji}</span>
+            {cheese.ref != null && (
+              <span className="absolute left-5 top-5 rounded-full bg-background/90 px-3 py-1 text-xs font-medium uppercase tracking-widest text-muted-foreground backdrop-blur">
+                Réf. {cheese.ref}
+              </span>
+            )}
+          </div>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="flex flex-col"
+          className="flex flex-col md:col-span-3"
         >
           <div className="flex flex-wrap items-center gap-2">
             {cheese.category && <Badge variant="secondary">{cheese.category}</Badge>}
             {cheese.milk && <Badge variant="outline">{cheese.milk}</Badge>}
+            {cheese.fabrication && <Badge variant="outline">{cheese.fabrication}</Badge>}
             {cheese.stock != null && (
               <Badge className={cheese.stock > 0 ? "bg-accent text-accent-foreground hover:bg-accent" : "bg-muted text-muted-foreground"}>
                 {cheese.stock > 0 ? `${cheese.stock} en stock` : "Épuisé"}
@@ -135,9 +143,14 @@ function CheeseDetail() {
           <h1 className="mt-4 font-display text-5xl font-semibold leading-[1.05] md:text-6xl">
             {cheese.name}
           </h1>
-          {(cheese.region || cheese.producer) && (
+          {(cheese.fabriquant || origin) && (
             <p className="mt-3 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              {[cheese.region, cheese.producer].filter(Boolean).join(" · ")}
+              {[cheese.fabriquant, origin].filter(Boolean).join(" · ")}
+            </p>
+          )}
+          {cheese.typeDesc && (
+            <p className="mt-6 text-lg leading-relaxed text-foreground/90">
+              {cheese.typeDesc}
             </p>
           )}
           {cheese.saveur && (
@@ -146,19 +159,35 @@ function CheeseDetail() {
             </p>
           )}
 
-          <div className="mt-8 rounded-lg border border-border bg-card p-2">
+          <div className="mt-8 grid gap-x-6 rounded-xl border border-border bg-card p-2 sm:grid-cols-2">
             {cheese.age && <StatRow icon={Clock} label="Affinage" value={cheese.age} />}
             {cheese.milk && <StatRow icon={Droplet} label="Lait" value={cheese.milk} />}
-            {cheese.weight && <StatRow icon={Wheat} label="Poids" value={cheese.weight} />}
+            {cheese.weight && <StatRow icon={Wheat} label="Poids pièce" value={cheese.weight} />}
             {cheese.fabrication && <StatRow icon={Factory} label="Fabrication" value={cheese.fabrication} />}
+            {cheese.category && <StatRow icon={Package} label="Type de pâte" value={cheese.category} />}
+            {cheese.matiereGrasse && <StatRow icon={Percent} label="Matière grasse" value={cheese.matiereGrasse} />}
+            {cheese.fabriquant && <StatRow icon={Building2} label="Fabriquant" value={cheese.fabriquant} />}
+            {origin && <StatRow icon={MapPin} label="Origine" value={origin} />}
             {cheese.season && <StatRow icon={Leaf} label="Saisonnalité" value={cheese.season} />}
-            {cheese.region && <StatRow icon={MapPin} label="Origine" value={cheese.region} />}
+            {cheese.colissage != null && (
+              <StatRow icon={Hash} label="Colissage" value={String(cheese.colissage)} />
+            )}
+            {cheese.nombrePoidsReel != null && (
+              <StatRow
+                icon={Wheat}
+                label={cheese.packagingUnit?.toLowerCase().startsWith("kg") ? "Poids réel" : "Nombre réel"}
+                value={`${cheese.nombrePoidsReel}${cheese.packagingUnit?.toLowerCase().startsWith("kg") ? " kg" : ""}`}
+              />
+            )}
           </div>
 
           <div className="mt-8 flex items-center justify-between rounded-lg border border-border bg-card p-5">
             <div>
               <p className="font-display text-3xl font-semibold">{cheese.priceLabel}</p>
-              <p className="text-xs text-muted-foreground">{cheese.unit}</p>
+              <p className="text-xs text-muted-foreground">
+                {cheese.unit}
+                {cheese.pricePerKg > 0 && ` · ${cheese.pricePerKg.toFixed(2)} € l'article`}
+              </p>
             </div>
             <Button
               size="lg"
