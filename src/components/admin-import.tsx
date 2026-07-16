@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import * as XLSX from "xlsx";
 import Papa from "papaparse";
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { importProducts, type ImportRow } from "@/lib/import-products.functions";
+import { clearProductList, insertProductsChunk, type ImportRow } from "@/lib/import-products.functions";
 import type { ListType } from "@/lib/products.functions";
 import { toast } from "sonner";
 import { extractInCellImages } from "@/lib/excel-images";
@@ -43,19 +43,24 @@ function ImportZone({ listType }: { listType: ListType }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
-  const send = useServerFn(importProducts);
+  const clearList = useServerFn(clearProductList);
+  const insertChunk = useServerFn(insertProductsChunk);
   const qc = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: (payload: { listType: ListType; rows: ImportRow[] }) => send({ data: payload }),
-    onSuccess: (res) => {
-      toast.success(`${meta.title} : ${res.created} ligne(s) importée(s)${res.failed ? `, ${res.failed} en échec` : ""}`);
-      if (res.errors.length) console.warn("Import errors:", res.errors);
-      qc.invalidateQueries({ queryKey: [meta.queryKey] });
-      setRows([]); setHeaders([]); setFileName("");
-    },
-    onError: (e: Error) => toast.error(e.message),
+  type Progress = {
+    phase: "idle" | "clearing" | "inserting" | "done" | "error";
+    total: number;
+    processed: number;
+    imported: number;
+    failed: number;
+    batchIndex: number;
+    totalBatches: number;
+    errors: string[];
+  };
+  const [progress, setProgress] = useState<Progress>({
+    phase: "idle", total: 0, processed: 0, imported: 0, failed: 0, batchIndex: 0, totalBatches: 0, errors: [],
   });
+  const isRunning = progress.phase === "clearing" || progress.phase === "inserting";
 
   async function handleFile(file: File) {
     setError("");
@@ -130,7 +135,7 @@ function colIndexToLetter(n: number): string {
   return s;
 }
 
-  function doImport() {
+  async function doImport() {
     const payload: ImportRow[] = rows.map((r) => {
       const fields: Record<string, string | number | undefined> = {};
       for (const k of Object.keys(r)) {
@@ -140,7 +145,53 @@ function colIndexToLetter(n: number): string {
       }
       return { fields };
     });
-    mutation.mutate({ listType, rows: payload });
+    const CHUNK = 25;
+    const totalBatches = Math.ceil(payload.length / CHUNK);
+    setProgress({
+      phase: "clearing", total: payload.length, processed: 0, imported: 0, failed: 0,
+      batchIndex: 0, totalBatches, errors: [],
+    });
+    try {
+      await clearList({ data: { listType } });
+    } catch (e) {
+      const msg = (e as Error).message;
+      setProgress((p) => ({ ...p, phase: "error", errors: [`Effacement : ${msg}`] }));
+      toast.error(msg);
+      return;
+    }
+    setProgress((p) => ({ ...p, phase: "inserting" }));
+    let imported = 0;
+    let failed = 0;
+    const errors: string[] = [];
+    for (let k = 0; k < payload.length; k += CHUNK) {
+      const chunk = payload.slice(k, k + CHUNK);
+      const batchIndex = Math.floor(k / CHUNK) + 1;
+      try {
+        const res = await insertChunk({ data: { listType, startPosition: k, rows: chunk } });
+        imported += res.inserted;
+        failed += res.failed;
+        if (res.error) errors.push(`Lot ${batchIndex}/${totalBatches} : ${res.error.slice(0, 200)}`);
+      } catch (e) {
+        failed += chunk.length;
+        errors.push(`Lot ${batchIndex}/${totalBatches} : ${(e as Error).message.slice(0, 200)}`);
+      }
+      setProgress((p) => ({
+        ...p,
+        processed: Math.min(p.total, k + chunk.length),
+        imported,
+        failed,
+        batchIndex,
+        errors,
+      }));
+    }
+    setProgress((p) => ({ ...p, phase: "done" }));
+    qc.invalidateQueries({ queryKey: [meta.queryKey] });
+    if (failed === 0) {
+      toast.success(`${meta.title} : ${imported} ligne(s) importée(s)`);
+      setRows([]); setHeaders([]); setFileName("");
+    } else {
+      toast.error(`${meta.title} : ${imported} importée(s), ${failed} en échec`);
+    }
   }
 
   const unknownHeaders = headers.filter((h) => !EXPECTED_FIELDS.includes(h));
@@ -185,11 +236,69 @@ function colIndexToLetter(n: number): string {
                 <span className="text-amber-600">· {unknownHeaders.length} colonne(s) ignorée(s)</span>
               )}
             </div>
-            <Button onClick={doImport} disabled={mutation.isPending}>
-              {mutation.isPending ? "Import en cours…" : `Remplacer par ${rows.length} ligne(s)`}
+            <Button onClick={doImport} disabled={isRunning}>
+              {isRunning ? "Import en cours…" : `Remplacer par ${rows.length} ligne(s)`}
             </Button>
           </div>
+
+          {progress.phase !== "idle" && (
+            <ProgressPanel progress={progress} />
+          )}
         </div>
+      )}
+    </div>
+  );
+}
+
+function ProgressPanel({ progress }: { progress: {
+  phase: "idle" | "clearing" | "inserting" | "done" | "error";
+  total: number; processed: number; imported: number; failed: number;
+  batchIndex: number; totalBatches: number; errors: string[];
+} }) {
+  const pct = progress.total > 0 ? Math.round((progress.processed / progress.total) * 100) : 0;
+  const phaseLabel =
+    progress.phase === "clearing" ? "Effacement de l'ancienne liste…" :
+    progress.phase === "inserting" ? `Import en cours — lot ${progress.batchIndex}/${progress.totalBatches}` :
+    progress.phase === "done" ? (progress.failed === 0 ? "Import terminé ✓" : "Import terminé avec erreurs") :
+    progress.phase === "error" ? "Import interrompu" : "";
+  return (
+    <div className="space-y-3 rounded-md border border-border bg-background p-4">
+      <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center gap-2 font-medium">
+          {(progress.phase === "clearing" || progress.phase === "inserting") && <Loader2 className="h-4 w-4 animate-spin" />}
+          {progress.phase === "done" && progress.failed === 0 && <CheckCircle2 className="h-4 w-4 text-primary" />}
+          {(progress.phase === "error" || (progress.phase === "done" && progress.failed > 0)) && <AlertCircle className="h-4 w-4 text-destructive" />}
+          <span>{phaseLabel}</span>
+        </div>
+        <span className="tabular-nums text-muted-foreground">{pct}%</span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+        <div
+          className="h-full bg-primary transition-all duration-300"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="rounded bg-secondary/50 p-2">
+          <div className="text-muted-foreground">Traitées</div>
+          <div className="font-display text-lg font-semibold tabular-nums">{progress.processed} / {progress.total}</div>
+        </div>
+        <div className="rounded bg-secondary/50 p-2">
+          <div className="text-muted-foreground">Importées</div>
+          <div className="font-display text-lg font-semibold tabular-nums text-primary">{progress.imported}</div>
+        </div>
+        <div className="rounded bg-secondary/50 p-2">
+          <div className="text-muted-foreground">Échecs</div>
+          <div className={`font-display text-lg font-semibold tabular-nums ${progress.failed > 0 ? "text-destructive" : ""}`}>{progress.failed}</div>
+        </div>
+      </div>
+      {progress.errors.length > 0 && (
+        <details className="text-xs">
+          <summary className="cursor-pointer text-destructive">{progress.errors.length} erreur(s) — voir le détail</summary>
+          <ul className="mt-2 max-h-40 space-y-1 overflow-auto rounded bg-destructive/5 p-2 text-destructive">
+            {progress.errors.map((e, i) => <li key={i} className="font-mono">{e}</li>)}
+          </ul>
+        </details>
       )}
     </div>
   );
