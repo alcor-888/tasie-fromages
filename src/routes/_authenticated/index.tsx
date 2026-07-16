@@ -301,16 +301,16 @@ function Index() {
             </div>
           ) : (
             <>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visible.map((c: Cheese, i: number) => (
                   <CheeseCard key={c.id} cheese={c} index={i} promotion={promoIds.has(c.id)} />
                 ))}
               </div>
               {hasMore && (
                 <div ref={sentinelRef} className="mt-10 flex flex-col items-center gap-4">
-                  <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: Math.min(3, filtered.length - visibleCount) }).map((_, i) => (
-                      <Skeleton key={i} className="h-80 w-full" />
+                  <div className="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {Array.from({ length: Math.min(4, filtered.length - visibleCount) }).map((_, i) => (
+                      <Skeleton key={i} className="h-60 w-full" />
                     ))}
                   </div>
                   <Button
