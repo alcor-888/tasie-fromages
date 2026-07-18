@@ -214,7 +214,7 @@ function CheeseDetail() {
             </Button>
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Réservation en ligne · paiement et retrait en boutique
+            Réservation en ligne
           </p>
         </motion.div>
       </section>
