@@ -141,11 +141,11 @@ export const bulkImportClients = createServerFn({ method: "POST" })
     await ensureAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let created = 0; let updated = 0; const errors: string[] = [];
+    const { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    const byEmail = new Map(list.users.map((u) => [(u.email ?? "").toLowerCase(), u]));
     for (const row of data.rows) {
       try {
-        // Look up existing user by email
-        const { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
-        const existing = list.users.find((u) => (u.email ?? "").toLowerCase() === row.email.toLowerCase());
+        const existing = byEmail.get(row.email.toLowerCase());
         let uid = existing?.id;
         if (!uid) {
           const { data: cr, error } = await supabaseAdmin.auth.admin.createUser({
