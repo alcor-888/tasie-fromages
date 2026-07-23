@@ -7,6 +7,7 @@ import { MapPin, Phone, Lock, Mail, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
 import logoSeal from "@/assets/logo-seal.png.asset.json";
+import roseCampoDui from "@/assets/rose-campo-dui.jpg.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listProducts } from "@/lib/products.functions";
 import { useFilters, type ActiveList } from "@/lib/filter-context";
@@ -184,6 +185,13 @@ function Index() {
             <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
               <a href="#selection">Découvrir les produits Corses ROSE-CAMPO-DUI</a>
             </Button>
+            <button
+              onClick={() => scrollToSelection("selection")}
+              className="ml-1 hidden shrink-0 sm:block"
+              aria-label="Produits Corses ROSE-CAMPO-DUI"
+            >
+              <img src={roseCampoDui.url} alt="Rose-Campo-Dui" className="h-28 w-28 rounded-full ring-2 ring-primary/30 shadow-md transition-transform hover:scale-105" />
+            </button>
           </div>
         </div>
       </header>
