@@ -166,23 +166,23 @@ function Index() {
             >
               Promotions
             </button>
-            <button
-              onClick={() => scrollToSelection("selection")}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
-                activeList === "selection"
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-card text-foreground hover:bg-accent border border-border"
-              }`}
-            >
-              Sélection du moment
-            </button>
+              <button
+                onClick={() => scrollToSelection("selection")}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+                  activeList === "selection"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-card text-foreground hover:bg-accent border border-border"
+                }`}
+              >
+                Produits Corses ROSE-CAMPO-DUI
+              </button>
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" size="sm" className="gap-1.5">
               <Link to="/admin"><Lock className="h-3.5 w-3.5" /> Admin</Link>
             </Button>
             <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
-              <a href="#selection">Découvrer ma sélection du moment</a>
+              <a href="#selection">Découvrir les produits Corses ROSE-CAMPO-DUI</a>
             </Button>
           </div>
         </div>
@@ -203,7 +203,7 @@ function Index() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild>
-                <a href="#selection">Découvrer ma sélection du moment</a>
+                <a href="#selection">Découvrir les produits Corses ROSE-CAMPO-DUI</a>
               </Button>
               <Button
                 size="lg"
@@ -252,10 +252,10 @@ function Index() {
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="mb-2 text-xs uppercase tracking-[0.3em] text-primary">
-                {activeList === "promotion" ? "Offres spéciales" : activeList === "all" ? "Notre catalogue" : "Notre sélection"}
+                {activeList === "promotion" ? "Offres spéciales" : activeList === "all" ? "Notre catalogue" : "Produits Corses"}
               </p>
               <h2 className="font-display text-4xl font-semibold md:text-5xl">
-                {activeList === "promotion" ? "Promotions du moment" : activeList === "all" ? "Tous nos produits, liste générale" : "Le plateau du moment"}
+                {activeList === "promotion" ? "Promotions du moment" : activeList === "all" ? "Tous nos produits, liste générale" : "Produits Corses ROSE-CAMPO-DUI"}
               </h2>
             </div>
             <p className="max-w-md text-sm text-muted-foreground">
