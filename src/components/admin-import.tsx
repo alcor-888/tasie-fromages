@@ -40,7 +40,7 @@ const LIST_META: Record<ListType, { title: string; desc: string; queryKey: strin
     queryKey: "products-all",
   },
   curated: {
-    title: "Produits Corses ROSE-CAMPO-DUI",
+    title: "Prudutti corsi ROSE-CAMPO-DUI",
     desc: "Fichier pour la liste Corse mise en avant — remplace la sélection actuelle.",
     queryKey: "products-curated",
   },
