@@ -30,6 +30,8 @@ function ActivationGate() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["my-profile"],
     queryFn: () => fetchProfile(),
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   if (isLoading) {
@@ -61,6 +63,8 @@ function ActivationGate() {
   };
 
   const signOut = async () => {
+    await qc.cancelQueries();
+    qc.clear();
     await supabase.auth.signOut();
     window.location.href = "/auth";
   };
