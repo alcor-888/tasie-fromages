@@ -345,27 +345,12 @@ function colIndexToLetter(n: number): string {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button disabled={isRunning || missingRequired.length > 0}>
-                    {isRunning ? "Import en cours…" : "Valider et importer"}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirmer l'import ?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Cette action va <strong>remplacer intégralement</strong> la liste « {meta.title} » par {rows.length} ligne(s) issues de <em>{fileName}</em>. Les produits actuels de cette liste seront supprimés. Cette opération est irréversible.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => { void doImport(); }}>
-                      Oui, remplacer la liste
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button
+                disabled={isRunning || missingRequired.length > 0}
+                onClick={() => { void doImport(); }}
+              >
+                {isRunning ? "Import en cours…" : "Importer"}
+              </Button>
             </div>
           </div>
 
