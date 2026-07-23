@@ -5,17 +5,6 @@ import * as XLSX from "xlsx";
 import Papa from "papaparse";
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { clearProductList, insertProductsChunk, type ImportRow } from "@/lib/import-products.functions";
 import type { ListType } from "@/lib/products.functions";
 import { toast } from "sonner";
