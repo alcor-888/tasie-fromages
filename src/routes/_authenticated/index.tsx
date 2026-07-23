@@ -182,12 +182,9 @@ function Index() {
             <Button asChild variant="outline" size="sm" className="gap-1.5">
               <Link to="/admin"><Lock className="h-3.5 w-3.5" /> Admin</Link>
             </Button>
-            <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
-              <a href="#selection">Découvrir les produits Corses ROSE-CAMPO-DUI</a>
-            </Button>
             <button
               onClick={() => scrollToSelection("selection")}
-              className="ml-1 hidden shrink-0 sm:block"
+              className="hidden shrink-0 sm:block"
               aria-label="Produits Corses ROSE-CAMPO-DUI"
             >
               <img src={roseCampoDui.url} alt="Rose-Campo-Dui" className="h-28 w-28 rounded-full ring-2 ring-primary/30 shadow-md transition-transform hover:scale-105" />
