@@ -98,7 +98,17 @@ export const updateClientProfile = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {
+    const patch: {
+      first_name: string | null;
+      last_name: string | null;
+      company: string | null;
+      delivery_address: string | null;
+      phone: string | null;
+      website: string | null;
+      activation_key?: string;
+      activated?: boolean;
+      activated_at?: string | null;
+    } = {
       first_name: data.firstName || null,
       last_name: data.lastName || null,
       company: data.company || null,
