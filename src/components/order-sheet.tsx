@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Minus, Plus, Trash2, ShoppingBag, Check } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
 import { placeOrder } from "@/lib/orders.functions";
+import { getMyProfile } from "@/lib/clients.functions";
 
 type OrderPayload = {
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
+  customerCompany?: string;
+  customerAddress?: string;
+  customerWebsite?: string;
   pickupDate: string;
   notes?: string;
   items: {
@@ -59,14 +63,30 @@ export function OrderSheet() {
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
   const navigate = useNavigate();
   const [step, setStep] = useState<"cart" | "form" | "done">("cart");
-  const [form, setForm] = useState({ name: "", phone: "", email: "", pickup: "", notes: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", company: "", address: "", website: "", pickup: "", notes: "" });
   const placeOrderFn = useServerFn(placeOrder);
+  const fetchProfile = useServerFn(getMyProfile);
+  const { data: profile } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile() });
+
+  useEffect(() => {
+    if (!profile) return;
+    setForm((f) => ({
+      ...f,
+      name: f.name || [profile.firstName, profile.lastName].filter(Boolean).join(" "),
+      phone: f.phone || profile.phone || "",
+      email: f.email || profile.email || "",
+      company: f.company || profile.company || "",
+      address: f.address || profile.deliveryAddress || "",
+      website: f.website || profile.website || "",
+    }));
+  }, [profile]);
+
   const mutation = useMutation({
     mutationFn: (payload: OrderPayload) => placeOrderFn({ data: payload }),
     onSuccess: () => {
       toast.success("Bon de commande envoyé — nous vous rappelons rapidement.");
       setStep("done");
-      setTimeout(() => { clear(); setStep("cart"); setOpen(false); setForm({ name: "", phone: "", email: "", pickup: "", notes: "" }); }, 3000);
+      setTimeout(() => { clear(); setStep("cart"); setOpen(false); }, 3000);
     },
     onError: (e: Error) => toast.error(e.message || "Envoi impossible, réessayez."),
   });
@@ -78,6 +98,9 @@ export function OrderSheet() {
       customerName: form.name,
       customerPhone: form.phone,
       customerEmail: form.email || undefined,
+      customerCompany: form.company || undefined,
+      customerAddress: form.address || undefined,
+      customerWebsite: form.website || undefined,
       pickupDate: form.pickup,
       notes: form.notes || undefined,
       items: items.map((i) => ({
@@ -171,9 +194,16 @@ export function OrderSheet() {
 
         {step === "form" && (
           <form onSubmit={submit} className="flex flex-1 flex-col gap-4 overflow-y-auto py-2">
+            <p className="text-xs text-muted-foreground">
+              Vos coordonnées sont pré-remplies depuis votre fiche. Vous pouvez les ajuster pour cette commande.
+            </p>
             <div className="grid gap-2">
               <Label htmlFor="name">Nom complet</Label>
               <Input id="name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="company">Entreprise</Label>
+              <Input id="company" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="phone">Téléphone</Label>
@@ -182,6 +212,14 @@ export function OrderSheet() {
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="address">Adresse de livraison</Label>
+              <Textarea id="address" rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="website">Site internet</Label>
+              <Input id="website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="notes">Notes (préférences…)</Label>
