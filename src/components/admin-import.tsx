@@ -3,8 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import * as XLSX from "xlsx";
 import Papa from "papaparse";
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2, X } from "lucide-react";
 import { clearProductList, insertProductsChunk, type ImportRow } from "@/lib/import-products.functions";
 import type { ListType } from "@/lib/products.functions";
 import { toast } from "sonner";
@@ -17,10 +16,8 @@ const EXPECTED_FIELDS = [
   "Colisage", "Nombre ou poids réel", "Photo",
 ];
 
-const REQUIRED_FIELDS = ["Nom", "Prix article"];
-const PREVIEW_COLUMNS = ["Ref", "Nom", "Type", "Prix article", "Prix pièce ou Kg", "Photo"];
-
 type Row = Record<string, string | number | undefined>;
+
 
 const LIST_META: Record<ListType, { title: string; desc: string; queryKey: string }> = {
   all: {
@@ -43,8 +40,6 @@ const LIST_META: Record<ListType, { title: string; desc: string; queryKey: strin
 function ImportZone({ listType }: { listType: ListType }) {
   const meta = LIST_META[listType];
   const [fileName, setFileName] = useState<string>("");
-  const [rows, setRows] = useState<Row[]>([]);
-  const [headers, setHeaders] = useState<string[]>([]);
   const [error, setError] = useState<string>("");
   const clearList = useServerFn(clearProductList);
   const insertChunk = useServerFn(insertProductsChunk);
@@ -87,80 +82,17 @@ function ImportZone({ listType }: { listType: ListType }) {
     return chunks;
   }
 
-  async function handleFile(file: File) {
-    setError("");
-    setFileName(file.name);
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-    try {
-      if (ext === "csv" || ext === "tsv") {
-        const text = await file.text();
-        const parsed = Papa.parse<Row>(text, { header: true, skipEmptyLines: true, delimiter: ext === "tsv" ? "\t" : "" });
-        ingest(parsed.data);
-      } else if (ext === "json") {
-        const text = await file.text();
-        const data = JSON.parse(text);
-        ingest(Array.isArray(data) ? data : data.records ?? data.rows ?? []);
-      } else if (["xlsx", "xls", "ods"].includes(ext)) {
-        const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array" });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        // Ligne d'en-tête = ligne 1 → première donnée ligne 2 (rowNumber)
-        const json = XLSX.utils.sheet_to_json<Row>(sheet, { defval: "" });
-        // Extraction des photos "dans la cellule" (Excel Rich Value)
-        let images = new Map<number, string>();
-        if (ext === "xlsx") {
-          try {
-            // Trouver l'index de la colonne "Photo"
-            const headers = Object.keys(json[0] ?? {});
-            const photoIdx = headers.findIndex((h) => /^photo$|^image$/i.test(h.trim()));
-            // Colonne 1 = A. Par défaut R (col 18) sinon calcul depuis header.
-            const colLetter =
-              photoIdx >= 0 ? colIndexToLetter(photoIdx + 1) : "R";
-            images = await extractInCellImages(buf, { targetColLetter: colLetter });
-          } catch (e) {
-            console.warn("Extraction images échouée", e);
-          }
-        }
-        // Attacher l'image (data URL) à chaque ligne : row Excel = index+2 (header à la ligne 1)
-        const enriched = json.map((row, i) => {
-          const excelRow = i + 2;
-          const dataUrl = images.get(excelRow);
-          if (dataUrl) return { ...row, Photo: dataUrl };
-          return row;
-        });
-        ingest(enriched);
-        if (images.size > 0) {
-          toast.success(`${images.size} photo(s) extraite(s) du fichier`);
-        }
-      } else {
-        setError(`Format .${ext} non supporté. Utilisez .xlsx, .csv, .tsv, .ods ou .json`);
-      }
-    } catch (e) {
-      setError((e as Error).message);
+  function colIndexToLetter(n: number): string {
+    let s = "";
+    while (n > 0) {
+      const m = (n - 1) % 26;
+      s = String.fromCharCode(65 + m) + s;
+      n = Math.floor((n - 1) / 26);
     }
+    return s;
   }
 
-  function ingest(data: Row[]) {
-    if (!data.length) { setError("Fichier vide"); return; }
-    // Filtre les lignes vides
-    const filtered = data.filter((r) => Object.values(r).some((v) => v != null && String(v).trim() !== ""));
-    if (!filtered.length) { setError("Aucune ligne exploitable"); return; }
-    const hs = Array.from(new Set(filtered.flatMap((r) => Object.keys(r))));
-    setHeaders(hs);
-    setRows(filtered);
-  }
-
-function colIndexToLetter(n: number): string {
-  let s = "";
-  while (n > 0) {
-    const m = (n - 1) % 26;
-    s = String.fromCharCode(65 + m) + s;
-    n = Math.floor((n - 1) / 26);
-  }
-  return s;
-}
-
-  async function doImport() {
+  async function doImport(rows: Row[]) {
     const payload: ImportRow[] = rows.map((r) => {
       const fields: Record<string, string | number | undefined> = {};
       for (const k of Object.keys(r)) {
@@ -214,19 +146,64 @@ function colIndexToLetter(n: number): string {
     qc.invalidateQueries({ queryKey: [meta.queryKey] });
     if (failed === 0) {
       toast.success(`${meta.title} : ${imported} ligne(s) importée(s)`);
-      setRows([]); setHeaders([]); setFileName("");
+      setFileName("");
     } else {
       toast.error(`${meta.title} : ${imported} importée(s), ${failed} en échec`);
     }
   }
 
-  const unknownHeaders = headers.filter((h) => !EXPECTED_FIELDS.includes(h));
-  const missingRequired = REQUIRED_FIELDS.filter((f) => !headers.includes(f));
-  const previewRows = rows.slice(0, 8);
-  const photosCount = rows.filter((r) => {
-    const v = r["Photo"];
-    return typeof v === "string" && v.startsWith("data:image/");
-  }).length;
+  async function handleFile(file: File) {
+    setError("");
+    setFileName(file.name);
+    setProgress({ phase: "idle", total: 0, processed: 0, imported: 0, failed: 0, batchIndex: 0, totalBatches: 0, errors: [] });
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    try {
+      let rows: Row[] = [];
+      if (ext === "csv" || ext === "tsv") {
+        const text = await file.text();
+        const parsed = Papa.parse<Row>(text, { header: true, skipEmptyLines: true, delimiter: ext === "tsv" ? "\t" : "" });
+        rows = parsed.data;
+      } else if (ext === "json") {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        rows = Array.isArray(data) ? data : data.records ?? data.rows ?? [];
+      } else if (["xlsx", "xls", "ods"].includes(ext)) {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json<Row>(sheet, { defval: "" });
+        let images = new Map<number, string>();
+        if (ext === "xlsx") {
+          try {
+            const headers = Object.keys(json[0] ?? {});
+            const photoIdx = headers.findIndex((h) => /^photo$|^image$/i.test(h.trim()));
+            const colLetter = photoIdx >= 0 ? colIndexToLetter(photoIdx + 1) : "R";
+            images = await extractInCellImages(buf, { targetColLetter: colLetter });
+          } catch (e) {
+            console.warn("Extraction images échouée", e);
+          }
+        }
+        rows = json.map((row, i) => {
+          const excelRow = i + 2;
+          const dataUrl = images.get(excelRow);
+          if (dataUrl) return { ...row, Photo: dataUrl };
+          return row;
+        });
+        if (images.size > 0) {
+          toast.success(`${images.size} photo(s) extraite(s) du fichier`);
+        }
+      } else {
+        setError(`Format .${ext} non supporté. Utilisez .xlsx, .csv, .tsv, .ods ou .json`);
+        return;
+      }
+
+      const filtered = rows.filter((r) => Object.values(r).some((v) => v != null && String(v).trim() !== ""));
+      if (!filtered.length) { setError("Aucune ligne exploitable"); return; }
+      await doImport(filtered);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
 
   return (
     <div className="space-y-4 rounded-lg border border-border bg-card p-6">
@@ -237,19 +214,34 @@ function colIndexToLetter(n: number): string {
 
       <div className="rounded-lg border border-dashed border-border bg-background p-6 text-center">
         <FileSpreadsheet className="mx-auto h-10 w-10 text-muted-foreground" />
-        <label className="mt-4 inline-block cursor-pointer">
+        <label className={`mt-4 inline-block ${isRunning ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
           <input
             type="file"
             accept=".xlsx,.xls,.csv,.tsv,.ods,.json"
             className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+            disabled={isRunning}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) { void handleFile(f); e.currentTarget.value = ""; } }}
           />
           <span className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">
-            <Upload className="h-4 w-4" /> Choisir un fichier
+            <Upload className="h-4 w-4" />
+            {isRunning ? "Import en cours…" : "Choisir un fichier"}
           </span>
         </label>
         <p className="mt-2 text-xs text-muted-foreground">.xlsx · .csv · .tsv · .ods · .json (max 2000 lignes)</p>
-        {fileName && <p className="mt-3 text-sm">{fileName}</p>}
+        {fileName && (
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-secondary/50 px-3 py-1 text-sm">
+            <span>{fileName}</span>
+            <button
+              type="button"
+              disabled={isRunning}
+              onClick={() => { setFileName(""); setProgress((p) => ({ ...p, phase: "idle" })); }}
+              className="rounded-full p-0.5 hover:bg-secondary disabled:opacity-50"
+              aria-label="Changer de fichier"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -258,99 +250,13 @@ function colIndexToLetter(n: number): string {
         </div>
       )}
 
-      {rows.length > 0 && (
-        <div className="space-y-3">
-          <div className="rounded-md border border-border bg-background p-4">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h4 className="font-display text-base font-semibold">Vérification avant import</h4>
-              <button
-                type="button"
-                className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-                onClick={() => { setRows([]); setHeaders([]); setFileName(""); }}
-                disabled={isRunning}
-              >
-                Annuler / changer de fichier
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-              <Stat label="Lignes détectées" value={rows.length} tone="primary" />
-              <Stat label="Colonnes reconnues" value={headers.length - unknownHeaders.length} />
-              <Stat label="Colonnes ignorées" value={unknownHeaders.length} tone={unknownHeaders.length ? "warn" : undefined} />
-              <Stat label="Photos détectées" value={photosCount} />
-            </div>
-
-            {missingRequired.length > 0 && (
-              <div className="mt-3 flex items-start gap-2 rounded bg-destructive/10 p-2 text-xs text-destructive">
-                <AlertCircle className="mt-0.5 h-3.5 w-3.5 flex-none" />
-                <span>Colonnes obligatoires manquantes : {missingRequired.join(", ")}</span>
-              </div>
-            )}
-            {unknownHeaders.length > 0 && (
-              <details className="mt-3 text-xs">
-                <summary className="cursor-pointer text-amber-700">
-                  {unknownHeaders.length} colonne(s) ignorée(s) — voir la liste
-                </summary>
-                <p className="mt-1 text-muted-foreground">{unknownHeaders.join(" · ")}</p>
-              </details>
-            )}
-
-            <div className="mt-4 overflow-x-auto rounded border border-border">
-              <table className="w-full text-xs">
-                <thead className="bg-secondary/50">
-                  <tr>
-                    {PREVIEW_COLUMNS.map((c) => (
-                      <th key={c} className="whitespace-nowrap px-2 py-1.5 text-left font-medium">{c}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {previewRows.map((r, i) => (
-                    <tr key={i} className="border-t border-border">
-                      {PREVIEW_COLUMNS.map((c) => {
-                        const v = r[c];
-                        if (c === "Photo" && typeof v === "string" && v.startsWith("data:image/")) {
-                          return (
-                            <td key={c} className="px-2 py-1.5">
-                              <img src={v} alt="" className="h-10 w-10 rounded object-cover" />
-                            </td>
-                          );
-                        }
-                        const text = v == null ? "" : String(v);
-                        return (
-                          <td key={c} className="max-w-[180px] truncate px-2 py-1.5" title={text}>
-                            {text || <span className="text-muted-foreground">—</span>}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {rows.length > previewRows.length && (
-                <div className="border-t border-border bg-secondary/30 px-2 py-1 text-center text-[11px] text-muted-foreground">
-                  … et {rows.length - previewRows.length} ligne(s) supplémentaire(s)
-                </div>
-              )}
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
-              <Button
-                disabled={isRunning || missingRequired.length > 0}
-                onClick={() => { void doImport(); }}
-              >
-                {isRunning ? "Import en cours…" : "Importer"}
-              </Button>
-            </div>
-          </div>
-
-          {progress.phase !== "idle" && (
-            <ProgressPanel progress={progress} />
-          )}
-        </div>
+      {progress.phase !== "idle" && (
+        <ProgressPanel progress={progress} />
       )}
     </div>
   );
 }
+
 
 function Stat({ label, value, tone }: { label: string; value: number; tone?: "primary" | "warn" }) {
   const color = tone === "primary" ? "text-primary" : tone === "warn" ? "text-amber-600" : "";
