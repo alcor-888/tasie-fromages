@@ -38,6 +38,54 @@ export type Database = {
         }
         Relationships: []
       }
+      client_profiles: {
+        Row: {
+          activated: boolean
+          activated_at: string | null
+          activation_key: string
+          company: string | null
+          created_at: string
+          delivery_address: string | null
+          email: string | null
+          first_name: string | null
+          last_name: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          activated?: boolean
+          activated_at?: string | null
+          activation_key: string
+          company?: string | null
+          created_at?: string
+          delivery_address?: string | null
+          email?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          activated?: boolean
+          activated_at?: string | null
+          activation_key?: string
+          company?: string | null
+          created_at?: string
+          delivery_address?: string | null
+          email?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           cheese_id: string
@@ -85,39 +133,51 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          customer_address: string | null
+          customer_company: string | null
           customer_email: string | null
           customer_name: string
           customer_phone: string
+          customer_website: string | null
           id: string
           notes: string | null
           pickup_date: string | null
           status: string
           total_estimate: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
+          customer_address?: string | null
+          customer_company?: string | null
           customer_email?: string | null
           customer_name: string
           customer_phone: string
+          customer_website?: string | null
           id?: string
           notes?: string | null
           pickup_date?: string | null
           status?: string
           total_estimate?: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
+          customer_address?: string | null
+          customer_company?: string | null
           customer_email?: string | null
           customer_name?: string
           customer_phone?: string
+          customer_website?: string | null
           id?: string
           notes?: string | null
           pickup_date?: string | null
           status?: string
           total_estimate?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
