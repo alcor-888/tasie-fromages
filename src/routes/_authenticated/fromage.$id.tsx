@@ -12,10 +12,17 @@ import { getProductById, listProducts } from "@/lib/products.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
 import { SearchFilterBar } from "@/components/search-filter-bar";
+import roseCampoDui from "@/assets/rose-campo-dui.jpg.asset.json";
 
 const cheesesQuery = queryOptions({
   queryKey: ["products-all"],
   queryFn: () => listProducts({ data: { listType: "all" } }),
+  staleTime: 60_000,
+});
+
+const curatedQuery = queryOptions({
+  queryKey: ["products-curated"],
+  queryFn: () => listProducts({ data: { listType: "curated" } }),
   staleTime: 60_000,
 });
 
@@ -28,6 +35,7 @@ const productQuery = (id: string) => queryOptions({
 export const Route = createFileRoute("/_authenticated/fromage/$id")({
   loader: ({ context, params }) => Promise.all([
     context.queryClient.ensureQueryData(cheesesQuery),
+    context.queryClient.ensureQueryData(curatedQuery),
     context.queryClient.ensureQueryData(productQuery(params.id)),
   ]),
   component: CheeseDetail,
@@ -61,8 +69,10 @@ function StatRow({ icon: Icon, label, value }: { icon: typeof Clock; label: stri
 function CheeseDetail() {
   const { id } = Route.useParams();
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
+  const { data: curated } = useSuspenseQuery(curatedQuery);
   const { data: cheese } = useSuspenseQuery(productQuery(id));
   if (!cheese) throw notFound();
+  const isRoseCampoDui = curated.some((c: Cheese) => c.id === cheese.id);
   const { add, setOpen, count } = useCart();
   const soldOut = cheese.stock === 0;
   const related = (() => {
@@ -135,6 +145,13 @@ function CheeseDetail() {
               <span className="absolute left-5 top-5 rounded-full bg-background/90 px-3 py-1 text-xs font-medium uppercase tracking-widest text-muted-foreground backdrop-blur">
                 Réf. {cheese.ref}
               </span>
+            )}
+            {isRoseCampoDui && (
+              <img
+                src={roseCampoDui.url}
+                alt="Rose-Campo-Dui"
+                className="absolute bottom-4 right-4 h-24 w-24 rounded-full ring-2 ring-primary/40 shadow-lg"
+              />
             )}
           </div>
         </motion.div>
