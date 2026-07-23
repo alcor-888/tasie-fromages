@@ -9,7 +9,15 @@ import type { ListType } from "@/lib/products.functions";
 import { toast } from "sonner";
 import { extractInCellImages } from "@/lib/excel-images";
 
+const EXPECTED_FIELDS = [
+  "Ref", "Nom", "Type", "Fabriquant", "Ville", "Département",
+  "Poids de la pièce", "Lait", "Fabrication", "Pâte", "Affinage",
+  "Matière grasse", "Prix pièce ou Kg", "Prix article", "Nbre ou Poids",
+  "Colisage", "Nombre ou poids réel", "Photo",
+];
+
 type Row = Record<string, string | number | undefined>;
+
 
 const LIST_META: Record<ListType, { title: string; desc: string; queryKey: string }> = {
   all: {
