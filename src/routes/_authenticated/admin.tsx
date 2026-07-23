@@ -54,6 +54,8 @@ function AdminPage() {
   });
 
   const signOut = async () => {
+    await qc.cancelQueries();
+    qc.clear();
     await supabase.auth.signOut();
     window.location.href = "/auth";
   };
