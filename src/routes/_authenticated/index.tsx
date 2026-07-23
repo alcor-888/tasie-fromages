@@ -207,9 +207,6 @@ function Index() {
               Une sélection de fromages et charcuteries à découvrir.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Button size="lg" asChild>
-                <a href="#selection">Découvrir les produits Corses ROSE-CAMPO-DUI</a>
-              </Button>
               <Button
                 size="lg"
                 asChild
