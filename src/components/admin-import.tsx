@@ -5,6 +5,17 @@ import * as XLSX from "xlsx";
 import Papa from "papaparse";
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { clearProductList, insertProductsChunk, type ImportRow } from "@/lib/import-products.functions";
 import type { ListType } from "@/lib/products.functions";
 import { toast } from "sonner";
@@ -16,6 +27,9 @@ const EXPECTED_FIELDS = [
   "Matière grasse", "Prix pièce ou Kg", "Prix article", "Nbre ou Poids",
   "Colisage", "Nombre ou poids réel", "Photo",
 ];
+
+const REQUIRED_FIELDS = ["Nom", "Prix article"];
+const PREVIEW_COLUMNS = ["Ref", "Nom", "Type", "Prix article", "Prix pièce ou Kg", "Photo"];
 
 type Row = Record<string, string | number | undefined>;
 
@@ -218,6 +232,12 @@ function colIndexToLetter(n: number): string {
   }
 
   const unknownHeaders = headers.filter((h) => !EXPECTED_FIELDS.includes(h));
+  const missingRequired = REQUIRED_FIELDS.filter((f) => !headers.includes(f));
+  const previewRows = rows.slice(0, 8);
+  const photosCount = rows.filter((r) => {
+    const v = r["Photo"];
+    return typeof v === "string" && v.startsWith("data:image/");
+  }).length;
 
   return (
     <div className="space-y-4 rounded-lg border border-border bg-card p-6">
@@ -251,17 +271,102 @@ function colIndexToLetter(n: number): string {
 
       {rows.length > 0 && (
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              {rows.length} ligne(s) prêtes à importer
-              {unknownHeaders.length > 0 && (
-                <span className="text-amber-600">· {unknownHeaders.length} colonne(s) ignorée(s)</span>
+          <div className="rounded-md border border-border bg-background p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h4 className="font-display text-base font-semibold">Vérification avant import</h4>
+              <button
+                type="button"
+                className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                onClick={() => { setRows([]); setHeaders([]); setFileName(""); }}
+                disabled={isRunning}
+              >
+                Annuler / changer de fichier
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+              <Stat label="Lignes détectées" value={rows.length} tone="primary" />
+              <Stat label="Colonnes reconnues" value={headers.length - unknownHeaders.length} />
+              <Stat label="Colonnes ignorées" value={unknownHeaders.length} tone={unknownHeaders.length ? "warn" : undefined} />
+              <Stat label="Photos détectées" value={photosCount} />
+            </div>
+
+            {missingRequired.length > 0 && (
+              <div className="mt-3 flex items-start gap-2 rounded bg-destructive/10 p-2 text-xs text-destructive">
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 flex-none" />
+                <span>Colonnes obligatoires manquantes : {missingRequired.join(", ")}</span>
+              </div>
+            )}
+            {unknownHeaders.length > 0 && (
+              <details className="mt-3 text-xs">
+                <summary className="cursor-pointer text-amber-700">
+                  {unknownHeaders.length} colonne(s) ignorée(s) — voir la liste
+                </summary>
+                <p className="mt-1 text-muted-foreground">{unknownHeaders.join(" · ")}</p>
+              </details>
+            )}
+
+            <div className="mt-4 overflow-x-auto rounded border border-border">
+              <table className="w-full text-xs">
+                <thead className="bg-secondary/50">
+                  <tr>
+                    {PREVIEW_COLUMNS.map((c) => (
+                      <th key={c} className="whitespace-nowrap px-2 py-1.5 text-left font-medium">{c}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {previewRows.map((r, i) => (
+                    <tr key={i} className="border-t border-border">
+                      {PREVIEW_COLUMNS.map((c) => {
+                        const v = r[c];
+                        if (c === "Photo" && typeof v === "string" && v.startsWith("data:image/")) {
+                          return (
+                            <td key={c} className="px-2 py-1.5">
+                              <img src={v} alt="" className="h-10 w-10 rounded object-cover" />
+                            </td>
+                          );
+                        }
+                        const text = v == null ? "" : String(v);
+                        return (
+                          <td key={c} className="max-w-[180px] truncate px-2 py-1.5" title={text}>
+                            {text || <span className="text-muted-foreground">—</span>}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {rows.length > previewRows.length && (
+                <div className="border-t border-border bg-secondary/30 px-2 py-1 text-center text-[11px] text-muted-foreground">
+                  … et {rows.length - previewRows.length} ligne(s) supplémentaire(s)
+                </div>
               )}
             </div>
-            <Button onClick={doImport} disabled={isRunning}>
-              {isRunning ? "Import en cours…" : `Remplacer par ${rows.length} ligne(s)`}
-            </Button>
+
+            <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button disabled={isRunning || missingRequired.length > 0}>
+                    {isRunning ? "Import en cours…" : "Valider et importer"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmer l'import ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action va <strong>remplacer intégralement</strong> la liste « {meta.title} » par {rows.length} ligne(s) issues de <em>{fileName}</em>. Les produits actuels de cette liste seront supprimés. Cette opération est irréversible.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => { void doImport(); }}>
+                      Oui, remplacer la liste
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
 
           {progress.phase !== "idle" && (
@@ -269,6 +374,16 @@ function colIndexToLetter(n: number): string {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: number; tone?: "primary" | "warn" }) {
+  const color = tone === "primary" ? "text-primary" : tone === "warn" ? "text-amber-600" : "";
+  return (
+    <div className="rounded bg-secondary/40 p-2">
+      <div className="text-muted-foreground">{label}</div>
+      <div className={`font-display text-base font-semibold tabular-nums ${color}`}>{value}</div>
     </div>
   );
 }
