@@ -175,7 +175,7 @@ function Index() {
                     : "bg-card text-foreground hover:bg-accent border border-border"
                 }`}
               >
-                Produits Corses ROSE-CAMPO-DUI
+                Prudutti corsi ROSE-CAMPO-DUI
               </button>
           </div>
           <div className="flex items-center gap-2">
@@ -185,7 +185,7 @@ function Index() {
             <button
               onClick={() => scrollToSelection("selection")}
               className="hidden shrink-0 sm:block"
-              aria-label="Produits Corses ROSE-CAMPO-DUI"
+              aria-label="Prudutti corsi ROSE-CAMPO-DUI"
             >
               <img src={roseCampoDui.url} alt="Rose-Campo-Dui" className="h-28 w-28 rounded-full ring-2 ring-primary/30 shadow-md transition-transform hover:scale-105" />
             </button>
@@ -254,10 +254,10 @@ function Index() {
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="mb-2 text-xs uppercase tracking-[0.3em] text-primary">
-                {activeList === "promotion" ? "Offres spéciales" : activeList === "all" ? "Notre catalogue" : "Produits Corses"}
+                {activeList === "promotion" ? "Offres spéciales" : activeList === "all" ? "Notre catalogue" : "Prudutti corsi"}
               </p>
               <h2 className="font-display text-4xl font-semibold md:text-5xl">
-                {activeList === "promotion" ? "Promotions du moment" : activeList === "all" ? "Tous nos produits, liste générale" : "Produits Corses ROSE-CAMPO-DUI"}
+                {activeList === "promotion" ? "Promotions du moment" : activeList === "all" ? "Tous nos produits, liste générale" : "Prudutti corsi ROSE-CAMPO-DUI"}
               </h2>
             </div>
             <p className="max-w-md text-sm text-muted-foreground">
