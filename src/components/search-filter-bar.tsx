@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, RotateCcw } from "lucide-react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { useFilters } from "@/lib/filter-context";
 import type { Cheese } from "@/data/cheeses";
 
 export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
-  const { search, setSearch, milk, setMilk, sort, setSort } = useFilters();
+  const { search, setSearch, milk, setMilk, sort, setSort, reset } = useFilters();
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -181,10 +181,24 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
           <SelectItem value="age">Affinage</SelectItem>
         </SelectContent>
       </Select>
-      <Button type="submit" className="gap-1.5">
-        <Search className="h-4 w-4" />
-        Rechercher
-      </Button>
+      <div className="flex gap-2 md:justify-end">
+        <Button type="submit" className="gap-1.5">
+          <Search className="h-4 w-4" />
+          Rechercher
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            reset();
+            setOpen(false);
+          }}
+          className="gap-1.5"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Réinitialiser
+        </Button>
+      </div>
     </form>
   );
 }
