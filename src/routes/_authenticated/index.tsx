@@ -225,8 +225,6 @@ function Index() {
             </div>
             <div className="mt-10 flex gap-8 border-t border-border pt-6 text-sm">
               <div><span className="font-display text-2xl font-semibold">300+</span><p className="text-xs uppercase tracking-wider text-muted-foreground">Produits de qualité PREMIUM</p></div>
-              <div><span className="font-display text-2xl font-semibold">120+</span><p className="text-xs uppercase tracking-wider text-muted-foreground">Producteurs</p></div>
-              <div><span className="font-display text-2xl font-semibold">AOP</span><p className="text-xs uppercase tracking-wider text-muted-foreground">Garantis</p></div>
             </div>
           </motion.div>
           <motion.div
