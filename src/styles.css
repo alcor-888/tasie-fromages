@@ -88,6 +88,8 @@
   --ring: oklch(0.38 0.12 25);
   --gradient-warm: linear-gradient(135deg, oklch(0.38 0.12 25), oklch(0.45 0.14 40));
   --shadow-elegant: 0 20px 60px -25px oklch(0.22 0.025 50 / 0.25);
+  --promo: oklch(0.65 0.2 55);
+  --promo-foreground: oklch(0.99 0.01 85);
   --promo-a: oklch(0.62 0.24 27);
   --promo-b: oklch(0.72 0.2 55);
   --promo-foreground: oklch(0.99 0.01 85);
