@@ -181,10 +181,24 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
           <SelectItem value="age">Affinage</SelectItem>
         </SelectContent>
       </Select>
-      <Button type="submit" className="gap-1.5">
-        <Search className="h-4 w-4" />
-        Rechercher
-      </Button>
+      <div className="flex gap-2 md:justify-end">
+        <Button type="submit" className="gap-1.5">
+          <Search className="h-4 w-4" />
+          Rechercher
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            reset();
+            setOpen(false);
+          }}
+          className="gap-1.5"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Réinitialiser
+        </Button>
+      </div>
     </form>
   );
 }
