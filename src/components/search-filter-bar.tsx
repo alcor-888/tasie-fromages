@@ -8,7 +8,7 @@ import { useFilters } from "@/lib/filter-context";
 import type { Cheese } from "@/data/cheeses";
 
 export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
-  const { search, setSearch, milk, setMilk, sort, setSort } = useFilters();
+  const { search, setSearch, milk, setMilk, sort, setSort, reset } = useFilters();
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
