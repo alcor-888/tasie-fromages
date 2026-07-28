@@ -47,8 +47,13 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
         >
           <h3 className="font-display text-[15px] font-semibold leading-tight line-clamp-2">{cheese.name}</h3>
         </Link>
+        {(cheese.fabriquant || cheese.region) && (
+          <p className="text-[11px] font-medium text-foreground/80 line-clamp-1">
+            {[cheese.fabriquant, cheese.region].filter(Boolean).join(" · ")}
+          </p>
+        )}
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground line-clamp-1">
-          {[cheese.region, cheese.milk, cheese.age].filter(Boolean).join(" · ")}
+          {[cheese.milk, cheese.age].filter(Boolean).join(" · ")}
         </p>
         <div className="mt-auto flex items-center justify-between pt-2">
           <div className="font-display leading-none">
