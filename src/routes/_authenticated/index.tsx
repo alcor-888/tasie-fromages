@@ -150,30 +150,30 @@ function Index() {
           <div className="hidden flex-wrap items-center justify-center gap-2 md:flex">
             <button
               onClick={() => scrollToSelection("all")}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+              className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer ${
                 activeList === "all"
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-card text-foreground hover:bg-accent border border-border"
+                  ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
+                  : "bg-card text-foreground hover:bg-primary/10 border border-border"
               }`}
             >
               Liste générale
             </button>
             <button
               onClick={() => scrollToSelection("promotion")}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+              className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer ${
                 activeList === "promotion"
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "bg-card text-foreground hover:bg-accent border border-border"
+                  ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
+                  : "bg-card text-foreground hover:bg-primary/10 border border-border"
               }`}
             >
               Promotions
             </button>
               <button
                 onClick={() => scrollToSelection("selection")}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
+                className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer ${
                   activeList === "selection"
-                    ? "bg-rose-corsi text-white shadow-md"
-                    : "bg-rose-corsi/15 text-rose-corsi hover:bg-rose-corsi/25 border border-rose-corsi/30"
+                    ? "bg-rose-corsi text-white shadow-md hover:bg-rose-corsi/90"
+                    : "bg-rose-corsi/15 text-rose-corsi hover:bg-rose-corsi/30 border border-rose-corsi/30"
                 }`}
               >
                 Prudutti corsi ROSE-CAMPO-DUI
