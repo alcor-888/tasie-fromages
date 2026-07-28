@@ -92,7 +92,6 @@
   --promo-foreground: oklch(0.99 0.01 85);
   --promo-a: oklch(0.62 0.24 27);
   --promo-b: oklch(0.72 0.2 55);
-  --promo-foreground: oklch(0.99 0.01 85);
   --gradient-promo: linear-gradient(135deg, var(--promo-a), var(--promo-b));
   --shadow-promo: 0 12px 28px -10px oklch(0.55 0.22 25 / 0.55);
   --rose-corsi: oklch(0.72 0.18 350);
