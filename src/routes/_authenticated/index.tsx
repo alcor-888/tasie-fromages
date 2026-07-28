@@ -162,8 +162,8 @@ function Index() {
               onClick={() => scrollToSelection("promotion")}
               className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md cursor-pointer ${
                 activeList === "promotion"
-                  ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
-                  : "bg-card text-foreground hover:bg-primary/10 border border-border"
+                  ? "bg-promo text-promo-foreground shadow-md hover:bg-promo/90"
+                  : "bg-promo/15 text-promo hover:bg-promo/25 border border-promo/30"
               }`}
             >
               Promotions
