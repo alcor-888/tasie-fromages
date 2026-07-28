@@ -8,17 +8,13 @@ import { useFilters } from "@/lib/filter-context";
 import type { Cheese } from "@/data/cheeses";
 
 export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
-  const { search, setSearch, category, setCategory, milk, setMilk, sort, setSort } = useFilters();
+  const { search, setSearch, milk, setMilk, sort, setSort } = useFilters();
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const categories = useMemo(
-    () => Array.from(new Set(cheeses.map((c) => c.category).filter(Boolean) as string[])).sort(),
-    [cheeses],
-  );
   const milks = useMemo(
     () => Array.from(new Set(cheeses.map((c) => c.milk).filter(Boolean) as string[])).sort(),
     [cheeses],
