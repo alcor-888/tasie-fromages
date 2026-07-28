@@ -8,12 +8,14 @@ interface FilterContextType {
   search: string;
   category: string;
   milk: string;
+  fabrication: string;
   sort: SortKey;
   activeList: ActiveList;
   page: number;
   setSearch: (v: string) => void;
   setCategory: (v: string) => void;
   setMilk: (v: string) => void;
+  setFabrication: (v: string) => void;
   setSort: (v: SortKey) => void;
   setActiveList: (v: ActiveList) => void;
   setPage: (v: number) => void;
@@ -24,6 +26,7 @@ const defaults = {
   q: "",
   cat: "all",
   milk: "all",
+  fab: "all",
   sort: "name" as SortKey,
   list: "all" as ActiveList,
   page: 1,
@@ -63,6 +66,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       search: readString(raw, "q", ""),
       category: readString(raw, "cat", "all"),
       milk: readString(raw, "milk", "all"),
+      fabrication: readString(raw, "fab", "all"),
       sort: readSort(raw),
       activeList: readList(raw),
       page: readPage(raw),
@@ -80,6 +84,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
           if (next.q === "" || next.q == null) delete next.q;
           if (next.cat === "all" || next.cat == null) delete next.cat;
           if (next.milk === "all" || next.milk == null) delete next.milk;
+          if (next.fab === "all" || next.fab == null) delete next.fab;
           if (next.sort === "name" || next.sort == null) delete next.sort;
           if (next.list === "all" || next.list == null) delete next.list;
           if (next.page === 1 || next.page == null) delete next.page;
@@ -95,14 +100,15 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const setSearch = useCallback((v: string) => update({ q: v, page: 1 }), [update]);
   const setCategory = useCallback((v: string) => update({ cat: v, page: 1 }), [update]);
   const setMilk = useCallback((v: string) => update({ milk: v, page: 1 }), [update]);
+  const setFabrication = useCallback((v: string) => update({ fab: v, page: 1 }), [update]);
   const setSort = useCallback((v: SortKey) => update({ sort: v, page: 1 }), [update]);
   const setActiveList = useCallback((v: ActiveList) => update({ list: v, page: 1 }), [update]);
   const setPage = useCallback((v: number) => update({ page: v }), [update]);
-  const reset = useCallback(() => update({ q: undefined, cat: undefined, milk: undefined, sort: undefined, list: undefined, page: undefined }), [update]);
+  const reset = useCallback(() => update({ q: undefined, cat: undefined, milk: undefined, fab: undefined, sort: undefined, list: undefined, page: undefined }), [update]);
 
   const value = useMemo(
-    () => ({ ...state, setSearch, setCategory, setMilk, setSort, setActiveList, setPage, reset }),
-    [state, setSearch, setCategory, setMilk, setSort, setActiveList, setPage, reset],
+    () => ({ ...state, setSearch, setCategory, setMilk, setFabrication, setSort, setActiveList, setPage, reset }),
+    [state, setSearch, setCategory, setMilk, setFabrication, setSort, setActiveList, setPage, reset],
   );
 
   return <FilterContext.Provider value={value}>{children}</FilterContext.Provider>;
