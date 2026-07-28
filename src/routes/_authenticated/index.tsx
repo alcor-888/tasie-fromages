@@ -172,8 +172,8 @@ function Index() {
                 onClick={() => scrollToSelection("selection")}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium shadow-sm transition-all ${
                   activeList === "selection"
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card text-foreground hover:bg-accent border border-border"
+                    ? "bg-rose-corsi text-white shadow-md"
+                    : "bg-rose-corsi/15 text-rose-corsi hover:bg-rose-corsi/25 border border-rose-corsi/30"
                 }`}
               >
                 Prudutti corsi ROSE-CAMPO-DUI
