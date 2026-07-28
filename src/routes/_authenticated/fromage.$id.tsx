@@ -102,29 +102,29 @@ function CheeseDetail() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link to="/" className="flex items-baseline gap-2">
-            <span className="font-display text-2xl font-semibold">La Cave</span>
-            <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Fromagère</span>
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:px-6">
+          <Link to="/" className="flex items-baseline gap-2 truncate">
+            <span className="font-display text-lg font-semibold sm:text-2xl">La Cave</span>
+            <span className="hidden text-xs uppercase tracking-[0.3em] text-muted-foreground sm:inline">Tasie Fromages</span>
           </Link>
           <Button size="sm" onClick={() => setOpen(true)} className="gap-2">
-            <ShoppingBag className="h-4 w-4" /> Panier{count > 0 ? ` (${count})` : ""}
+            <ShoppingBag className="h-4 w-4" /> <span className="hidden sm:inline">Panier</span>{count > 0 ? ` (${count})` : ""}
           </Button>
         </div>
       </header>
 
-      <div className="sticky top-16 z-30 mx-auto max-w-7xl px-6 py-2">
+      <div className="sticky top-14 z-30 mx-auto max-w-7xl px-3 py-2 sm:top-16 sm:px-6">
         <SearchFilterBar cheeses={cheeses} />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 pt-6">
+      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 sm:pt-6">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Retour à la sélection
         </Link>
       </div>
 
       {/* Hero detail */}
-      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-10 md:grid-cols-5 md:py-16">
+      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-10 md:grid-cols-5 md:gap-12 md:py-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -150,7 +150,7 @@ function CheeseDetail() {
               <img
                 src={roseCampoDui.url}
                 alt="Rose-Campo-Dui"
-                className="absolute bottom-4 right-4 h-24 w-24 rounded-full ring-2 ring-primary/40 shadow-lg"
+                className="absolute bottom-3 right-3 h-16 w-16 rounded-full ring-2 ring-primary/40 shadow-lg sm:bottom-4 sm:right-4 sm:h-24 sm:w-24"
               />
             )}
           </div>
@@ -172,7 +172,7 @@ function CheeseDetail() {
               </Badge>
             )}
           </div>
-          <h1 className="mt-4 font-display text-5xl font-semibold leading-[1.05] md:text-6xl">
+          <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.1] sm:text-5xl md:text-6xl md:leading-[1.05]">
             {cheese.name}
           </h1>
           {(cheese.fabriquant || origin) && (
@@ -181,17 +181,17 @@ function CheeseDetail() {
             </p>
           )}
           {cheese.typeDesc && (
-            <p className="mt-6 text-lg leading-relaxed text-foreground/90">
+            <p className="mt-4 text-base leading-relaxed text-foreground/90 sm:mt-6 sm:text-lg">
               {cheese.typeDesc}
             </p>
           )}
           {cheese.saveur && (
-            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-lg">
               {cheese.saveur}
             </p>
           )}
 
-          <div className="mt-8 grid gap-x-6 rounded-xl border border-border bg-card p-2 sm:grid-cols-2">
+          <div className="mt-6 grid gap-x-6 rounded-xl border border-border bg-card p-3 sm:mt-8 sm:grid-cols-2">
             {cheese.age && <StatRow icon={Clock} label="Affinage" value={cheese.age} />}
             {cheese.milk && <StatRow icon={Droplet} label="Lait" value={cheese.milk} />}
             {cheese.weight && <StatRow icon={Wheat} label="Poids pièce" value={cheese.weight} />}
@@ -213,9 +213,9 @@ function CheeseDetail() {
             )}
           </div>
 
-          <div className="mt-8 flex items-center justify-between rounded-lg border border-border bg-card p-5">
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 sm:mt-8 sm:p-5">
             <div>
-              <p className="font-display text-3xl font-semibold">{cheese.priceLabel}</p>
+              <p className="font-display text-2xl font-semibold sm:text-3xl">{cheese.priceLabel}</p>
               <p className="text-xs text-muted-foreground">
                 {cheese.unit}
                 {cheese.pricePerKg > 0 && ` · ${cheese.pricePerKg.toFixed(2)} € l'article`}
@@ -238,12 +238,12 @@ function CheeseDetail() {
 
       {cheese.conseils && (
         <section className="border-t border-border bg-secondary/30">
-          <div className="mx-auto max-w-3xl px-6 py-16">
+          <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
             <p className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-primary">
               <Lightbulb className="h-4 w-4" /> Conseils du fromager
             </p>
-            <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">Comment le déguster</h2>
-            <p className="mt-6 whitespace-pre-line text-lg leading-relaxed text-muted-foreground">
+            <h2 className="mt-2 font-display text-2xl font-semibold sm:text-3xl md:text-4xl">Comment le déguster</h2>
+            <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-lg">
               {cheese.conseils}
             </p>
           </div>
@@ -253,9 +253,9 @@ function CheeseDetail() {
       {/* Related */}
       {related.length > 0 && (
         <section className="border-t border-border bg-secondary/30">
-          <div className="mx-auto max-w-7xl px-6 py-16">
-            <h2 className="mb-8 font-display text-3xl font-semibold">À découvrir aussi</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto max-w-7xl px-3 py-10 sm:px-6 sm:py-16">
+            <h2 className="mb-6 font-display text-2xl font-semibold sm:mb-8 sm:text-3xl">À découvrir aussi</h2>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {related.map((c: Cheese, i: number) => (
                 <CheeseCard key={c.id} cheese={c} index={i} />
               ))}

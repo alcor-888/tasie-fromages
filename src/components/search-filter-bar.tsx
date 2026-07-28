@@ -91,9 +91,9 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
         e.preventDefault();
         runSearch();
       }}
-      className="grid gap-3 rounded-lg border border-border bg-card p-4 md:grid-cols-[1fr_auto_auto_auto_auto]"
+      className="grid gap-2 rounded-lg border border-border bg-card p-2 sm:gap-3 sm:p-4 md:grid-cols-[1fr_auto_auto_auto_auto]"
     >
-      <div className="relative" ref={wrapperRef}>
+      <div className="relative col-span-2 sm:col-span-1" ref={wrapperRef}>
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
@@ -163,7 +163,7 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
         )}
       </div>
       <Select value={milk} onValueChange={setMilk}>
-        <SelectTrigger className="md:w-[180px]">
+        <SelectTrigger className="w-full md:w-[180px]">
           <SelectValue placeholder="Type de lait" />
         </SelectTrigger>
         <SelectContent>
@@ -176,7 +176,7 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
         </SelectContent>
       </Select>
       <Select value={fabrication} onValueChange={setFabrication}>
-        <SelectTrigger className="md:w-[180px]">
+        <SelectTrigger className="w-full md:w-[180px]">
           <SelectValue placeholder="Traitement" />
         </SelectTrigger>
         <SelectContent>
@@ -189,7 +189,7 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
         </SelectContent>
       </Select>
       <Select value={sort} onValueChange={(v) => setSort(v as "name" | "price-asc" | "price-desc" | "age")}>
-        <SelectTrigger className="md:w-[180px]">
+        <SelectTrigger className="col-span-2 w-full sm:col-span-1 md:w-[180px]">
           <SelectValue placeholder="Trier" />
         </SelectTrigger>
         <SelectContent>
@@ -199,10 +199,11 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
           <SelectItem value="age">Affinage</SelectItem>
         </SelectContent>
       </Select>
-      <div className="flex gap-2 md:justify-end">
-        <Button type="submit" className="gap-1.5">
+      <div className="col-span-2 flex gap-2 sm:col-span-1 md:justify-end">
+        <Button type="submit" className="flex-1 gap-1.5 md:flex-none">
           <Search className="h-4 w-4" />
-          Rechercher
+          <span className="hidden sm:inline">Rechercher</span>
+          <span className="sm:hidden">OK</span>
         </Button>
         <Button
           type="button"
@@ -211,10 +212,11 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
             reset();
             setOpen(false);
           }}
-          className="gap-1.5"
+          className="flex-1 gap-1.5 md:flex-none"
         >
           <RotateCcw className="h-4 w-4" />
-          Réinitialiser
+          <span className="hidden sm:inline">Réinitialiser</span>
+          <span className="sm:hidden">Reset</span>
         </Button>
       </div>
     </form>

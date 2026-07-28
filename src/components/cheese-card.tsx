@@ -39,34 +39,35 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
         )}
         <span className="absolute right-2 top-2 text-lg drop-shadow">{cheese.emoji}</span>
       </Link>
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
+      <div className="flex flex-1 flex-col gap-1 p-2.5 sm:gap-1.5 sm:p-3">
         <Link
           to="/fromage/$id"
           params={{ id: cheese.id }}
           className="after:absolute after:inset-0 after:content-[''] hover:text-primary transition-colors"
         >
-          <h3 className="font-display text-[15px] font-semibold leading-tight line-clamp-2">{cheese.name}</h3>
+          <h3 className="font-display text-sm font-semibold leading-tight line-clamp-2 sm:text-[15px]">{cheese.name}</h3>
         </Link>
         {(cheese.fabriquant || cheese.region) && (
-          <p className="text-[11px] font-medium text-foreground/80 line-clamp-1">
+          <p className="text-[10px] font-medium text-foreground/80 line-clamp-1 sm:text-[11px]">
             {[cheese.fabriquant, cheese.region].filter(Boolean).join(" · ")}
           </p>
         )}
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground line-clamp-1">
+        <p className="text-[9px] uppercase tracking-wider text-muted-foreground line-clamp-1 sm:text-[10px]">
           {[cheese.milk, cheese.age].filter(Boolean).join(" · ")}
         </p>
-        <div className="mt-auto flex items-center justify-between pt-2">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-1 pt-2">
           <div className="font-display leading-none">
-            <span className="text-lg font-semibold">{cheese.priceLabel}</span>
-            <span className="ml-1 text-[10px] text-muted-foreground">{cheese.unit}</span>
+            <span className="text-base font-semibold sm:text-lg">{cheese.priceLabel}</span>
+            <span className="ml-1 text-[9px] text-muted-foreground sm:text-[10px]">{cheese.unit}</span>
           </div>
           <Button
             size="sm"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); add(cheese); setOpen(true); }}
-            className="relative z-10 h-8 gap-1 px-2.5 text-xs"
+            className="relative z-10 h-8 gap-1 px-2 text-xs"
           >
             <Plus className="h-3.5 w-3.5" />
-            Ajouter
+            <span className="hidden sm:inline">Ajouter</span>
+            <span className="sm:hidden">+</span>
           </Button>
         </div>
       </div>
