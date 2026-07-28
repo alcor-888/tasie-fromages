@@ -55,6 +55,16 @@ const PRODUCT_COLUMNS =
 
 const PRODUCT_DETAIL_COLUMNS = `${PRODUCT_COLUMNS},image_url`;
 
+function formatPercent(raw: string | null | undefined): string | undefined {
+  if (raw == null || raw === "") return undefined;
+  const s = String(raw).trim();
+  if (s.includes("%")) return s;
+  const n = parseFloat(s.replace(",", "."));
+  if (!Number.isFinite(n)) return s;
+  const pct = n > 0 && n <= 1 ? n * 100 : n;
+  return `${Number(pct.toFixed(1))} %`;
+}
+
 function toCheese(r: Row): Cheese {
   const price = typeof r.price_per_kg === "number" ? r.price_per_kg : parseFloat(String(r.price_per_kg ?? "0")) || 0;
   const saveur = r.saveur ?? undefined;
@@ -85,7 +95,7 @@ function toCheese(r: Row): Cheese {
     fabriquant: r.fabriquant ?? undefined,
     ville: r.ville ?? undefined,
     department: r.department ?? undefined,
-    matiereGrasse: r.matiere_grasse ?? undefined,
+    matiereGrasse: formatPercent(r.matiere_grasse),
     colissage,
     nombrePoidsReel: npr,
     imageUrl: r.image_url ?? undefined,
