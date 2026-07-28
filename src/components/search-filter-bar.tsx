@@ -8,17 +8,13 @@ import { useFilters } from "@/lib/filter-context";
 import type { Cheese } from "@/data/cheeses";
 
 export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
-  const { search, setSearch, category, setCategory, milk, setMilk, sort, setSort } = useFilters();
+  const { search, setSearch, milk, setMilk, sort, setSort } = useFilters();
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const categories = useMemo(
-    () => Array.from(new Set(cheeses.map((c) => c.category).filter(Boolean) as string[])).sort(),
-    [cheeses],
-  );
   const milks = useMemo(
     () => Array.from(new Set(cheeses.map((c) => c.milk).filter(Boolean) as string[])).sort(),
     [cheeses],
@@ -90,7 +86,7 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
         e.preventDefault();
         runSearch();
       }}
-      className="grid gap-3 rounded-lg border border-border bg-card p-4 md:grid-cols-[1fr_auto_auto_auto_auto]"
+      className="grid gap-3 rounded-lg border border-border bg-card p-4 md:grid-cols-[1fr_auto_auto_auto]"
     >
       <div className="relative" ref={wrapperRef}>
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -161,25 +157,12 @@ export function SearchFilterBar({ cheeses }: { cheeses: Cheese[] }) {
           </ul>
         )}
       </div>
-      <Select value={category} onValueChange={setCategory}>
-        <SelectTrigger className="md:w-[180px]">
-          <SelectValue placeholder="Catégorie" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Toutes catégories</SelectItem>
-          {categories.map((c) => (
-            <SelectItem key={c} value={c}>
-              {c}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <Select value={milk} onValueChange={setMilk}>
-        <SelectTrigger className="md:w-[150px]">
-          <SelectValue placeholder="Lait" />
+        <SelectTrigger className="md:w-[180px]">
+          <SelectValue placeholder="Type de lait" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Tous laits</SelectItem>
+          <SelectItem value="all">Tous les laits</SelectItem>
           {milks.map((m) => (
             <SelectItem key={m} value={m}>
               {m}
