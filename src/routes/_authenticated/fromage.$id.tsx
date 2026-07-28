@@ -12,7 +12,7 @@ import { getProductById, listProducts } from "@/lib/products.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
 import { SearchFilterBar } from "@/components/search-filter-bar";
-import roseCampoDui from "@/assets/rose-campo-dui.jpg.asset.json";
+import roseCampoDui from "@/assets/rose-campo-dui.png.asset.json";
 
 const cheesesQuery = queryOptions({
   queryKey: ["products-all"],

@@ -7,7 +7,7 @@ import { MapPin, Phone, Lock, Mail, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
 import logoSeal from "@/assets/logo-seal.png.asset.json";
-import roseCampoDui from "@/assets/rose-campo-dui.jpg.asset.json";
+import roseCampoDui from "@/assets/rose-campo-dui.png.asset.json";
 import type { Cheese } from "@/data/cheeses";
 import { listProducts } from "@/lib/products.functions";
 import { useFilters, type ActiveList } from "@/lib/filter-context";
