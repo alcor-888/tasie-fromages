@@ -70,7 +70,7 @@ function Index() {
   const { data: cheeses } = useSuspenseQuery(cheesesQuery);
   const { data: curated } = useSuspenseQuery(curatedQuery);
   const { data: promotions } = useSuspenseQuery(promotionsQuery);
-  const { search, category, milk, sort, activeList, setActiveList, page, setPage } = useFilters();
+  const { search, category, milk, fabrication, sort, activeList, setActiveList, page, setPage } = useFilters();
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const visibleCount = page * PAGE_SIZE;
 
@@ -88,6 +88,7 @@ function Index() {
     let list = source.filter((c: Cheese) => {
       if (category !== "all" && c.category !== category) return false;
       if (milk !== "all" && c.milk !== milk) return false;
+      if (fabrication !== "all" && c.fabrication !== fabrication) return false;
       if (search && !`${c.name} ${c.region ?? ""} ${c.description ?? ""} ${c.producer ?? ""}`.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
@@ -111,7 +112,7 @@ function Index() {
       return a.name.localeCompare(b.name);
     });
     return list;
-  }, [cheeses, promotions, curated, search, category, milk, sort, activeList]);
+  }, [cheeses, promotions, curated, search, category, milk, fabrication, sort, activeList]);
 
   const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
   const hasMore = visibleCount < filtered.length;
@@ -278,7 +279,7 @@ function Index() {
               : activeList === "selection" ? curated.length
               : cheeses.length;
             const hasActiveFilters =
-              search.trim() !== "" || category !== "all" || milk !== "all";
+              search.trim() !== "" || category !== "all" || milk !== "all" || fabrication !== "all";
             return (
               <div id="results" className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 scroll-mt-32">
                 <p className="text-sm text-muted-foreground">
@@ -303,6 +304,11 @@ function Index() {
                     {milk !== "all" && (
                       <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-secondary-foreground">
                         {milk}
+                      </span>
+                    )}
+                    {fabrication !== "all" && (
+                      <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-secondary-foreground">
+                        {fabrication}
                       </span>
                     )}
                   </div>
