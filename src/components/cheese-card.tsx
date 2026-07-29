@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { getCategoryImage, type Cheese } from "@/data/cheeses";
 
 export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index: number; promotion?: boolean }) {
   const { add, setOpen } = useCart();
+  const [loaded, setLoaded] = useState(false);
   return (
     <motion.article
       initial={{ opacity: 0, y: 24 }}
@@ -22,13 +24,21 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
         params={{ id: cheese.id }}
         className="relative block aspect-[4/3] overflow-hidden"
       >
+        <div
+          aria-hidden
+          className={`absolute inset-0 bg-gradient-to-br from-secondary/60 to-muted animate-pulse transition-opacity duration-500 ${loaded ? "opacity-0" : "opacity-100"}`}
+        />
         <img
           src={cheese.imageUrl || getCategoryImage(cheese.category, cheese.milk)}
           alt={cheese.name}
           loading="lazy"
+          decoding="async"
+          // @ts-expect-error fetchpriority not yet in React types
+          fetchpriority="low"
+          onLoad={() => setLoaded(true)}
           width={1600}
           height={1100}
-          className={`h-full w-full transition-transform duration-700 group-hover:scale-105 ${cheese.imageUrl ? "object-contain bg-secondary/40" : "object-cover"}`}
+          className={`h-full w-full transition-all duration-700 group-hover:scale-105 ${loaded ? "opacity-100" : "opacity-0"} ${cheese.imageUrl ? "object-contain bg-secondary/40" : "object-cover"}`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         {promotion && <PromoBadge className="absolute left-3 top-3" />}
