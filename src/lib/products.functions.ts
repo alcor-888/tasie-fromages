@@ -104,13 +104,9 @@ function toCheese(r: Row): Cheese {
   };
 }
 
-async function signVariant(
-  admin: Awaited<ReturnType<typeof import("@/integrations/supabase/client.server").getSupabaseAdmin>> extends never
-    ? never
-    : import("@supabase/supabase-js").SupabaseClient,
-  path: string,
-  width: number,
-): Promise<string | null> {
+type StorageClient = { storage: { from: (b: string) => { createSignedUrl: (p: string, e: number, o?: unknown) => Promise<{ data: { signedUrl: string } | null; error: unknown }> } } };
+
+async function signVariant(admin: StorageClient, path: string, width: number): Promise<string | null> {
   const { data, error } = await admin.storage
     .from("product-photos")
     .createSignedUrl(path, 60 * 60, {
