@@ -30,6 +30,8 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
         />
         <img
           src={cheese.imageUrl || getCategoryImage(cheese.category, cheese.milk)}
+          srcSet={cheese.imageSrcSet}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           alt={cheese.name}
           loading="lazy"
           decoding="async"

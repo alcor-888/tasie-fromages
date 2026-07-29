@@ -135,6 +135,8 @@ function CheeseDetail() {
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-secondary/30 shadow-[var(--shadow-elegant)] ring-1 ring-border">
             <img
               src={image}
+              srcSet={hasRealPhoto ? cheese.imageSrcSet : undefined}
+              sizes="(max-width: 768px) 100vw, 40vw"
               alt={cheese.name}
               width={1600}
               height={1600}
