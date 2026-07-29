@@ -32,6 +32,7 @@ export interface Cheese {
   colissage?: number;
   nombrePoidsReel?: number;
   imageUrl?: string;
+  imageSrcSet?: string;
   packagingUnit?: string;
 }
 
