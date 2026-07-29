@@ -167,6 +167,30 @@ function AdminPage() {
             <AdminPassword />
           </TabsContent>
         </Tabs>
+
+        <Dialog open={githubOpen} onOpenChange={setGithubOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Github className="h-5 w-5" /> Connecter GitHub
+              </DialogTitle>
+              <DialogDescription className="space-y-3 pt-2 text-sm text-muted-foreground">
+                <p>Synchronisez automatiquement le code de l’application avec GitHub pour ne jamais le perdre.</p>
+                <ol className="list-decimal space-y-1 pl-4">
+                  <li>Dans l’éditeur Lovable, cliquez sur le menu <strong>Plus (+)</strong> en bas à gauche.</li>
+                  <li>Sélectionnez <strong>GitHub → Connecter le projet</strong>.</li>
+                  <li>Autorisez l’application Lovable GitHub App.</li>
+                  <li>Choisissez le compte ou l’organisation.</li>
+                  <li>Cliquez sur <strong>Créer le dépôt</strong>.</li>
+                </ol>
+                <p className="text-xs">Une fois connecté, chaque modification sera sauvegardée sur GitHub et vous pourrez restaurer une version antérieure à tout moment.</p>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setGithubOpen(false)}>Fermer</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
