@@ -73,7 +73,8 @@ function AdminPage() {
           </Link>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={() => setGithubOpen(true)} className="gap-2">
-              <Github className="h-4 w-4" /> GitHub
+              <Github className="h-4 w-4" />
+              <span className="hidden sm:inline">GitHub</span>
             </Button>
             <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
