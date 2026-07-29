@@ -247,18 +247,18 @@ function Index() {
 
       {/* Hero */}
       <section id="top" className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 sm:py-16 md:grid-cols-2 md:items-center md:py-24">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-4 sm:px-6 sm:py-8 md:grid-cols-2 md:items-center md:py-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <p className="mb-3 text-[10px] uppercase tracking-[0.4em] text-primary sm:text-xs">fondée en 2008</p>
-            <img src={logoAsset.url} alt="Tasie Fromages par Rodolphe Bardet" className="mx-auto w-full max-w-[220px] sm:max-w-xs md:max-w-lg" />
-            <p className="-mt-4 text-center text-base leading-relaxed text-muted-foreground sm:-mt-8 sm:text-lg md:text-left">
+            <p className="mb-1 text-[10px] uppercase tracking-[0.4em] text-primary sm:text-xs">fondée en 2008</p>
+            <img src={logoAsset.url} alt="Tasie Fromages par Rodolphe Bardet" className="mx-auto w-full max-w-[200px] sm:max-w-xs md:max-w-md" />
+            <p className="-mt-6 text-center text-base leading-relaxed text-muted-foreground sm:-mt-10 sm:text-lg md:text-left">
               Une sélection de fromages et charcuteries à découvrir.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3 sm:mt-8 md:justify-start">
+            <div className="mt-4 flex flex-wrap justify-center gap-3 md:justify-start">
               <Button
                 size="lg"
                 asChild
@@ -275,7 +275,7 @@ function Index() {
                 </Link>
               </Button>
             </div>
-            <div className="mt-8 flex justify-center gap-8 border-t border-border pt-6 text-sm md:justify-start">
+            <div className="mt-5 flex justify-center gap-8 border-t border-border pt-4 text-sm md:justify-start">
               <div className="text-center md:text-left"><span className="font-display text-2xl font-semibold">300+</span><p className="text-xs uppercase tracking-wider text-muted-foreground">Produits de qualité PREMIUM</p></div>
             </div>
           </motion.div>
@@ -299,9 +299,9 @@ function Index() {
 
       {/* Selection */}
       <section id="selection" className="border-t border-border bg-secondary/30">
-        <div className="mx-auto max-w-7xl px-3 py-10 sm:px-6 sm:py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8 md:py-12">
 
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-4 sm:mb-10">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 sm:mb-6">
             <div>
               <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-primary sm:text-xs">
                 {activeList === "promotion" ? "Offres spéciales" : activeList === "all" ? "Notre catalogue" : "Prudutti corsi"}
@@ -411,7 +411,7 @@ function Index() {
 
       {/* Message */}
       <section id="commander" className="border-t border-border bg-secondary/20">
-        <div className="mx-auto max-w-3xl px-5 py-16 text-center sm:px-6 sm:py-24">
+        <div className="mx-auto max-w-3xl px-5 py-8 text-center sm:px-6 sm:py-12">
           <blockquote className="relative">
             <span className="absolute -top-6 left-1/2 -translate-x-1/2 font-display text-6xl text-primary/20 select-none" aria-hidden="true">"</span>
             <p className="text-base font-medium leading-[1.7] text-foreground sm:text-xl md:text-2xl md:leading-[1.8]">
@@ -431,9 +431,9 @@ function Index() {
 
 
       <footer className="border-t border-border bg-background">
-        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-16">
-          <div className="flex flex-col items-center gap-8 text-center">
-            <img src={logoSeal.url} alt="Tasie Fromages" className="h-28 w-auto sm:h-40 md:h-52" />
+        <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 sm:py-10">
+          <div className="flex flex-col items-center gap-5 text-center">
+            <img src={logoSeal.url} alt="Tasie Fromages" className="h-20 w-auto sm:h-32 md:h-40" />
             <div className="space-y-1">
               <p className="text-xs uppercase tracking-[0.4em] text-primary">fondée en 2008</p>
               <p className="text-lg leading-relaxed text-muted-foreground">

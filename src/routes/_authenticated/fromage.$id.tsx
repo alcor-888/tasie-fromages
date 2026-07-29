@@ -124,7 +124,7 @@ function CheeseDetail() {
       </div>
 
       {/* Hero detail */}
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-10 md:grid-cols-5 md:gap-12 md:py-16">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-4 sm:px-6 sm:py-6 md:grid-cols-5 md:gap-10 md:py-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -240,7 +240,7 @@ function CheeseDetail() {
 
       {cheese.conseils && (
         <section className="border-t border-border bg-secondary/30">
-          <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
+          <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
             <p className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-primary">
               <Lightbulb className="h-4 w-4" /> Conseils du fromager
             </p>
@@ -255,8 +255,8 @@ function CheeseDetail() {
       {/* Related */}
       {related.length > 0 && (
         <section className="border-t border-border bg-secondary/30">
-          <div className="mx-auto max-w-7xl px-3 py-10 sm:px-6 sm:py-16">
-            <h2 className="mb-6 font-display text-2xl font-semibold sm:mb-8 sm:text-3xl">À découvrir aussi</h2>
+          <div className="mx-auto max-w-7xl px-3 py-6 sm:px-6 sm:py-10">
+            <h2 className="mb-4 font-display text-2xl font-semibold sm:mb-6 sm:text-3xl">À découvrir aussi</h2>
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {related.map((c: Cheese, i: number) => (
                 <CheeseCard key={c.id} cheese={c} index={i} />
