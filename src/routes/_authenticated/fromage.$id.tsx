@@ -124,7 +124,7 @@ function CheeseDetail() {
       </div>
 
       {/* Hero detail */}
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 sm:py-10 md:grid-cols-5 md:gap-12 md:py-16">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-4 sm:px-6 sm:py-6 md:grid-cols-5 md:gap-10 md:py-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
