@@ -104,9 +104,7 @@ function toCheese(r: Row): Cheese {
   };
 }
 
-type StorageClient = { storage: { from: (b: string) => { createSignedUrl: (p: string, e: number, o?: unknown) => Promise<{ data: { signedUrl: string } | null; error: unknown }> } } };
-
-async function signVariant(admin: StorageClient, path: string, width: number): Promise<string | null> {
+async function signVariant(admin: { storage: { from: (b: string) => { createSignedUrl: (p: string, e: number, o?: { transform?: { width?: number; quality?: number; resize?: "cover" | "contain" | "fill" } }) => Promise<{ data: { signedUrl: string } | null; error: unknown }> } } }, path: string, width: number): Promise<string | null> {
   const { data, error } = await admin.storage
     .from("product-photos")
     .createSignedUrl(path, 60 * 60, {
