@@ -99,7 +99,7 @@ function CheeseDetail() {
   const origin = [cheese.ville, cheese.department || cheese.region].filter(Boolean).join(", ");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24 md:pb-0">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:px-6">
@@ -267,6 +267,24 @@ function CheeseDetail() {
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} Tasie Fromages
       </footer>
+
+      {/* Mobile sticky CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 p-3 backdrop-blur md:hidden">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+          <div className="leading-tight">
+            <p className="font-display text-lg font-semibold">{cheese.priceLabel}</p>
+            <p className="text-[10px] text-muted-foreground">{cheese.unit}</p>
+          </div>
+          <Button
+            size="lg"
+            disabled={soldOut}
+            onClick={() => { add(cheese); setOpen(true); }}
+            className="gap-2 px-6"
+          >
+            <Plus className="h-4 w-4" /> {soldOut ? "Épuisé" : "Commander"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
