@@ -161,9 +161,9 @@ function Index() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2 sm:px-6 sm:py-3">
           <a href="#top" className="flex items-center shrink-0">
-            <img src={logoSeal.url} alt="Tasie Fromages" className="h-10 w-auto sm:h-16 md:h-24" />
+            <img src={logoSeal.url} alt="Tasie Fromages" className="h-12 w-auto sm:h-16 md:h-20" />
           </a>
           <div className="hidden flex-wrap items-center justify-center gap-2 md:flex">
             <button
@@ -206,7 +206,7 @@ function Index() {
               className="shrink-0"
               aria-label="Prudutti corsi ROSE-CAMPO-DUI"
             >
-              <img src={roseCampoDui.url} alt="Rose-Campo-Dui" className="h-10 w-10 rounded-full ring-2 ring-primary/30 shadow-md transition-transform hover:scale-105 sm:h-16 sm:w-16 md:h-24 md:w-24" />
+              <img src={roseCampoDui.url} alt="Rose-Campo-Dui" className="h-12 w-12 rounded-full ring-2 ring-primary/30 shadow-md transition-transform hover:scale-105 sm:h-16 sm:w-16 md:h-20 md:w-20" />
             </button>
           </div>
         </div>
