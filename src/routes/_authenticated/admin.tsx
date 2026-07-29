@@ -43,6 +43,7 @@ function AdminPage() {
   const fetchOrders = useServerFn(listOrders);
   const updateStatus = useServerFn(setOrderStatus);
   const qc = useQueryClient();
+  const [githubOpen, setGithubOpen] = useState(false);
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["admin-orders"],
@@ -71,6 +72,9 @@ function AdminPage() {
             <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Admin</span>
           </Link>
           <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setGithubOpen(true)} className="gap-2">
+              <Github className="h-4 w-4" /> GitHub
+            </Button>
             <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
             </Button>
