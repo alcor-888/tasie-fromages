@@ -82,7 +82,7 @@ function PromotionsPage() {
 
       {/* Hero promotions */}
       <section className="border-b border-border bg-secondary/30">
-        <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-7xl px-6 py-6 md:py-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -98,7 +98,7 @@ function PromotionsPage() {
       </section>
 
       {/* Products */}
-      <section className="mx-auto max-w-7xl px-6 py-10 md:py-16">
+      <section className="mx-auto max-w-7xl px-6 py-6 md:py-10">
         <div className="sticky top-16 z-30 mb-8">
           <SearchFilterBar cheeses={promotions} />
         </div>
