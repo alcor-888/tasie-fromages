@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Lock, Mail, Sparkles } from "lucide-react";
+import { MapPin, Phone, Lock, Mail, Sparkles, Loader2 } from "lucide-react";
 
 import heroImage from "@/assets/hero-cheese.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
@@ -16,7 +16,13 @@ import { SearchFilterBar } from "@/components/search-filter-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const PAGE_SIZE = 24;
+// Smaller initial batch on mobile for faster paint, larger on desktop.
+const PAGE_SIZE_MOBILE = 12;
+const PAGE_SIZE_DESKTOP = 24;
+function getPageSize() {
+  if (typeof window === "undefined") return PAGE_SIZE_DESKTOP;
+  return window.matchMedia("(max-width: 640px)").matches ? PAGE_SIZE_MOBILE : PAGE_SIZE_DESKTOP;
+}
 
 const cheesesQuery = queryOptions({
   queryKey: ["products-all"],
@@ -72,7 +78,14 @@ function Index() {
   const { data: promotions } = useSuspenseQuery(promotionsQuery);
   const { search, category, milk, fabrication, sort, activeList, setActiveList, page, setPage } = useFilters();
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const visibleCount = page * PAGE_SIZE;
+  const [pageSize, setPageSize] = useState<number>(() => getPageSize());
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const handler = () => setPageSize(getPageSize());
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  const visibleCount = page * pageSize;
 
   const promoIds = useMemo(
     () => new Set(promotions.map((p: Cheese) => p.id)),
@@ -128,11 +141,16 @@ function Index() {
           setPage(page + 1);
         }
       },
-      { rootMargin: "600px 0px" },
+      { rootMargin: "800px 0px", threshold: 0 },
     );
     io.observe(el);
     return () => io.disconnect();
   }, [hasMore, filtered.length, page, setPage]);
+
+  // Safety: if filters shrink the list below current page, clamp back to 1.
+  useEffect(() => {
+    if (page > 1 && filtered.length <= pageSize) setPage(1);
+  }, [filtered.length, page, pageSize, setPage]);
 
   const scrollToSelection = (list: ActiveList) => {
     setActiveList(list);
@@ -362,18 +380,28 @@ function Index() {
                 ))}
               </div>
               {hasMore && (
-                <div ref={sentinelRef} className="mt-10 flex flex-col items-center gap-4">
+                <div ref={sentinelRef} className="mt-8 flex flex-col items-center gap-4">
                   <div className="grid w-full grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-                    {Array.from({ length: Math.min(4, filtered.length - visibleCount) }).map((_, i) => (
+                    {Array.from({ length: Math.min(pageSize, filtered.length - visibleCount) }).map((_, i) => (
                       <Skeleton key={i} className="h-60 w-full" />
                     ))}
                   </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Chargement…
+                  </div>
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => setPage(page + 1)}
                   >
                     Afficher plus ({filtered.length - visibleCount} restants)
                   </Button>
+                </div>
+              )}
+              {!hasMore && filtered.length > pageSize && (
+                <div className="mt-8 text-center text-xs text-muted-foreground">
+                  Vous avez atteint la fin de la liste ({filtered.length} produits).
                 </div>
               )}
             </>
