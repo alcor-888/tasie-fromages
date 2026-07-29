@@ -99,20 +99,63 @@ function toCheese(r: Row): Cheese {
     colissage,
     nombrePoidsReel: npr,
     imageUrl: r.image_url ?? undefined,
+    imageSrcSet: (r as unknown as { image_srcset?: string }).image_srcset ?? undefined,
     packagingUnit: r.packaging_unit ?? undefined,
   };
 }
 
-async function resolveImageUrl(raw: string | null): Promise<string | null> {
-  if (!raw) return null;
-  if (/^(data:image\/|https?:\/\/)/i.test(raw)) return raw;
+async function signVariant(
+  admin: Awaited<ReturnType<typeof import("@/integrations/supabase/client.server").getSupabaseAdmin>> extends never
+    ? never
+    : import("@supabase/supabase-js").SupabaseClient,
+  path: string,
+  width: number,
+): Promise<string | null> {
+  const { data, error } = await admin.storage
+    .from("product-photos")
+    .createSignedUrl(path, 60 * 60, {
+      transform: { width, quality: 75, resize: "contain" },
+    });
+  if (error || !data) return null;
+  return data.signedUrl;
+}
+
+/**
+ * Resolve an image reference into a base URL + optional srcset.
+ * - Storage paths get signed transform URLs at 400 / 800 (list) or 1200 (detail).
+ * - data: / https: URLs are returned as-is (no srcset possible).
+ */
+async function resolveImage(
+  raw: string | null,
+  variant: "list" | "detail" = "list",
+): Promise<{ url: string | null; srcset?: string }> {
+  if (!raw) return { url: null };
+  if (/^(data:image\/|https?:\/\/)/i.test(raw)) return { url: raw };
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin.storage
-    .from("product-photos")
-    .createSignedUrl(raw, 60 * 60);
-  if (error) return null;
-  return data.signedUrl;
+
+  const widths = variant === "detail" ? [800, 1200, 1600] : [300, 600, 900];
+  const variants = await Promise.all(widths.map((w) => signVariant(supabaseAdmin, raw, w)));
+  const pairs = widths
+    .map((w, i) => (variants[i] ? { w, url: variants[i]! } : null))
+    .filter((v): v is { w: number; url: string } => v !== null);
+
+  if (pairs.length === 0) {
+    // Transforms may be disabled — fall back to the plain signed URL.
+    const { data } = await supabaseAdmin.storage
+      .from("product-photos")
+      .createSignedUrl(raw, 60 * 60);
+    return { url: data?.signedUrl ?? null };
+  }
+
+  const base = pairs[Math.min(1, pairs.length - 1)].url; // mid width as default src
+  const srcset = pairs.map((p) => `${p.url} ${p.w}w`).join(", ");
+  return { url: base, srcset };
+}
+
+async function resolveImageUrl(raw: string | null): Promise<string | null> {
+  const { url } = await resolveImage(raw, "list");
+  return url;
 }
 
 const listSchema = z.object({ listType: z.enum(["all", "curated", "promotions"]) });
@@ -138,12 +181,21 @@ export const listProducts = createServerFn({ method: "GET" })
       .not("image_url", "like", "data:%");
 
     const images = new Map<string, string>();
+    const srcsets = new Map<string, string>();
     await Promise.all((imageRows ?? []).map(async (img) => {
-      const resolved = await resolveImageUrl((img as { image_url: string | null }).image_url);
-      if (resolved) images.set((img as { id: string }).id, resolved);
+      const row = img as { id: string; image_url: string | null };
+      const { url, srcset } = await resolveImage(row.image_url, "list");
+      if (url) images.set(row.id, url);
+      if (srcset) srcsets.set(row.id, srcset);
     }));
 
-    return baseRows.map((r) => toCheese({ ...r, image_url: images.get(r.id) ?? null }));
+    return baseRows.map((r) =>
+      toCheese({
+        ...r,
+        image_url: images.get(r.id) ?? null,
+        image_srcset: srcsets.get(r.id) ?? null,
+      } as Row & { image_srcset: string | null }),
+    );
   });
 
 export const getProductById = createServerFn({ method: "GET" })
@@ -158,6 +210,10 @@ export const getProductById = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!row) return null;
 
-    const resolvedImage = await resolveImageUrl((row as unknown as Row).image_url);
-    return toCheese({ ...(row as unknown as Row), image_url: resolvedImage });
+    const { url, srcset } = await resolveImage((row as unknown as Row).image_url, "detail");
+    return toCheese({
+      ...(row as unknown as Row),
+      image_url: url,
+      image_srcset: srcset ?? null,
+    } as Row & { image_srcset: string | null });
   });
