@@ -1,13 +1,15 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { LogOut, RefreshCw } from "lucide-react";
+import { LogOut, RefreshCw, Github } from "lucide-react";
 import { listOrders, setOrderStatus } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AdminImport } from "@/components/admin-import";
 import { AdminPassword } from "@/components/admin-password";
 import { AdminClients } from "@/components/admin-clients";
@@ -41,6 +43,7 @@ function AdminPage() {
   const fetchOrders = useServerFn(listOrders);
   const updateStatus = useServerFn(setOrderStatus);
   const qc = useQueryClient();
+  const [githubOpen, setGithubOpen] = useState(false);
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["admin-orders"],
@@ -69,6 +72,10 @@ function AdminPage() {
             <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Admin</span>
           </Link>
           <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setGithubOpen(true)} className="gap-2">
+              <Github className="h-4 w-4" />
+              <span className="hidden sm:inline">GitHub</span>
+            </Button>
             <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
             </Button>
@@ -161,6 +168,30 @@ function AdminPage() {
             <AdminPassword />
           </TabsContent>
         </Tabs>
+
+        <Dialog open={githubOpen} onOpenChange={setGithubOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Github className="h-5 w-5" /> Connecter GitHub
+              </DialogTitle>
+              <DialogDescription className="space-y-3 pt-2 text-sm text-muted-foreground">
+                <p>Synchronisez automatiquement le code de l’application avec GitHub pour ne jamais le perdre.</p>
+                <ol className="list-decimal space-y-1 pl-4">
+                  <li>Dans l’éditeur Lovable, cliquez sur le menu <strong>Plus (+)</strong> en bas à gauche.</li>
+                  <li>Sélectionnez <strong>GitHub → Connecter le projet</strong>.</li>
+                  <li>Autorisez l’application Lovable GitHub App.</li>
+                  <li>Choisissez le compte ou l’organisation.</li>
+                  <li>Cliquez sur <strong>Créer le dépôt</strong>.</li>
+                </ol>
+                <p className="text-xs">Une fois connecté, chaque modification sera sauvegardée sur GitHub et vous pourrez restaurer une version antérieure à tout moment.</p>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setGithubOpen(false)}>Fermer</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
