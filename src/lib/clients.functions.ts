@@ -54,7 +54,7 @@ export const createClient = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     profileFields.extend({
       email: z.string().trim().email().max(255),
-      password: z.string().min(6).max(72),
+      password: z.string().min(6).max(72).optional(),
       activationKey: z.string().trim().min(3).max(80),
     }).parse(input),
   )
@@ -63,7 +63,7 @@ export const createClient = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
-      password: data.password,
+      password: data.password || crypto.randomUUID(),
       email_confirm: true,
     });
     if (error) throw new Error(error.message);
@@ -132,7 +132,7 @@ export const bulkImportClients = createServerFn({ method: "POST" })
     z.object({
       rows: z.array(profileFields.extend({
         email: z.string().trim().email().max(255),
-        password: z.string().min(6).max(72),
+        password: z.string().min(6).max(72).optional(),
         activationKey: z.string().trim().min(3).max(80),
       })).min(1).max(500),
     }).parse(input),
@@ -149,13 +149,15 @@ export const bulkImportClients = createServerFn({ method: "POST" })
         let uid = existing?.id;
         if (!uid) {
           const { data: cr, error } = await supabaseAdmin.auth.admin.createUser({
-            email: row.email, password: row.password, email_confirm: true,
+            email: row.email, password: row.password || crypto.randomUUID(), email_confirm: true,
           });
           if (error) throw error;
           uid = cr.user?.id!;
           created++;
         } else {
-          await supabaseAdmin.auth.admin.updateUserById(uid, { password: row.password });
+          if (row.password) {
+            await supabaseAdmin.auth.admin.updateUserById(uid, { password: row.password });
+          }
           updated++;
         }
         const { error: pErr } = await supabaseAdmin.from("client_profiles").upsert({
