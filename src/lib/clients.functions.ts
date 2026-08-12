@@ -126,6 +126,52 @@ export const updateClientProfile = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Première connexion / mot de passe oublié.
+ * Public : le client prouve son identité avec l'email + la clé d'activation
+ * remise par l'administrateur, puis choisit son mot de passe personnel.
+ */
+export const activateWithKey = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        email: z.string().trim().email().max(255),
+        key: z.string().trim().min(1).max(80),
+        password: z.string().min(8).max(72),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = data.email.trim().toLowerCase();
+
+    const { data: profile } = await supabaseAdmin
+      .from("client_profiles")
+      .select("user_id, activation_key")
+      .ilike("email", email)
+      .maybeSingle();
+
+    const invalid = new Error("Email ou clé d'activation incorrect.");
+    if (!profile) throw invalid;
+    if ((profile.activation_key ?? "").trim().toLowerCase() !== data.key.trim().toLowerCase()) {
+      throw invalid;
+    }
+
+    const { error: pwErr } = await supabaseAdmin.auth.admin.updateUserById(profile.user_id, {
+      password: data.password,
+      email_confirm: true,
+    });
+    if (pwErr) throw new Error(pwErr.message);
+
+    const { error } = await supabaseAdmin
+      .from("client_profiles")
+      .update({ activated: true, activated_at: new Date().toISOString() })
+      .eq("user_id", profile.user_id);
+    if (error) throw new Error(error.message);
+
+    return { ok: true };
+  });
+
 export const bulkImportClients = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
