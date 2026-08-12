@@ -74,6 +74,33 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
   const html = renderHtml(payload);
   const subject = `Nouvelle commande — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
 
+  let attachments: { filename: string; content: string }[] | undefined;
+  try {
+    const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
+    const bytes = await buildOrderPdf({
+      orderId: payload.orderId,
+      createdAt: payload.createdAt,
+      customerName: payload.customerName,
+      customerPhone: payload.customerPhone,
+      customerEmail: payload.customerEmail,
+      customerCompany: payload.customerCompany ?? null,
+      customerAddress: payload.customerAddress ?? null,
+      customerWebsite: payload.customerWebsite ?? null,
+      pickupDate: payload.pickupDate,
+      notes: payload.notes,
+      totalEstimate: payload.totalEstimate,
+      items: payload.items,
+    });
+    attachments = [
+      {
+        filename: `bon-de-commande-${payload.orderId.slice(0, 8)}.pdf`,
+        content: toBase64(bytes),
+      },
+    ];
+  } catch (e) {
+    console.error("[orders] PDF generation failed:", e);
+  }
+
   const res = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
     method: "POST",
     headers: {
@@ -87,6 +114,7 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
       reply_to: payload.customerEmail || undefined,
       subject,
       html,
+      attachments,
     }),
   });
   if (!res.ok) {

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const itemSchema = z.object({
   cheeseId: z.string().min(1).max(100),
@@ -83,4 +84,46 @@ export const placeOrder = createServerFn({ method: "POST" })
     }
 
     return { id: order.id, totalEstimate };
+  });
+
+export const getOrderPdf = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ orderId: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .select(
+        "id, created_at, customer_name, customer_phone, customer_email, customer_company, customer_address, customer_website, pickup_date, notes, total_estimate, order_items(cheese_name, quantity, unit_price, unit_label)",
+      )
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!order) throw new Error("Commande introuvable.");
+
+    const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
+    const bytes = await buildOrderPdf({
+      orderId: order.id,
+      createdAt: order.created_at,
+      customerName: order.customer_name,
+      customerPhone: order.customer_phone,
+      customerEmail: order.customer_email,
+      customerCompany: order.customer_company,
+      customerAddress: order.customer_address,
+      customerWebsite: order.customer_website,
+      pickupDate: order.pickup_date,
+      notes: order.notes,
+      totalEstimate: Number(order.total_estimate ?? 0),
+      items: (order.order_items ?? []).map((i) => ({
+        cheeseName: i.cheese_name,
+        quantity: Number(i.quantity),
+        unitPrice: Number(i.unit_price),
+        unitLabel: i.unit_label,
+      })),
+    });
+
+    return {
+      filename: `bon-de-commande-${order.id.slice(0, 8)}.pdf`,
+      base64: toBase64(bytes),
+    };
   });

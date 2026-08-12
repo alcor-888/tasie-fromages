@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Minus, Plus, Trash2, ShoppingBag, Check } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, Check, FileDown } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
-import { placeOrder } from "@/lib/orders.functions";
+import { placeOrder, getOrderPdf } from "@/lib/orders.functions";
 import { getMyProfile } from "@/lib/clients.functions";
 
 type OrderPayload = {
@@ -65,6 +65,9 @@ export function OrderSheet() {
   const [step, setStep] = useState<"cart" | "form" | "done">("cart");
   const [form, setForm] = useState({ name: "", phone: "", email: "", company: "", address: "", website: "", pickup: "", notes: "" });
   const placeOrderFn = useServerFn(placeOrder);
+  const getOrderPdfFn = useServerFn(getOrderPdf);
+  const [lastOrderId, setLastOrderId] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
   const fetchProfile = useServerFn(getMyProfile);
   const { data: profile } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile() });
 
@@ -83,13 +86,43 @@ export function OrderSheet() {
 
   const mutation = useMutation({
     mutationFn: (payload: OrderPayload) => placeOrderFn({ data: payload }),
-    onSuccess: () => {
+    onSuccess: (res) => {
+      setLastOrderId(res.id);
       toast.success("Bon de commande envoyé — nous vous rappelons rapidement.");
       setStep("done");
-      setTimeout(() => { clear(); setStep("cart"); setOpen(false); }, 3000);
     },
     onError: (e: Error) => toast.error(e.message || "Envoi impossible, réessayez."),
   });
+
+  const downloadPdf = async () => {
+    if (!lastOrderId) return;
+    setDownloading(true);
+    try {
+      const res = await getOrderPdfFn({ data: { orderId: lastOrderId } });
+      const binary = atob(res.base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = res.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error((e as Error).message || "Téléchargement impossible.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const finishOrder = () => {
+    clear();
+    setLastOrderId(null);
+    setStep("cart");
+    setOpen(false);
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,6 +279,13 @@ export function OrderSheet() {
               <Check className="h-8 w-8" />
             </div>
             <p className="text-muted-foreground">Nous vous contactons sous 24h pour confirmer.</p>
+            <div className="flex w-full flex-col gap-2 px-4">
+              <Button type="button" variant="outline" onClick={downloadPdf} disabled={downloading || !lastOrderId}>
+                <FileDown className="mr-2 h-4 w-4" />
+                {downloading ? "Préparation…" : "Télécharger le bon de commande (PDF)"}
+              </Button>
+              <Button type="button" onClick={finishOrder}>Fermer</Button>
+            </div>
           </div>
         )}
       </SheetContent>
