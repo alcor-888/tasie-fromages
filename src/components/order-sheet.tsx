@@ -67,6 +67,7 @@ export function OrderSheet() {
   const placeOrderFn = useServerFn(placeOrder);
   const getOrderPdfFn = useServerFn(getOrderPdf);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
+  const [lastOrderRef, setLastOrderRef] = useState<{ number: string; createdAt: string } | null>(null);
   const [downloading, setDownloading] = useState(false);
   const fetchProfile = useServerFn(getMyProfile);
   const { data: profile } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile() });
@@ -88,6 +89,10 @@ export function OrderSheet() {
     mutationFn: (payload: OrderPayload) => placeOrderFn({ data: payload }),
     onSuccess: (res) => {
       setLastOrderId(res.id);
+      setLastOrderRef({
+        number: res.orderNumber ?? `BC-${res.id.slice(0, 8).toUpperCase()}`,
+        createdAt: res.createdAt,
+      });
       toast.success("Bon de commande envoyé — nous vous rappelons rapidement.");
       setStep("done");
     },
@@ -278,6 +283,24 @@ export function OrderSheet() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <Check className="h-8 w-8" />
             </div>
+            {lastOrderRef && (
+              <div>
+                <p className="font-semibold">Bon de commande n° {lastOrderRef.number}</p>
+                <p className="text-sm text-muted-foreground">
+                  Émis le{" "}
+                  {new Date(lastOrderRef.createdAt).toLocaleDateString("fr-FR", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}{" "}
+                  à{" "}
+                  {new Date(lastOrderRef.createdAt).toLocaleTimeString("fr-FR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            )}
             <p className="text-muted-foreground">Nous vous contactons sous 24h pour confirmer.</p>
             <div className="flex w-full flex-col gap-2 px-4">
               <Button type="button" variant="outline" onClick={downloadPdf} disabled={downloading || !lastOrderId}>
