@@ -10,6 +10,7 @@ const ADMIN_EMAILS = [
 
 interface NotifyPayload {
   orderId: string;
+  orderNumber?: string | null;
   createdAt: string;
   customerName: string;
   customerPhone: string;
@@ -28,6 +29,15 @@ interface NotifyPayload {
   }[];
 }
 
+function formatDateTime(iso: string) {
+  const d = new Date(iso);
+  return `${d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} à ${d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+function orderRef(p: NotifyPayload) {
+  return p.orderNumber || `BC-${p.orderId.slice(0, 8).toUpperCase()}`;
+}
+
 function renderHtml(p: NotifyPayload) {
   const rows = p.items
     .map(
@@ -40,6 +50,8 @@ function renderHtml(p: NotifyPayload) {
     .join("");
   return `<div style="font-family:system-ui,sans-serif;max-width:600px;margin:auto;color:#222">
     <h2 style="font-family:Georgia,serif">Nouveau bon de commande</h2>
+    <p style="margin:0 0 4px"><strong>N° ${escape(orderRef(p))}</strong></p>
+    <p style="margin:0 0 12px;color:#666">Émis le ${escape(formatDateTime(p.createdAt))}</p>
     <p><strong>${escape(p.customerName)}</strong> · ${escape(p.customerPhone)}${p.customerEmail ? ` · ${escape(p.customerEmail)}` : ""}</p>
     ${p.customerCompany ? `<p><strong>Entreprise :</strong> ${escape(p.customerCompany)}</p>` : ""}
     ${p.customerAddress ? `<p><strong>Adresse de livraison :</strong><br/>${escape(p.customerAddress).replace(/\n/g, "<br/>")}</p>` : ""}
@@ -71,14 +83,16 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
     return;
   }
 
+  const ref = orderRef(payload);
   const html = renderHtml(payload);
-  const subject = `Nouvelle commande — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
+  const subject = `Bon de commande n° ${ref} — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
 
   let attachments: { filename: string; content: string }[] | undefined;
   try {
     const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
     const bytes = await buildOrderPdf({
       orderId: payload.orderId,
+      orderNumber: payload.orderNumber ?? null,
       createdAt: payload.createdAt,
       customerName: payload.customerName,
       customerPhone: payload.customerPhone,
@@ -93,7 +107,7 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
     });
     attachments = [
       {
-        filename: `bon-de-commande-${payload.orderId.slice(0, 8)}.pdf`,
+        filename: `bon-de-commande-${ref}.pdf`,
         content: toBase64(bytes),
       },
     ];

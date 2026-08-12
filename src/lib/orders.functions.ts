@@ -46,7 +46,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         total_estimate: totalEstimate,
         status: "new",
       })
-      .select("id, created_at")
+      .select("id, created_at, order_number")
       .single();
     if (orderErr || !order) throw new Error(orderErr?.message ?? "Order failed");
 
@@ -67,6 +67,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       const { notifyAdminsOfOrder } = await import("./orders.server");
       await notifyAdminsOfOrder({
         orderId: order.id,
+        orderNumber: order.order_number,
         createdAt: order.created_at,
         customerName: data.customerName,
         customerPhone: data.customerPhone,
@@ -83,7 +84,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       console.error("[orders] admin notification failed:", e);
     }
 
-    return { id: order.id, totalEstimate };
+    return { id: order.id, orderNumber: order.order_number, createdAt: order.created_at, totalEstimate };
   });
 
 export const getOrderPdf = createServerFn({ method: "POST" })
@@ -94,7 +95,7 @@ export const getOrderPdf = createServerFn({ method: "POST" })
     const { data: order, error } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, created_at, customer_name, customer_phone, customer_email, customer_company, customer_address, customer_website, pickup_date, notes, total_estimate, order_items(cheese_name, quantity, unit_price, unit_label)",
+        "id, order_number, created_at, customer_name, customer_phone, customer_email, customer_company, customer_address, customer_website, pickup_date, notes, total_estimate, order_items(cheese_name, quantity, unit_price, unit_label)",
       )
       .eq("id", data.orderId)
       .maybeSingle();
@@ -104,6 +105,7 @@ export const getOrderPdf = createServerFn({ method: "POST" })
     const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
     const bytes = await buildOrderPdf({
       orderId: order.id,
+      orderNumber: order.order_number,
       createdAt: order.created_at,
       customerName: order.customer_name,
       customerPhone: order.customer_phone,
@@ -123,7 +125,7 @@ export const getOrderPdf = createServerFn({ method: "POST" })
     });
 
     return {
-      filename: `bon-de-commande-${order.id.slice(0, 8)}.pdf`,
+      filename: `bon-de-commande-${order.order_number ?? order.id.slice(0, 8)}.pdf`,
       base64: toBase64(bytes),
     };
   });

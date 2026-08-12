@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf
 
 export interface OrderPdfData {
   orderId: string;
+  orderNumber?: string | null;
   createdAt: string;
   customerName: string;
   customerPhone: string;
@@ -100,12 +101,15 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   text("TASIE FROMAGES", { size: 20, font: bold, color: brand });
   y -= 18;
   text("Bon de commande", { size: 13, font: bold });
+  y -= 16;
+  const ref = data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
+  text(`Bon de commande n° ${ref}`, { size: 11, font: bold, color: brand });
   y -= 14;
-  text(
-    `Commande n° ${data.orderId.slice(0, 8).toUpperCase()} — ${new Date(data.createdAt).toLocaleString("fr-FR")}`,
-    { size: 9, color: muted },
-  );
-  y -= 22;
+  const created = new Date(data.createdAt);
+  const dateStr = created.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+  const timeStr = created.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  text(`Émis le ${dateStr} à ${timeStr}`, { size: 9, color: muted });
+  y -= 20;
   page.drawLine({ start: { x: M, y }, end: { x: M + width, y }, thickness: 1, color: brand });
   y -= 24;
 
@@ -204,7 +208,7 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   const pages = pdf.getPages();
   pages.forEach((p, idx) => {
     const footer = sanitize(
-      `La Cave Tasie Fromages — bon de commande sans paiement en ligne — page ${idx + 1}/${pages.length}`,
+      `La Cave Tasie Fromages — Bon de commande n° ${ref} — page ${idx + 1}/${pages.length}`,
     );
     p.drawText(footer, { x: M, y: M - 18, size: 8, font: regular, color: muted });
   });

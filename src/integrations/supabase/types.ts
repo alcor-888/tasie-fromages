@@ -141,6 +141,7 @@ export type Database = {
           customer_website: string | null
           id: string
           notes: string | null
+          order_number: string | null
           pickup_date: string | null
           status: string
           total_estimate: number
@@ -157,6 +158,7 @@ export type Database = {
           customer_website?: string | null
           id?: string
           notes?: string | null
+          order_number?: string | null
           pickup_date?: string | null
           status?: string
           total_estimate?: number
@@ -173,6 +175,7 @@ export type Database = {
           customer_website?: string | null
           id?: string
           notes?: string | null
+          order_number?: string | null
           pickup_date?: string | null
           status?: string
           total_estimate?: number
