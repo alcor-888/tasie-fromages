@@ -83,14 +83,16 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
     return;
   }
 
+  const ref = orderRef(payload);
   const html = renderHtml(payload);
-  const subject = `Nouvelle commande — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
+  const subject = `Bon de commande n° ${ref} — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
 
   let attachments: { filename: string; content: string }[] | undefined;
   try {
     const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
     const bytes = await buildOrderPdf({
       orderId: payload.orderId,
+      orderNumber: payload.orderNumber ?? null,
       createdAt: payload.createdAt,
       customerName: payload.customerName,
       customerPhone: payload.customerPhone,
@@ -105,7 +107,7 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
     });
     attachments = [
       {
-        filename: `bon-de-commande-${payload.orderId.slice(0, 8)}.pdf`,
+        filename: `bon-de-commande-${ref}.pdf`,
         content: toBase64(bytes),
       },
     ];
