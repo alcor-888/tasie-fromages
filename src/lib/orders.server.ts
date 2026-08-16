@@ -76,6 +76,42 @@ function escape(s: string): string {
 export async function notifyAdminsOfOrder(payload: NotifyPayload) {
   console.log(`[orders] New order ${payload.orderId} for ${payload.customerName} — ${payload.totalEstimate.toFixed(2)}€`);
 
+  const ref = orderRef(payload);
+
+  // Primary path: Lovable managed email (sender domain notify.tasie-fromages.fr)
+  try {
+    const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+    const templateData = {
+      orderRef: ref,
+      emittedAt: formatDateTime(payload.createdAt),
+      customerName: payload.customerName,
+      customerPhone: payload.customerPhone,
+      customerEmail: payload.customerEmail,
+      customerCompany: payload.customerCompany ?? null,
+      customerAddress: payload.customerAddress ?? null,
+      customerWebsite: payload.customerWebsite ?? null,
+      notes: payload.notes,
+      totalEstimate: payload.totalEstimate,
+      items: payload.items.map((i) => ({
+        name: i.cheeseName,
+        quantity: i.quantity,
+        unitLabel: i.unitLabel,
+        lineTotal: i.unitPrice * i.quantity,
+      })),
+    };
+    for (const admin of ADMIN_EMAILS) {
+      await sendTemplateEmail("order-notification", admin, {
+        templateData,
+        idempotencyKey: `order-notification-${payload.orderId}-${admin}`,
+        replyTo: payload.customerEmail || undefined,
+      });
+    }
+    console.log(`[orders] Managed email sent for order ${ref}`);
+    return;
+  } catch (e) {
+    console.error("[orders] Managed email send failed, falling back to Resend:", e);
+  }
+
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   if (!RESEND_API_KEY || !LOVABLE_API_KEY) {
@@ -83,7 +119,6 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
     return;
   }
 
-  const ref = orderRef(payload);
   const html = renderHtml(payload);
   const subject = `Bon de commande n° ${ref} — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
 
