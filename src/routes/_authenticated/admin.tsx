@@ -2,8 +2,8 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { LogOut, RefreshCw, Github } from "lucide-react";
-import { listOrders, setOrderStatus } from "@/lib/admin.functions";
+import { LogOut, RefreshCw, Github, Trash2 } from "lucide-react";
+import { listOrders, setOrderStatus, deleteOrder } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,6 @@ const STATUSES = [
   { value: "new", label: "Nouvelle" },
   { value: "confirmed", label: "Confirmée" },
   { value: "ready", label: "Prête" },
-  { value: "done", label: "Retirée" },
   { value: "cancelled", label: "Annulée" },
 ] as const;
 
@@ -43,6 +42,7 @@ function statusColor(s: string) {
 function AdminPage() {
   const fetchOrders = useServerFn(listOrders);
   const updateStatus = useServerFn(setOrderStatus);
+  const removeOrder = useServerFn(deleteOrder);
   const qc = useQueryClient();
   const [githubOpen, setGithubOpen] = useState(false);
 
@@ -56,6 +56,13 @@ function AdminPage() {
     onSuccess: () => { toast.success("Statut mis à jour"); qc.invalidateQueries({ queryKey: ["admin-orders"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const deletion = useMutation({
+    mutationFn: (id: string) => removeOrder({ data: { id } }),
+    onSuccess: () => { toast.success("Commande effacée"); qc.invalidateQueries({ queryKey: ["admin-orders"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const signOut = async () => {
     await qc.cancelQueries();
@@ -139,6 +146,19 @@ function AdminPage() {
                       {STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="gap-2"
+                    disabled={deletion.isPending}
+                    onClick={() => {
+                      if (window.confirm(`Effacer définitivement la commande de ${o.customer_name} ?`)) {
+                        deletion.mutate(o.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" /> Effacer
+                  </Button>
                 </div>
               </div>
 

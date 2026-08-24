@@ -37,6 +37,18 @@ export const listOrders = createServerFn({ method: "GET" })
     return orders ?? [];
   });
 
+export const deleteOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }) => {
+    if (!(await isAdminUser(context.userId))) throw new Error("Accès refusé.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("order_items").delete().eq("order_id", data.id);
+    const { error } = await supabaseAdmin.from("orders").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const setOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string; status: "new" | "confirmed" | "ready" | "done" | "cancelled" }) => input)
