@@ -27,14 +27,17 @@ function ActivationGate() {
   const [key, setKey] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const hasSession = useHasSession();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["my-profile"],
     queryFn: () => fetchProfile(),
+    enabled: hasSession === true,
     retry: false,
     refetchOnWindowFocus: false,
   });
 
-  if (isLoading) {
+  if (hasSession === null || (hasSession && isLoading)) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">…</div>;
   }
   if (error) {
