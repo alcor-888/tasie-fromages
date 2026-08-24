@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
 import { placeOrder, getOrderPdf } from "@/lib/orders.functions";
+import { useHasSession } from "@/hooks/use-session";
 import { getMyProfile } from "@/lib/clients.functions";
 
 type OrderPayload = {
