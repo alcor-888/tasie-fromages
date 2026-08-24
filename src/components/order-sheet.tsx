@@ -70,7 +70,14 @@ export function OrderSheet() {
   const [lastOrderRef, setLastOrderRef] = useState<{ number: string; createdAt: string } | null>(null);
   const [downloading, setDownloading] = useState(false);
   const fetchProfile = useServerFn(getMyProfile);
-  const { data: profile } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile() });
+  const hasSession = useHasSession();
+  const { data: profile } = useQuery({
+    queryKey: ["my-profile"],
+    queryFn: () => fetchProfile(),
+    enabled: hasSession === true,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (!profile) return;
