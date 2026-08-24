@@ -146,6 +146,19 @@ function AdminPage() {
                       {STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="gap-2"
+                    disabled={deletion.isPending}
+                    onClick={() => {
+                      if (window.confirm(`Effacer définitivement la commande de ${o.customer_name} ?`)) {
+                        deletion.mutate(o.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" /> Effacer
+                  </Button>
                 </div>
               </div>
 
