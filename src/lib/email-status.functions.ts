@@ -18,3 +18,12 @@ export const sendTestNotification = createServerFn({ method: "POST" })
     const { runNotificationTest } = await import("@/lib/email-status.server");
     return runNotificationTest();
   });
+
+export const getDnsStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { assertAdmin } = await import("@/lib/admin-guard.server");
+    await assertAdmin(context.userId);
+    const { readDnsStatus } = await import("@/lib/email-status.server");
+    return readDnsStatus();
+  });
