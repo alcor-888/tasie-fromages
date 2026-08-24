@@ -111,3 +111,72 @@ export async function runNotificationTest(): Promise<TestSendResult[]> {
   }
   return results;
 }
+
+export interface DnsRecordCheck {
+  type: "TXT" | "NS";
+  host: string;
+  expected: string;
+  found: boolean;
+  observed: string[];
+}
+
+export interface DnsStatusResult {
+  checkedAt: string;
+  verified: boolean;
+  records: DnsRecordCheck[];
+  error: string | null;
+}
+
+const EXPECTED_DNS: { type: "TXT" | "NS"; host: string; expected: string }[] = [
+  {
+    type: "TXT",
+    host: "_lovable-email.tasie-fromages.fr",
+    expected:
+      "lovable_email_verify=b53ac29a177cc18a863423c13caa9dbd647ea39d52ca168fa2fa3b4ab8381865",
+  },
+  { type: "NS", host: SENDER_DOMAIN, expected: "ns3.lovable.cloud" },
+  { type: "NS", host: SENDER_DOMAIN, expected: "ns4.lovable.cloud" },
+];
+
+async function resolve(host: string, type: string): Promise<string[]> {
+  const res = await fetch(
+    `https://dns.google/resolve?name=${encodeURIComponent(host)}&type=${type}`,
+    { headers: { accept: "application/dns-json" } },
+  );
+  if (!res.ok) throw new Error(`Résolution DNS impossible (${res.status})`);
+  const json = (await res.json()) as { Answer?: { data: string }[] };
+  return (json.Answer ?? []).map((a) =>
+    a.data.replace(/^"|"$/g, "").replace(/\.$/, "").toLowerCase(),
+  );
+}
+
+export async function readDnsStatus(): Promise<DnsStatusResult> {
+  const checkedAt = new Date().toISOString();
+  try {
+    const cache = new Map<string, string[]>();
+    const records: DnsRecordCheck[] = [];
+    for (const r of EXPECTED_DNS) {
+      const key = `${r.host}|${r.type}`;
+      if (!cache.has(key)) cache.set(key, await resolve(r.host, r.type));
+      const observed = cache.get(key)!;
+      records.push({
+        ...r,
+        observed,
+        found: observed.some((v) => v === r.expected.toLowerCase()),
+      });
+    }
+    return {
+      checkedAt,
+      verified: records.every((r) => r.found),
+      records,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      checkedAt,
+      verified: false,
+      records: EXPECTED_DNS.map((r) => ({ ...r, found: false, observed: [] })),
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
