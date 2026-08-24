@@ -42,6 +42,7 @@ function statusColor(s: string) {
 function AdminPage() {
   const fetchOrders = useServerFn(listOrders);
   const updateStatus = useServerFn(setOrderStatus);
+  const removeOrder = useServerFn(deleteOrder);
   const qc = useQueryClient();
   const [githubOpen, setGithubOpen] = useState(false);
 
