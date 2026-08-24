@@ -77,6 +77,8 @@ export function AdminEmailStatus() {
         </div>
       </div>
 
+      <AdminDnsStatus />
+
       {isLoading && <p className="text-muted-foreground">Chargement…</p>}
       {error && <p className="text-destructive">{(error as Error).message}</p>}
 
