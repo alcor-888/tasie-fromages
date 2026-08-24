@@ -57,6 +57,13 @@ function AdminPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const deletion = useMutation({
+    mutationFn: (id: string) => removeOrder({ data: { id } }),
+    onSuccess: () => { toast.success("Commande effacée"); qc.invalidateQueries({ queryKey: ["admin-orders"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const signOut = async () => {
     await qc.cancelQueries();
     qc.clear();
