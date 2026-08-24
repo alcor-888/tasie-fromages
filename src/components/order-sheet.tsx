@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
 import { placeOrder, getOrderPdf } from "@/lib/orders.functions";
+import { useHasSession } from "@/hooks/use-session";
 import { getMyProfile } from "@/lib/clients.functions";
 
 type OrderPayload = {
@@ -70,7 +71,14 @@ export function OrderSheet() {
   const [lastOrderRef, setLastOrderRef] = useState<{ number: string; createdAt: string } | null>(null);
   const [downloading, setDownloading] = useState(false);
   const fetchProfile = useServerFn(getMyProfile);
-  const { data: profile } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile() });
+  const hasSession = useHasSession();
+  const { data: profile } = useQuery({
+    queryKey: ["my-profile"],
+    queryFn: () => fetchProfile(),
+    enabled: hasSession === true,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (!profile) return;

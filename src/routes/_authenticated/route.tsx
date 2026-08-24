@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useHasSession } from "@/hooks/use-session";
 import { LogOut, KeyRound } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -27,14 +28,17 @@ function ActivationGate() {
   const [key, setKey] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const hasSession = useHasSession();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["my-profile"],
     queryFn: () => fetchProfile(),
+    enabled: hasSession === true,
     retry: false,
     refetchOnWindowFocus: false,
   });
 
-  if (isLoading) {
+  if (hasSession === null || (hasSession && isLoading)) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">…</div>;
   }
   if (error) {
