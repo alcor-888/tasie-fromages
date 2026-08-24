@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AdminImport } from "@/components/admin-import";
 import { AdminPassword } from "@/components/admin-password";
 import { AdminClients } from "@/components/admin-clients";
+import { AdminEmailStatus } from "@/components/admin-email-status";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -95,6 +96,7 @@ function AdminPage() {
             <TabsTrigger value="orders">Commandes</TabsTrigger>
             <TabsTrigger value="import">Import produits</TabsTrigger>
             <TabsTrigger value="clients">Clients</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="password">Mot de passe</TabsTrigger>
           </TabsList>
 
@@ -163,6 +165,9 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="clients" className="mt-6">
             <AdminClients />
+          </TabsContent>
+          <TabsContent value="notifications" className="mt-6">
+            <AdminEmailStatus />
           </TabsContent>
           <TabsContent value="password" className="mt-6">
             <AdminPassword />
