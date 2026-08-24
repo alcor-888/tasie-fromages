@@ -5,6 +5,7 @@ import { RefreshCw, Send, CheckCircle2, AlertTriangle } from "lucide-react";
 import { getEmailStatus, sendTestNotification } from "@/lib/email-status.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AdminDnsStatus } from "@/components/admin-dns-status";
 import { toast } from "sonner";
 
 function fmt(iso: string) {
