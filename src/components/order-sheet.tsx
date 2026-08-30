@@ -28,6 +28,7 @@ type OrderPayload = {
     cheeseName: string;
     unitPrice: number;
     unitLabel?: string;
+    piecesPerPack?: number;
     quantity: number;
   }[];
 };
