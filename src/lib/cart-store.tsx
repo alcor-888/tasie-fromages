@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import type { Cheese } from "@/data/cheeses";
-import { piecePrice } from "@/data/cheeses";
 
 const CART_STORAGE_KEY = "la-cave-fromagere-cart";
 
@@ -76,7 +75,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") window.localStorage.removeItem(CART_STORAGE_KEY);
   };
   const count = items.reduce((s, i) => s + i.quantity, 0);
-  const total = items.reduce((s, i) => s + i.quantity * piecePrice(i.cheese), 0);
+  // Une quantité dans le panier correspond à un article ou à un colis complet.
+  // pricePerKg contient le prix facturé de cet article/colis (colonne N).
+  const total = items.reduce((s, i) => s + i.quantity * i.cheese.pricePerKg, 0);
 
   return (
     <CartContext.Provider value={{ items, add, remove, setQty, clear, count, total, open, setOpen }}>

@@ -147,7 +147,7 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
     page.drawRectangle({ x: M, y: y - 6, width, height: 20, color: band });
     text("Désignation", { size: 9, font: bold, y: y });
     text("Quantité", { size: 9, font: bold, x: colQty, y: y });
-    const u = sanitize("Prix unitaire");
+    const u = sanitize("Prix article/colis");
     page.drawText(u, { x: colUnit + 90 - bold.widthOfTextAtSize(u, 9), y, size: 9, font: bold, color: ink });
     const t = sanitize("Total");
     page.drawText(t, { x: colTotal - bold.widthOfTextAtSize(t, 9), y, size: 9, font: bold, color: ink });
@@ -160,8 +160,8 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   for (const item of data.items) {
     const nameLines = wrap(item.cheeseName, regular, 10, colQty - M - 12);
     const packLine = item.piecesPerPack
-      ? `${item.piecesPerPack} piece(s) par colis (article) - prix a la piece ${money(item.unitPrice)} - prix du colis ${money(item.unitPrice * item.piecesPerPack)}`
-      // unitPrice = prix a la piece ; prix du colis = unitPrice x piecesPerPack
+      ? `${item.piecesPerPack} piece(s) par colis (article) - prix a la piece ${money(item.unitPrice / item.piecesPerPack)} - prix du colis ${money(item.unitPrice)}`
+      // unitPrice = prix facturé de l'article/colis ; le prix pièce est informatif.
       : null;
     const rowHeight = Math.max(nameLines.length * 12 + (packLine ? 12 : 0), 14) + 6;
     if (y - rowHeight < M + 60) {

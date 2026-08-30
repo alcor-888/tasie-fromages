@@ -134,10 +134,10 @@ export function OrderSheet() {
     }
   };
 
-  // Contrôle de cohérence : le total du panier doit correspondre à la somme
-  // des lignes du bon de commande (prix pièce × quantité).
+  // Contrôle de cohérence : une quantité commandée correspond à un article
+  // ou colis complet, donc chaque ligne utilise son prix article/colis.
   const orderLines = items.map((i) => ({
-    unitPrice: piecePrice(i.cheese),
+    unitPrice: i.cheese.pricePerKg,
     quantity: i.quantity,
   }));
   const totalCheck = checkTotals(computeItemsTotal(orderLines), total);
@@ -171,7 +171,7 @@ export function OrderSheet() {
       items: items.map((i) => ({
         cheeseId: i.cheese.id,
         cheeseName: i.cheese.name,
-        unitPrice: piecePrice(i.cheese),
+        unitPrice: i.cheese.pricePerKg,
         unitLabel: i.cheese.unit,
         piecesPerPack: i.cheese.colissage ?? undefined,
         quantity: i.quantity,
@@ -229,7 +229,7 @@ export function OrderSheet() {
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
-                          <p className="font-display text-sm font-semibold">{(i.quantity * piecePrice(i.cheese)).toFixed(2)}€</p>
+                          <p className="font-display text-sm font-semibold">{(i.quantity * i.cheese.pricePerKg).toFixed(2)}€</p>
                         </div>
                       </div>
                     </li>
@@ -301,21 +301,21 @@ export function OrderSheet() {
               <p className="mb-2 text-sm font-semibold">Récapitulatif de votre commande</p>
               <ul className="space-y-2">
                 {items.map((i) => {
-                  const unit = piecePrice(i.cheese);
+                  const piece = piecePrice(i.cheese);
                   const pack = i.cheese.colissage && i.cheese.colissage > 1 ? i.cheese.colissage : null;
-                  const packPrice = pack ? unit * pack : null;
+                  const articlePrice = i.cheese.pricePerKg;
                   return (
                     <li key={i.cheese.id} className="flex justify-between gap-2 text-sm">
                       <div className="flex-1">
                         <p className="font-medium leading-tight">{i.cheese.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {unit.toFixed(2)}€ la pièce
-                          {pack ? ` · ${pack} pièce${pack > 1 ? "s" : ""} / colis · ${packPrice!.toFixed(2)}€ le colis` : ""}
+                          {piece.toFixed(2)}€ la pièce
+                          {pack ? ` · ${pack} pièce${pack > 1 ? "s" : ""} / colis · ${articlePrice.toFixed(2)}€ le colis` : ` · ${articlePrice.toFixed(2)}€ l'article`}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium">x{i.quantity}</p>
-                        <p className="text-xs text-muted-foreground">{(i.quantity * unit).toFixed(2)}€</p>
+                        <p className="text-xs text-muted-foreground">{(i.quantity * articlePrice).toFixed(2)}€</p>
                       </div>
                     </li>
                   );
