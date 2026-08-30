@@ -12,6 +12,7 @@ const itemSchema = z.object({
 });
 
 const orderSchema = z.object({
+  clientTotal: z.number().min(0).max(1000000).optional(),
   customerName: z.string().trim().min(1).max(100),
   customerPhone: z.string().trim().min(3).max(30),
   customerEmail: z.string().trim().email().max(255).optional().or(z.literal("")),
