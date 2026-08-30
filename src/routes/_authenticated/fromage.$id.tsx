@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getCategoryImage, piecePrice, type Cheese } from "@/data/cheeses";
+import { getCategoryImage, piecePrice, formatEuro, packSize, packPriceLabel, type Cheese } from "@/data/cheeses";
 import { getProductById, listProducts } from "@/lib/products.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
@@ -216,19 +216,19 @@ function CheeseDetail() {
             <div className="space-y-1">
               {cheese.pricePerKg > 0 && (
                 <p className="font-display text-2xl font-semibold sm:text-3xl">
-                  {piecePrice(cheese).toFixed(2)} €{" "}
-                  <span className="text-sm font-normal text-muted-foreground">la pièce</span>
+                  {formatEuro(piecePrice(cheese))}{" "}
+                  <span className="text-sm font-normal text-muted-foreground">à la pièce (unité)</span>
                 </p>
               )}
               <p className="font-display text-2xl font-bold sm:text-3xl">
-                {cheese.priceLabel}{" "}
-                <span className="text-sm font-normal text-muted-foreground">{cheese.unit || "le colis"}</span>
+                {formatEuro(cheese.pricePerKg)}{" "}
+                <span className="text-sm font-normal text-muted-foreground">
+                  {packSize(cheese) ? `le colis de ${packSize(cheese)} pièces` : "l'article"}
+                </span>
               </p>
-              {cheese.colissage != null && cheese.colissage > 0 && cheese.pricePerKg > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  Colis (article) de {cheese.colissage} pièce{cheese.colissage > 1 ? "s" : ""}
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                Facturation au {packSize(cheese) ? "colis" : "article"} · {packPriceLabel(cheese)}
+              </p>
             </div>
             <Button
               size="lg"
@@ -283,13 +283,15 @@ function CheeseDetail() {
           <div className="leading-tight">
             {cheese.pricePerKg > 0 && (
               <p className="font-display text-base font-semibold">
-                {piecePrice(cheese).toFixed(2)} €{" "}
+                {formatEuro(piecePrice(cheese))}{" "}
                 <span className="text-[10px] font-normal text-muted-foreground">la pièce</span>
               </p>
             )}
             <p className="font-display text-base font-bold">
-              {cheese.priceLabel}{" "}
-              <span className="text-[10px] font-normal text-muted-foreground">{cheese.unit || "le colis"}</span>
+              {formatEuro(cheese.pricePerKg)}{" "}
+              <span className="text-[10px] font-normal text-muted-foreground">
+                {packSize(cheese) ? `le colis de ${packSize(cheese)}` : "l'article"}
+              </span>
             </p>
           </div>
           <Button
