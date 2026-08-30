@@ -1,7 +1,7 @@
 // Server-only helper to notify admins of new orders.
-// Email delivery is wired to Resend when RESEND_API_KEY is present in the
-// project secrets; otherwise the order is just logged to the server console
-// and remains visible in the /admin dashboard.
+// Primary delivery: Brevo (BREVO_API_KEY, sender = BREVO_SENDER_EMAIL or a
+// validated sender of the Brevo account). Fallbacks: Lovable managed email,
+// then Resend. The order always remains visible in the /admin dashboard.
 
 const ADMIN_EMAILS = [
   "alaincorrente@gmail.com",
