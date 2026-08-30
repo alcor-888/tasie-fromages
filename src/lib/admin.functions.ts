@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function isAdminUser(userId: string) {
@@ -31,7 +32,7 @@ export const listOrders = createServerFn({ method: "GET" })
 
 export const deleteOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string }) => input)
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     if (!(await isAdminUser(context.userId))) throw new Error("Accès refusé.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -43,7 +44,14 @@ export const deleteOrder = createServerFn({ method: "POST" })
 
 export const setOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string; status: "new" | "confirmed" | "ready" | "done" | "cancelled" }) => input)
+  .inputValidator((input) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["new", "confirmed", "ready", "done", "cancelled"]),
+      })
+      .parse(input),
+  )
   .handler(async ({ data, context }) => {
     if (!(await isAdminUser(context.userId))) throw new Error("Accès refusé.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
