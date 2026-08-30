@@ -154,6 +154,7 @@ export function OrderSheet() {
         cheeseName: i.cheese.name,
         unitPrice: i.cheese.pricePerKg,
         unitLabel: i.cheese.unit,
+        piecesPerPack: i.cheese.colissage ?? undefined,
         quantity: i.quantity,
       })),
     });
