@@ -297,21 +297,20 @@ export function OrderSheet() {
               <p className="mb-2 text-sm font-semibold">Récapitulatif de votre commande</p>
               <ul className="space-y-2">
                 {items.map((i) => {
-                  const piece = piecePrice(i.cheese);
-                  const pack = i.cheese.colissage && i.cheese.colissage > 1 ? i.cheese.colissage : null;
+                  const pack = packSize(i.cheese);
                   const articlePrice = i.cheese.pricePerKg;
                   return (
                     <li key={i.cheese.id} className="flex justify-between gap-2 text-sm">
                       <div className="flex-1">
                         <p className="font-medium leading-tight">{i.cheese.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {piece.toFixed(2)}€ la pièce
-                          {pack ? ` · ${pack} pièce${pack > 1 ? "s" : ""} / colis · ${articlePrice.toFixed(2)}€ le colis` : ` · ${articlePrice.toFixed(2)}€ l'article`}
+                        <p className="text-xs text-muted-foreground">Prix à la pièce : {piecePriceLabel(i.cheese)}</p>
+                        <p className="text-xs font-medium text-foreground/80">
+                          Prix facturé : {formatEuro(articlePrice)} {pack ? `le colis de ${pack} pièces` : "l'article"}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium">x{i.quantity}</p>
-                        <p className="text-xs text-muted-foreground">{(i.quantity * articlePrice).toFixed(2)}€</p>
+                        <p className="text-xs font-semibold">{formatEuro(i.quantity * articlePrice)}</p>
                       </div>
                     </li>
                   );
