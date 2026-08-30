@@ -204,7 +204,11 @@ function CheeseDetail() {
             {origin && <StatRow icon={MapPin} label="Origine" value={origin} />}
             {cheese.season && <StatRow icon={Leaf} label="Saisonnalité" value={cheese.season} />}
             {cheese.colissage != null && (
-              <StatRow icon={Hash} label="Colissage" value={String(cheese.colissage)} />
+              <StatRow
+                icon={Hash}
+                label="Pièces par colis"
+                value={`${cheese.colissage} pièce${cheese.colissage > 1 ? "s" : ""}`}
+              />
             )}
             {cheese.nombrePoidsReel != null && (
               <StatRow
