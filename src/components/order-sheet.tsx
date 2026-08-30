@@ -142,7 +142,14 @@ export function OrderSheet() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
+    if (!totalCheck.ok) {
+      toast.error(
+        `Incohérence détectée : total du panier ${totalCheck.actual.toFixed(2)}€ ≠ total du bon de commande ${totalCheck.expected.toFixed(2)}€. Rechargez la page ou modifiez le panier.`,
+      );
+      return;
+    }
     mutation.mutate({
+      clientTotal: totalCheck.expected,
       customerName: form.name,
       customerPhone: form.phone,
       customerEmail: form.email || undefined,
