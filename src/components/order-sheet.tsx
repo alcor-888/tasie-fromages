@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
 import { piecePrice } from "@/data/cheeses";
+import { checkTotals, computeItemsTotal } from "@/lib/order-total";
 import { placeOrder, getOrderPdf } from "@/lib/orders.functions";
 import { useHasSession } from "@/hooks/use-session";
 import { getMyProfile } from "@/lib/clients.functions";
