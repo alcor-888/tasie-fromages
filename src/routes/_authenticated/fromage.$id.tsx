@@ -210,13 +210,6 @@ function CheeseDetail() {
                 value={`${cheese.colissage} pièce${cheese.colissage > 1 ? "s" : ""}`}
               />
             )}
-            {cheese.nombrePoidsReel != null && (
-              <StatRow
-                icon={Wheat}
-                label={cheese.packagingUnit?.toLowerCase().startsWith("kg") ? "Poids réel" : "Nombre réel"}
-                value={`${cheese.nombrePoidsReel}${cheese.packagingUnit?.toLowerCase().startsWith("kg") ? " kg" : ""}`}
-              />
-            )}
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 sm:mt-8 sm:p-5">
@@ -224,11 +217,11 @@ function CheeseDetail() {
               <p className="font-display text-2xl font-semibold sm:text-3xl">{cheese.priceLabel}</p>
               <p className="text-xs text-muted-foreground">
                 {cheese.unit}
-                {cheese.pricePerKg > 0 && ` · ${cheese.pricePerKg.toFixed(2)} € l'article`}
+                {cheese.pricePerKg > 0 && ` · ${cheese.pricePerKg.toFixed(2)} € la pièce`}
               </p>
               {cheese.colissage != null && cheese.colissage > 0 && cheese.pricePerKg > 0 && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Colis de {cheese.colissage} pièce{cheese.colissage > 1 ? "s" : ""} ·{" "}
+                  Colis (article) de {cheese.colissage} pièce{cheese.colissage > 1 ? "s" : ""} ·{" "}
                   {(cheese.pricePerKg * cheese.colissage).toFixed(2)} € le colis
                 </p>
               )}
