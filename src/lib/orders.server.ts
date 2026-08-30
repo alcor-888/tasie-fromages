@@ -115,7 +115,7 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   if (BREVO_API_KEY && LOVABLE_API_KEY) {
     try {
-      const senderEmail = process.env.BREVO_SENDER_EMAIL || "alaincorrente@gmail.com";
+      const senderEmail = process.env.BREVO_SENDER_EMAIL || "bardet.rodolphe@gmail.com";
       const res = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
         method: "POST",
         headers: {
