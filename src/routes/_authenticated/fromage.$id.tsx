@@ -281,8 +281,16 @@ function CheeseDetail() {
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 p-3 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
           <div className="leading-tight">
-            <p className="font-display text-lg font-semibold">{cheese.priceLabel}</p>
-            <p className="text-[10px] text-muted-foreground">{cheese.unit}</p>
+            {cheese.pricePerKg > 0 && (
+              <p className="font-display text-base font-semibold">
+                {piecePrice(cheese).toFixed(2)} €{" "}
+                <span className="text-[10px] font-normal text-muted-foreground">la pièce</span>
+              </p>
+            )}
+            <p className="font-display text-base font-bold">
+              {cheese.priceLabel}{" "}
+              <span className="text-[10px] font-normal text-muted-foreground">{cheese.unit || "le colis"}</span>
+            </p>
           </div>
           <Button
             size="lg"
