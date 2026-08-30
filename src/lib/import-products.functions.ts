@@ -145,7 +145,9 @@ function mapRow(
     fabrication: s(pick(f, ["Fabrication"])),
     fabriquant: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
     producer: s(pick(f, ["Fabriquant", "Fabricant", "Producteur", "Producer"])),
-    colissage: n(pick(f, ["Colisage", "Colissage"])),
+    colissage:
+      n(pick(f, ["Colisage", "Colissage", "Nombre de pieces", "Nombre de pièces", "Nb pieces", "Nb pièces", "Pieces par colis", "Pièces par colis"])) ??
+      n(f["__col_P" as keyof typeof f]),
     nombre_poids_reel: n(pick(f, ["Nombre ou poids réel", "Nombre ou poids reel", "Nombre/poids réel"])),
     image_url: s(pick(f, ["Photo", "Image", "Image URL"])),
     saveur: s(pick(f, ["Saveur", "Flavor"])),
