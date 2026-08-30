@@ -48,6 +48,29 @@ export function piecePrice(cheese: Pick<Cheese, "pricePerKg" | "colissage">): nu
   return cheese.pricePerKg;
 }
 
+export function formatEuro(v: number): string {
+  return `${v.toFixed(2).replace(".", ",")} €`;
+}
+
+/** Nombre de pièces par colis, uniquement si le colis regroupe plusieurs pièces. */
+export function packSize(cheese: Pick<Cheese, "colissage">): number | null {
+  const pack = cheese.colissage ?? 0;
+  return pack > 1 ? pack : null;
+}
+
+/** Libellé du prix du colis / de l'article (prix facturé). */
+export function packPriceLabel(cheese: Pick<Cheese, "pricePerKg" | "colissage">): string {
+  const pack = packSize(cheese);
+  return pack
+    ? `${formatEuro(cheese.pricePerKg)} / colis de ${pack} pièces`
+    : `${formatEuro(cheese.pricePerKg)} / article`;
+}
+
+/** Libellé du prix unitaire (à la pièce). */
+export function piecePriceLabel(cheese: Pick<Cheese, "pricePerKg" | "colissage">): string {
+  return `${formatEuro(piecePrice(cheese))} / pièce`;
+}
+
 export function getCategoryImage(category?: string, milk?: string): string {
   const c = (category ?? "").toLowerCase();
   if (c.includes("persill")) return persilleeImg;
