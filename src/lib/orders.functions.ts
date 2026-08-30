@@ -70,7 +70,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         unit_label: i.unitLabel ?? null,
         pieces_per_pack: i.piecesPerPack ?? null,
         quantity: i.quantity,
-        line_total: i.unitPrice * i.quantity,
+        line_total: Math.round((i.unitPrice * i.quantity + Number.EPSILON) * 100) / 100,
       })),
     );
     if (itemsErr) throw new Error(itemsErr.message);
