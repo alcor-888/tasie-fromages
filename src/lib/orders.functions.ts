@@ -7,6 +7,7 @@ const itemSchema = z.object({
   cheeseName: z.string().min(1).max(200),
   unitPrice: z.number().min(0).max(10000),
   unitLabel: z.string().max(50).optional(),
+  piecesPerPack: z.number().min(0).max(100000).optional(),
   quantity: z.number().min(0.1).max(999),
 });
 
@@ -57,6 +58,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         cheese_name: i.cheeseName,
         unit_price: i.unitPrice,
         unit_label: i.unitLabel ?? null,
+        pieces_per_pack: i.piecesPerPack ?? null,
         quantity: i.quantity,
         line_total: i.unitPrice * i.quantity,
       })),
@@ -95,7 +97,7 @@ export const getOrderPdf = createServerFn({ method: "POST" })
     const { data: order, error } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, order_number, created_at, customer_name, customer_phone, customer_email, customer_company, customer_address, customer_website, pickup_date, notes, total_estimate, order_items(cheese_name, quantity, unit_price, unit_label)",
+        "id, order_number, created_at, customer_name, customer_phone, customer_email, customer_company, customer_address, customer_website, pickup_date, notes, total_estimate, order_items(cheese_name, quantity, unit_price, unit_label, pieces_per_pack)",
       )
       .eq("id", data.orderId)
       .maybeSingle();
@@ -121,6 +123,7 @@ export const getOrderPdf = createServerFn({ method: "POST" })
         quantity: Number(i.quantity),
         unitPrice: Number(i.unit_price),
         unitLabel: i.unit_label,
+        piecesPerPack: i.pieces_per_pack == null ? null : Number(i.pieces_per_pack),
       })),
     });
 

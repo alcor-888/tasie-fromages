@@ -154,6 +154,7 @@ export function OrderSheet() {
         cheeseName: i.cheese.name,
         unitPrice: i.cheese.pricePerKg,
         unitLabel: i.cheese.unit,
+        piecesPerPack: i.cheese.colissage ?? undefined,
         quantity: i.quantity,
       })),
     });
@@ -194,6 +195,11 @@ export function OrderSheet() {
                           </button>
                         </div>
                         <p className="text-xs text-muted-foreground">{i.cheese.pricePerKg}€ {i.cheese.unit}</p>
+                        {i.cheese.colissage != null && i.cheese.colissage > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            {i.cheese.colissage} pièce{i.cheese.colissage > 1 ? "s" : ""} / colis · pièce {i.cheese.pricePerKg.toFixed(2)}€ · colis {(i.cheese.pricePerKg * i.cheese.colissage).toFixed(2)}€
+                          </p>
+                        )}
                         <div className="mt-auto flex items-center justify-between pt-2">
                           <div className="flex items-center gap-1">
                             <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setQty(i.cheese.id, i.quantity - 1)}>

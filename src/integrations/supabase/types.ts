@@ -94,6 +94,7 @@ export type Database = {
           id: string
           line_total: number
           order_id: string
+          pieces_per_pack: number | null
           quantity: number
           unit_label: string | null
           unit_price: number
@@ -105,6 +106,7 @@ export type Database = {
           id?: string
           line_total?: number
           order_id: string
+          pieces_per_pack?: number | null
           quantity: number
           unit_label?: string | null
           unit_price?: number
@@ -116,6 +118,7 @@ export type Database = {
           id?: string
           line_total?: number
           order_id?: string
+          pieces_per_pack?: number | null
           quantity?: number
           unit_label?: string | null
           unit_price?: number

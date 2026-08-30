@@ -26,6 +26,7 @@ interface NotifyPayload {
     quantity: number;
     unitPrice: number;
     unitLabel?: string;
+    piecesPerPack?: number | null;
   }[];
 }
 
@@ -42,7 +43,11 @@ function renderHtml(p: NotifyPayload) {
   const rows = p.items
     .map(
       (i) => `<tr>
-        <td style="padding:6px 10px;border-bottom:1px solid #eee">${escape(i.cheeseName)}</td>
+        <td style="padding:6px 10px;border-bottom:1px solid #eee">${escape(i.cheeseName)}${
+          i.piecesPerPack
+            ? `<br/><span style="font-size:12px;color:#666">${i.piecesPerPack} pièce(s) / colis · pièce ${i.unitPrice.toFixed(2)} € · colis ${(i.unitPrice * i.piecesPerPack).toFixed(2)} €</span>`
+            : ""
+        }</td>
         <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center">${i.quantity} ${escape(i.unitLabel ?? "")}</td>
         <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right">${(i.unitPrice * i.quantity).toFixed(2)} €</td>
       </tr>`,
