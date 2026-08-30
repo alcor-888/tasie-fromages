@@ -25,8 +25,9 @@ const orderSchema = z.object({
 });
 
 export const placeOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) => orderSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { computeItemsTotal, checkTotals } = await import("./order-total");
@@ -56,6 +57,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         notes: data.notes || null,
         total_estimate: totalEstimate,
         status: "new",
+        user_id: context.userId,
       })
       .select("id, created_at, order_number")
       .single();
@@ -102,17 +104,26 @@ export const placeOrder = createServerFn({ method: "POST" })
 export const getOrderPdf = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ orderId: z.string().uuid() }).parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: order, error } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, order_number, created_at, customer_name, customer_phone, customer_email, customer_company, customer_address, customer_website, pickup_date, notes, total_estimate, order_items(cheese_name, quantity, unit_price, unit_label, pieces_per_pack)",
+        "id, user_id, order_number, created_at, customer_name, customer_phone, customer_email, customer_company, customer_address, customer_website, pickup_date, notes, total_estimate, order_items(cheese_name, quantity, unit_price, unit_label, pieces_per_pack)",
       )
       .eq("id", data.orderId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!order) throw new Error("Commande introuvable.");
+
+    // Seuls le client propriétaire de la commande et les administrateurs
+    // peuvent télécharger le bon de commande.
+    if (order.user_id !== context.userId) {
+      const { assertAdmin } = await import("@/lib/admin-guard.server");
+      await assertAdmin(context.userId);
+    }
+
+
 
     const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
     const bytes = await buildOrderPdf({

@@ -1,25 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import type { Cheese } from "@/data/cheeses";
 import { getCheeseEmoji } from "@/data/cheeses";
 
 export type ListType = "all" | "curated" | "promotions";
 
-function publicClient() {
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
-  return createClient(process.env.SUPABASE_URL!, key, {
-    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input, init) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  });
-}
 
 interface Row {
   id: string;
@@ -155,9 +141,10 @@ async function resolveImageUrl(raw: string | null): Promise<string | null> {
 const listSchema = z.object({ listType: z.enum(["all", "curated", "promotions"]) });
 
 export const listProducts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((i: { listType: ListType }) => listSchema.parse(i))
-  .handler(async ({ data }): Promise<Cheese[]> => {
-    const sb = publicClient();
+  .handler(async ({ data, context }): Promise<Cheese[]> => {
+    const sb = context.supabase;
     const { data: rows, error } = await sb
       .from("products")
       .select(PRODUCT_COLUMNS)
@@ -193,9 +180,10 @@ export const listProducts = createServerFn({ method: "GET" })
   });
 
 export const getProductById = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => z.object({ id: z.string().uuid() }).parse(input))
-  .handler(async ({ data }): Promise<Cheese | null> => {
-    const sb = publicClient();
+  .handler(async ({ data, context }): Promise<Cheese | null> => {
+    const sb = context.supabase;
     const { data: row, error } = await sb
       .from("products")
       .select(PRODUCT_DETAIL_COLUMNS)

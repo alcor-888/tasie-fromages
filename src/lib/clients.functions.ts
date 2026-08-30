@@ -147,7 +147,7 @@ export const activateWithKey = createServerFn({ method: "POST" })
 
     const { data: profile } = await supabaseAdmin
       .from("client_profiles")
-      .select("user_id, activation_key")
+      .select("user_id, activation_key, activated")
       .ilike("email", email)
       .maybeSingle();
 
@@ -155,6 +155,11 @@ export const activateWithKey = createServerFn({ method: "POST" })
     if (!profile) throw invalid;
     if ((profile.activation_key ?? "").trim().toLowerCase() !== data.key.trim().toLowerCase()) {
       throw invalid;
+    }
+    // La clé d'activation ne sert qu'une fois : après activation, le mot de
+    // passe se change uniquement depuis un compte connecté.
+    if (profile.activated) {
+      throw new Error("Ce compte est déjà activé. Connectez-vous avec votre mot de passe.");
     }
 
     const { error: pwErr } = await supabaseAdmin.auth.admin.updateUserById(profile.user_id, {

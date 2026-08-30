@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function isAdminUser(userId: string) {
@@ -14,17 +15,9 @@ async function isAdminUser(userId: string) {
 export const listOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    // Aucun auto-octroi du rôle admin : le rôle doit exister en base.
     if (!(await isAdminUser(context.userId))) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { count } = await supabaseAdmin
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "admin");
-      if ((count ?? 0) === 0) {
-        await supabaseAdmin.from("user_roles").insert({ user_id: context.userId, role: "admin" });
-      } else {
-        throw new Error("Accès réservé aux administrateurs.");
-      }
+      throw new Error("Accès réservé aux administrateurs.");
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -39,7 +32,7 @@ export const listOrders = createServerFn({ method: "GET" })
 
 export const deleteOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string }) => input)
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     if (!(await isAdminUser(context.userId))) throw new Error("Accès refusé.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -51,7 +44,14 @@ export const deleteOrder = createServerFn({ method: "POST" })
 
 export const setOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string; status: "new" | "confirmed" | "ready" | "done" | "cancelled" }) => input)
+  .inputValidator((input) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["new", "confirmed", "ready", "done", "cancelled"]),
+      })
+      .parse(input),
+  )
   .handler(async ({ data, context }) => {
     if (!(await isAdminUser(context.userId))) throw new Error("Accès refusé.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
