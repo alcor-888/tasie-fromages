@@ -326,11 +326,20 @@ export function OrderSheet() {
             <div className="mt-auto flex flex-col gap-2 border-t pt-4">
               <div className="flex items-baseline justify-between">
                 <span className="text-sm text-muted-foreground">Total estimé</span>
-                <span className="font-display text-xl font-semibold">{total.toFixed(2)}€</span>
+                <span className="font-display text-xl font-semibold">{totalCheck.expected.toFixed(2)}€</span>
               </div>
+              {totalCheck.ok ? (
+                <p className="text-xs text-muted-foreground">
+                  Total vérifié : panier {totalCheck.actual.toFixed(2)}€ = bon de commande {totalCheck.expected.toFixed(2)}€.
+                </p>
+              ) : (
+                <p className="text-xs font-medium text-destructive">
+                  Incohérence : panier {totalCheck.actual.toFixed(2)}€ vs bon de commande {totalCheck.expected.toFixed(2)}€ (écart {totalCheck.diff.toFixed(2)}€). Envoi bloqué.
+                </p>
+              )}
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep("cart")}>Retour</Button>
-                <Button type="submit" className="flex-1" disabled={mutation.isPending}>
+                <Button type="submit" className="flex-1" disabled={mutation.isPending || !totalCheck.ok}>
                   {mutation.isPending ? "Envoi…" : "Envoyer la commande"}
                 </Button>
               </div>
