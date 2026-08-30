@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Cheese } from "@/data/cheeses";
@@ -155,9 +156,10 @@ async function resolveImageUrl(raw: string | null): Promise<string | null> {
 const listSchema = z.object({ listType: z.enum(["all", "curated", "promotions"]) });
 
 export const listProducts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((i: { listType: ListType }) => listSchema.parse(i))
-  .handler(async ({ data }): Promise<Cheese[]> => {
-    const sb = publicClient();
+  .handler(async ({ data, context }): Promise<Cheese[]> => {
+    const sb = context.supabase;
     const { data: rows, error } = await sb
       .from("products")
       .select(PRODUCT_COLUMNS)
@@ -193,9 +195,10 @@ export const listProducts = createServerFn({ method: "GET" })
   });
 
 export const getProductById = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => z.object({ id: z.string().uuid() }).parse(input))
-  .handler(async ({ data }): Promise<Cheese | null> => {
-    const sb = publicClient();
+  .handler(async ({ data, context }): Promise<Cheese | null> => {
+    const sb = context.supabase;
     const { data: row, error } = await sb
       .from("products")
       .select(PRODUCT_DETAIL_COLUMNS)
