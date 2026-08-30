@@ -28,6 +28,7 @@ type OrderPayload = {
     cheeseName: string;
     unitPrice: number;
     unitLabel?: string;
+    piecesPerPack?: number;
     quantity: number;
   }[];
 };
@@ -278,6 +279,33 @@ export function OrderSheet() {
               <Label htmlFor="notes">Notes (préférences…)</Label>
               <Textarea id="notes" rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
+
+            <div className="rounded-md border border-border bg-card p-3">
+              <p className="mb-2 text-sm font-semibold">Récapitulatif de votre commande</p>
+              <ul className="space-y-2">
+                {items.map((i) => {
+                  const unit = piecePrice(i.cheese);
+                  const pack = i.cheese.colissage && i.cheese.colissage > 1 ? i.cheese.colissage : null;
+                  const packPrice = pack ? unit * pack : null;
+                  return (
+                    <li key={i.cheese.id} className="flex justify-between gap-2 text-sm">
+                      <div className="flex-1">
+                        <p className="font-medium leading-tight">{i.cheese.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {unit.toFixed(2)}€ la pièce
+                          {pack ? ` · ${pack} pièce${pack > 1 ? "s" : ""} / colis · ${packPrice!.toFixed(2)}€ le colis` : ""}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">x{i.quantity}</p>
+                        <p className="text-xs text-muted-foreground">{(i.quantity * unit).toFixed(2)}€</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
             <div className="mt-auto flex flex-col gap-2 border-t pt-4">
               <div className="flex items-baseline justify-between">
                 <span className="text-sm text-muted-foreground">Total estimé</span>
