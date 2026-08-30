@@ -18,6 +18,7 @@ export interface OrderPdfData {
     quantity: number;
     unitPrice: number;
     unitLabel?: string | null;
+    piecesPerPack?: number | null;
   }[];
 }
 
@@ -158,7 +159,10 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
 
   for (const item of data.items) {
     const nameLines = wrap(item.cheeseName, regular, 10, colQty - M - 12);
-    const rowHeight = Math.max(nameLines.length * 12, 14) + 6;
+    const packLine = item.piecesPerPack
+      ? `${item.piecesPerPack} piece(s) / colis - prix piece ${money(item.unitPrice)} - prix colis ${money(item.unitPrice * item.piecesPerPack)}`
+      : null;
+    const rowHeight = Math.max(nameLines.length * 12 + (packLine ? 12 : 0), 14) + 6;
     if (y - rowHeight < M + 60) {
       newPage();
       drawHead();
@@ -167,6 +171,9 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
     nameLines.forEach((line, idx) => {
       text(line, { size: 10, y: top - idx * 12 });
     });
+    if (packLine) {
+      text(packLine, { size: 8, color: muted, y: top - nameLines.length * 12 });
+    }
     const qty = `${item.quantity}${item.unitLabel ? ` ${sanitize(item.unitLabel)}` : ""}`;
     text(qty, { size: 10, x: colQty, y: top });
     const unit = sanitize(money(item.unitPrice));
