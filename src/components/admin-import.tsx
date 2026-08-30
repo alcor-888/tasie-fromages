@@ -95,7 +95,11 @@ function ImportZone({ listType }: { listType: ListType }) {
   async function doImport(rows: Row[]) {
     const payload: ImportRow[] = rows.map((r) => {
       const fields: Record<string, string | number | undefined> = {};
-      for (const k of Object.keys(r)) {
+      const orderedKeys = Object.keys(r);
+      // Colonne P (16e) : nombre de pièces par colis, quel que soit l'intitulé.
+      const colP = orderedKeys[15] != null ? r[orderedKeys[15]] : undefined;
+      if (colP !== "" && colP != null) fields["__col_P"] = colP;
+      for (const k of orderedKeys) {
         const v = r[k];
         if (v === "" || v == null) continue;
         fields[k] = v;
