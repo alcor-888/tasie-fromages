@@ -160,7 +160,7 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   for (const item of data.items) {
     const nameLines = wrap(item.cheeseName, regular, 10, colQty - M - 12);
     const packLine = item.piecesPerPack
-      ? `${item.piecesPerPack} piece(s) / colis - prix piece ${money(item.unitPrice)} - prix colis ${money(item.unitPrice * item.piecesPerPack)}`
+      ? `${item.piecesPerPack} piece(s) par colis (article) - prix a la piece ${money(item.unitPrice)} - prix du colis ${money(item.unitPrice * item.piecesPerPack)}`
       : null;
     const rowHeight = Math.max(nameLines.length * 12 + (packLine ? 12 : 0), 14) + 6;
     if (y - rowHeight < M + 60) {
