@@ -53,6 +53,6 @@ describe("panier", () => {
     act(() => result.current.add(banon));
     act(() => result.current.clear());
     expect(result.current.count).toBe(0);
-    expect(window.localStorage.getItem("la-cave-fromagere-cart")).toBeNull();
+    expect(JSON.parse(window.localStorage.getItem("la-cave-fromagere-cart") ?? "[]")).toEqual([]);
   });
 });

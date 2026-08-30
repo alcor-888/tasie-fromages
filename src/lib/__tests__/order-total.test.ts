@@ -13,7 +13,7 @@ describe("totaux du bon de commande", () => {
       { unitPrice: 20.7, quantity: 3 },
     ]);
     expect(total).toBe(roundMoney(36.96 * 2 + 20.7 * 3));
-    expect(total).toBe(135.92);
+    expect(total).toBe(136.02);
   });
 
   it("valide un panier cohérent avec le bon de commande", () => {
