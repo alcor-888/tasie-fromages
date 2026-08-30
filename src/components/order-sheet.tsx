@@ -15,6 +15,7 @@ import { useHasSession } from "@/hooks/use-session";
 import { getMyProfile } from "@/lib/clients.functions";
 
 type OrderPayload = {
+  clientTotal?: number;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
