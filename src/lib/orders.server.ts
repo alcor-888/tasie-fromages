@@ -1,7 +1,7 @@
 // Server-only helper to notify admins of new orders.
-// Email delivery is wired to Resend when RESEND_API_KEY is present in the
-// project secrets; otherwise the order is just logged to the server console
-// and remains visible in the /admin dashboard.
+// Primary delivery: Brevo (BREVO_API_KEY, sender = BREVO_SENDER_EMAIL or a
+// validated sender of the Brevo account). Fallbacks: Lovable managed email,
+// then Resend. The order always remains visible in the /admin dashboard.
 
 const ADMIN_EMAILS = [
   "alaincorrente@gmail.com",
@@ -77,8 +77,76 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
   console.log(`[orders] New order ${payload.orderId} for ${payload.customerName} — ${payload.totalEstimate.toFixed(2)}€`);
 
   const ref = orderRef(payload);
+  const html = renderHtml(payload);
+  const subject = `Bon de commande n° ${ref} — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
 
-  // Primary path: Lovable managed email (sender domain notify.tasie-fromages.fr)
+  // Build the PDF attachment (shared by Brevo and Resend fallbacks)
+  let attachments: { filename: string; content: string }[] | undefined;
+  try {
+    const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
+    const bytes = await buildOrderPdf({
+      orderId: payload.orderId,
+      orderNumber: payload.orderNumber ?? null,
+      createdAt: payload.createdAt,
+      customerName: payload.customerName,
+      customerPhone: payload.customerPhone,
+      customerEmail: payload.customerEmail,
+      customerCompany: payload.customerCompany ?? null,
+      customerAddress: payload.customerAddress ?? null,
+      customerWebsite: payload.customerWebsite ?? null,
+      pickupDate: payload.pickupDate,
+      notes: payload.notes,
+      totalEstimate: payload.totalEstimate,
+      items: payload.items,
+    });
+    attachments = [
+      {
+        filename: `bon-de-commande-${ref}.pdf`,
+        content: toBase64(bytes),
+      },
+    ];
+  } catch (e) {
+    console.error("[orders] PDF generation failed:", e);
+  }
+
+  // Primary path: Brevo transactional email (sender must be a validated
+  // sender in the Brevo account; override with BREVO_SENDER_EMAIL secret).
+  const BREVO_API_KEY = process.env.BREVO_API_KEY;
+  const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
+  if (BREVO_API_KEY && LOVABLE_API_KEY) {
+    try {
+      const senderEmail = process.env.BREVO_SENDER_EMAIL || "alaincorrente@gmail.com";
+      const res = await fetch("https://connector-gateway.lovable.dev/brevo/smtp/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+          sender: { name: "Tasie Fromages", email: senderEmail },
+          to: ADMIN_EMAILS.map((email) => ({ email })),
+          replyTo: payload.customerEmail ? { email: payload.customerEmail } : undefined,
+          subject,
+          htmlContent: html,
+          attachment: attachments?.map((a) => ({ name: a.filename, content: a.content })),
+        }),
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error(`[orders] Brevo send failed [${res.status}]: ${txt}`);
+        throw new Error(`Brevo ${res.status}: ${txt}`);
+      }
+      console.log(`[orders] Brevo email sent for order ${ref}`);
+      return;
+    } catch (e) {
+      console.error("[orders] Brevo send failed, trying fallbacks:", e);
+    }
+  } else {
+    console.warn("[orders] Brevo not configured — skipping Brevo path.");
+  }
+
+  // Fallback: Lovable managed email (sender domain notify.tasie-fromages.fr)
   try {
     const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
     const templateData = {
@@ -113,41 +181,9 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
   }
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   if (!RESEND_API_KEY || !LOVABLE_API_KEY) {
-    console.warn("[orders] Email notification skipped — RESEND not configured.");
+    console.warn("[orders] Email notification skipped — no email provider configured.");
     return;
-  }
-
-  const html = renderHtml(payload);
-  const subject = `Bon de commande n° ${ref} — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
-
-  let attachments: { filename: string; content: string }[] | undefined;
-  try {
-    const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
-    const bytes = await buildOrderPdf({
-      orderId: payload.orderId,
-      orderNumber: payload.orderNumber ?? null,
-      createdAt: payload.createdAt,
-      customerName: payload.customerName,
-      customerPhone: payload.customerPhone,
-      customerEmail: payload.customerEmail,
-      customerCompany: payload.customerCompany ?? null,
-      customerAddress: payload.customerAddress ?? null,
-      customerWebsite: payload.customerWebsite ?? null,
-      pickupDate: payload.pickupDate,
-      notes: payload.notes,
-      totalEstimate: payload.totalEstimate,
-      items: payload.items,
-    });
-    attachments = [
-      {
-        filename: `bon-de-commande-${ref}.pdf`,
-        content: toBase64(bytes),
-      },
-    ];
-  } catch (e) {
-    console.error("[orders] PDF generation failed:", e);
   }
 
   const res = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
