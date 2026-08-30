@@ -133,6 +133,14 @@ export function OrderSheet() {
     }
   };
 
+  // Contrôle de cohérence : le total du panier doit correspondre à la somme
+  // des lignes du bon de commande (prix pièce × quantité).
+  const orderLines = items.map((i) => ({
+    unitPrice: piecePrice(i.cheese),
+    quantity: i.quantity,
+  }));
+  const totalCheck = checkTotals(computeItemsTotal(orderLines), total);
+
   const finishOrder = () => {
     clear();
     setLastOrderId(null);
