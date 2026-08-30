@@ -38,6 +38,16 @@ export interface Cheese {
 
 const FALLBACK_IMG = presseImg;
 
+/**
+ * pricePerKg (colonne N des fichiers Excel) contient le PRIX DU COLIS (article).
+ * Le prix à la pièce = prix du colis / nombre de pièces par colis (colonne P).
+ */
+export function piecePrice(cheese: Pick<Cheese, "pricePerKg" | "colissage">): number {
+  const pack = cheese.colissage ?? 0;
+  if (pack > 1) return cheese.pricePerKg / pack;
+  return cheese.pricePerKg;
+}
+
 export function getCategoryImage(category?: string, milk?: string): string {
   const c = (category ?? "").toLowerCase();
   if (c.includes("persill")) return persilleeImg;

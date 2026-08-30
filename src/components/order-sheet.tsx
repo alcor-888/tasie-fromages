@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
+import { piecePrice } from "@/data/cheeses";
 import { placeOrder, getOrderPdf } from "@/lib/orders.functions";
 import { useHasSession } from "@/hooks/use-session";
 import { getMyProfile } from "@/lib/clients.functions";
@@ -152,7 +153,7 @@ export function OrderSheet() {
       items: items.map((i) => ({
         cheeseId: i.cheese.id,
         cheeseName: i.cheese.name,
-        unitPrice: i.cheese.pricePerKg,
+        unitPrice: piecePrice(i.cheese),
         unitLabel: i.cheese.unit,
         piecesPerPack: i.cheese.colissage ?? undefined,
         quantity: i.quantity,
@@ -194,10 +195,10 @@ export function OrderSheet() {
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
-                        <p className="text-xs text-muted-foreground">{i.cheese.pricePerKg.toFixed(2)}€ la pièce</p>
+                        <p className="text-xs text-muted-foreground">{piecePrice(i.cheese).toFixed(2)}€ la pièce</p>
                         {i.cheese.colissage != null && i.cheese.colissage > 0 && (
                           <p className="text-xs text-muted-foreground">
-                            {i.cheese.colissage} pièce{i.cheese.colissage > 1 ? "s" : ""} / colis (article) · prix du colis {(i.cheese.pricePerKg * i.cheese.colissage).toFixed(2)}€
+                            {i.cheese.colissage} pièce{i.cheese.colissage > 1 ? "s" : ""} / colis (article) · prix du colis {i.cheese.pricePerKg.toFixed(2)}€
                           </p>
                         )}
                         <div className="mt-auto flex items-center justify-between pt-2">
@@ -210,7 +211,7 @@ export function OrderSheet() {
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
-                          <p className="font-display text-sm font-semibold">{(i.quantity * i.cheese.pricePerKg).toFixed(2)}€</p>
+                          <p className="font-display text-sm font-semibold">{(i.quantity * piecePrice(i.cheese)).toFixed(2)}€</p>
                         </div>
                       </div>
                     </li>

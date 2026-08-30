@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getCategoryImage, type Cheese } from "@/data/cheeses";
+import { getCategoryImage, piecePrice, type Cheese } from "@/data/cheeses";
 import { getProductById, listProducts } from "@/lib/products.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
@@ -217,12 +217,12 @@ function CheeseDetail() {
               <p className="font-display text-2xl font-semibold sm:text-3xl">{cheese.priceLabel}</p>
               <p className="text-xs text-muted-foreground">
                 {cheese.unit}
-                {cheese.pricePerKg > 0 && ` · ${cheese.pricePerKg.toFixed(2)} € la pièce`}
+                {cheese.pricePerKg > 0 && ` · ${piecePrice(cheese).toFixed(2)} € la pièce`}
               </p>
               {cheese.colissage != null && cheese.colissage > 0 && cheese.pricePerKg > 0 && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   Colis (article) de {cheese.colissage} pièce{cheese.colissage > 1 ? "s" : ""} ·{" "}
-                  {(cheese.pricePerKg * cheese.colissage).toFixed(2)} € le colis
+                  {cheese.pricePerKg.toFixed(2)} € le colis
                 </p>
               )}
             </div>
