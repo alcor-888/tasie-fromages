@@ -213,16 +213,20 @@ function CheeseDetail() {
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 sm:mt-8 sm:p-5">
-            <div>
-              <p className="font-display text-2xl font-semibold sm:text-3xl">{cheese.priceLabel}</p>
-              <p className="text-xs text-muted-foreground">
-                {cheese.unit}
-                {cheese.pricePerKg > 0 && ` · ${piecePrice(cheese).toFixed(2)} € la pièce`}
+            <div className="space-y-1">
+              {cheese.pricePerKg > 0 && (
+                <p className="font-display text-2xl font-semibold sm:text-3xl">
+                  {piecePrice(cheese).toFixed(2)} €{" "}
+                  <span className="text-sm font-normal text-muted-foreground">la pièce</span>
+                </p>
+              )}
+              <p className="font-display text-2xl font-bold sm:text-3xl">
+                {cheese.priceLabel}{" "}
+                <span className="text-sm font-normal text-muted-foreground">{cheese.unit || "le colis"}</span>
               </p>
               {cheese.colissage != null && cheese.colissage > 0 && cheese.pricePerKg > 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Colis (article) de {cheese.colissage} pièce{cheese.colissage > 1 ? "s" : ""} ·{" "}
-                  {cheese.pricePerKg.toFixed(2)} € le colis
+                <p className="text-xs text-muted-foreground">
+                  Colis (article) de {cheese.colissage} pièce{cheese.colissage > 1 ? "s" : ""}
                 </p>
               )}
             </div>
