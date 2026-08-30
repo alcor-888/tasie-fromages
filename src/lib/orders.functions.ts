@@ -57,6 +57,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         notes: data.notes || null,
         total_estimate: totalEstimate,
         status: "new",
+        user_id: context.userId,
       })
       .select("id, created_at, order_number")
       .single();
