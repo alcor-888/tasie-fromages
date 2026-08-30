@@ -9,7 +9,7 @@ export type TotalCheckItem = {
   quantity: number;
 };
 
-/** Total de référence : somme des lignes (prix pièce × quantité), arrondi au centime. */
+/** Total de référence : somme des lignes (prix article/colis × quantité), arrondi au centime. */
 export function computeItemsTotal(items: TotalCheckItem[]): number {
   return roundMoney(
     items.reduce((sum, i) => sum + roundMoney(i.unitPrice * i.quantity), 0),
