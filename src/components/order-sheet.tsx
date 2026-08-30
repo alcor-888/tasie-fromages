@@ -10,11 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
 import { piecePrice } from "@/data/cheeses";
+import { checkTotals, computeItemsTotal } from "@/lib/order-total";
 import { placeOrder, getOrderPdf } from "@/lib/orders.functions";
 import { useHasSession } from "@/hooks/use-session";
 import { getMyProfile } from "@/lib/clients.functions";
 
 type OrderPayload = {
+  clientTotal?: number;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
@@ -132,6 +134,14 @@ export function OrderSheet() {
     }
   };
 
+  // Contrôle de cohérence : le total du panier doit correspondre à la somme
+  // des lignes du bon de commande (prix pièce × quantité).
+  const orderLines = items.map((i) => ({
+    unitPrice: piecePrice(i.cheese),
+    quantity: i.quantity,
+  }));
+  const totalCheck = checkTotals(computeItemsTotal(orderLines), total);
+
   const finishOrder = () => {
     clear();
     setLastOrderId(null);
@@ -142,7 +152,14 @@ export function OrderSheet() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
+    if (!totalCheck.ok) {
+      toast.error(
+        `Incohérence détectée : total du panier ${totalCheck.actual.toFixed(2)}€ ≠ total du bon de commande ${totalCheck.expected.toFixed(2)}€. Rechargez la page ou modifiez le panier.`,
+      );
+      return;
+    }
     mutation.mutate({
+      clientTotal: totalCheck.expected,
       customerName: form.name,
       customerPhone: form.phone,
       customerEmail: form.email || undefined,
@@ -309,11 +326,20 @@ export function OrderSheet() {
             <div className="mt-auto flex flex-col gap-2 border-t pt-4">
               <div className="flex items-baseline justify-between">
                 <span className="text-sm text-muted-foreground">Total estimé</span>
-                <span className="font-display text-xl font-semibold">{total.toFixed(2)}€</span>
+                <span className="font-display text-xl font-semibold">{totalCheck.expected.toFixed(2)}€</span>
               </div>
+              {totalCheck.ok ? (
+                <p className="text-xs text-muted-foreground">
+                  Total vérifié : panier {totalCheck.actual.toFixed(2)}€ = bon de commande {totalCheck.expected.toFixed(2)}€.
+                </p>
+              ) : (
+                <p className="text-xs font-medium text-destructive">
+                  Incohérence : panier {totalCheck.actual.toFixed(2)}€ vs bon de commande {totalCheck.expected.toFixed(2)}€ (écart {totalCheck.diff.toFixed(2)}€). Envoi bloqué.
+                </p>
+              )}
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep("cart")}>Retour</Button>
-                <Button type="submit" className="flex-1" disabled={mutation.isPending}>
+                <Button type="submit" className="flex-1" disabled={mutation.isPending || !totalCheck.ok}>
                   {mutation.isPending ? "Envoi…" : "Envoyer la commande"}
                 </Button>
               </div>

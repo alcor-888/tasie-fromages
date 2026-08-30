@@ -12,6 +12,7 @@ const itemSchema = z.object({
 });
 
 const orderSchema = z.object({
+  clientTotal: z.number().min(0).max(1000000).optional(),
   customerName: z.string().trim().min(1).max(100),
   customerPhone: z.string().trim().min(3).max(30),
   customerEmail: z.string().trim().email().max(255).optional().or(z.literal("")),
@@ -28,10 +29,19 @@ export const placeOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const totalEstimate = data.items.reduce(
-      (s, i) => s + i.unitPrice * i.quantity,
-      0,
-    );
+    const { computeItemsTotal, checkTotals } = await import("./order-total");
+    const totalEstimate = computeItemsTotal(data.items);
+
+    // Contrôle de cohérence : le total du panier envoyé par le client doit
+    // correspondre au total recalculé côté serveur.
+    if (data.clientTotal != null) {
+      const check = checkTotals(totalEstimate, data.clientTotal);
+      if (!check.ok) {
+        throw new Error(
+          `Incohérence de total : panier ${check.actual.toFixed(2)}€ vs bon de commande ${check.expected.toFixed(2)}€ (écart ${check.diff.toFixed(2)}€). Commande non enregistrée.`,
+        );
+      }
+    }
 
     const { data: order, error: orderErr } = await supabaseAdmin
       .from("orders")
@@ -60,7 +70,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         unit_label: i.unitLabel ?? null,
         pieces_per_pack: i.piecesPerPack ?? null,
         quantity: i.quantity,
-        line_total: i.unitPrice * i.quantity,
+        line_total: Math.round((i.unitPrice * i.quantity + Number.EPSILON) * 100) / 100,
       })),
     );
     if (itemsErr) throw new Error(itemsErr.message);
