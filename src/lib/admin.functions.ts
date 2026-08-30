@@ -14,17 +14,9 @@ async function isAdminUser(userId: string) {
 export const listOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    // Aucun auto-octroi du rôle admin : le rôle doit exister en base.
     if (!(await isAdminUser(context.userId))) {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { count } = await supabaseAdmin
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "admin");
-      if ((count ?? 0) === 0) {
-        await supabaseAdmin.from("user_roles").insert({ user_id: context.userId, role: "admin" });
-      } else {
-        throw new Error("Accès réservé aux administrateurs.");
-      }
+      throw new Error("Accès réservé aux administrateurs.");
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
