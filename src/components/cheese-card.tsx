@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PromoBadge } from "@/components/promo-badge";
 import { useCart } from "@/lib/cart-store";
-import { getCategoryImage, type Cheese } from "@/data/cheeses";
+import { getCategoryImage, formatEuro, packSize, piecePriceLabel, type Cheese } from "@/data/cheeses";
 
 export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index: number; promotion?: boolean }) {
   const { add, setOpen } = useCart();
