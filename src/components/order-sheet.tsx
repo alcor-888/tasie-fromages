@@ -213,12 +213,8 @@ export function OrderSheet() {
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
-                        <p className="text-xs text-muted-foreground">{piecePrice(i.cheese).toFixed(2)}€ la pièce</p>
-                        {i.cheese.colissage != null && i.cheese.colissage > 0 && (
-                          <p className="text-xs text-muted-foreground">
-                            {i.cheese.colissage} pièce{i.cheese.colissage > 1 ? "s" : ""} / colis (article) · prix du colis {i.cheese.pricePerKg.toFixed(2)}€
-                          </p>
-                        )}
+                        <p className="text-xs text-muted-foreground">{piecePriceLabel(i.cheese)}</p>
+                        <p className="text-xs font-medium text-foreground/80">{packPriceLabel(i.cheese)}</p>
                         <div className="mt-auto flex items-center justify-between pt-2">
                           <div className="flex items-center gap-1">
                             <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setQty(i.cheese.id, i.quantity - 1)}>
@@ -229,7 +225,7 @@ export function OrderSheet() {
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
-                          <p className="font-display text-sm font-semibold">{(i.quantity * i.cheese.pricePerKg).toFixed(2)}€</p>
+                          <p className="font-display text-sm font-bold">{formatEuro(i.quantity * i.cheese.pricePerKg)}</p>
                         </div>
                       </div>
                     </li>
