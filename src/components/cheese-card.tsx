@@ -35,8 +35,7 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
           alt={cheese.name}
           loading="lazy"
           decoding="async"
-          // @ts-expect-error fetchpriority not yet in React types
-          fetchpriority="low"
+          fetchPriority="low"
           onLoad={() => setLoaded(true)}
           width={1600}
           height={1100}
