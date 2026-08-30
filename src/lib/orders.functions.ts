@@ -25,8 +25,9 @@ const orderSchema = z.object({
 });
 
 export const placeOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) => orderSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { computeItemsTotal, checkTotals } = await import("./order-total");
