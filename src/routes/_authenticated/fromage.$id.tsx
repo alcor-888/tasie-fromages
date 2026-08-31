@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getCategoryImage, piecePrice, formatEuro, packSize, packPriceLabel, type Cheese } from "@/data/cheeses";
+import { getCategoryImage, unitPrice, unitWord, formatEuro, packQuantityLabel, packPriceLabel, type Cheese } from "@/data/cheeses";
 import { getProductById, listProducts } from "@/lib/products.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
