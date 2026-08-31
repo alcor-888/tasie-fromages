@@ -203,13 +203,14 @@ function CheeseDetail() {
             {cheese.fabriquant && <StatRow icon={Building2} label="Fabriquant" value={cheese.fabriquant} />}
             {origin && <StatRow icon={MapPin} label="Origine" value={origin} />}
             {cheese.season && <StatRow icon={Leaf} label="Saisonnalité" value={cheese.season} />}
-            {cheese.colissage != null && (
+            {packQuantityLabel(cheese) && (
               <StatRow
                 icon={Hash}
-                label="Pièces par colis"
-                value={`${cheese.colissage} pièce${cheese.colissage > 1 ? "s" : ""}`}
+                label={unitWord(cheese) === "kg" ? "Poids du colis" : "Pièces par colis"}
+                value={packQuantityLabel(cheese)!}
               />
             )}
+
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 sm:mt-8 sm:p-5">
