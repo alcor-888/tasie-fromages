@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
-import { unitPriceLabel, unitWord, packPriceLabel, packQuantityLabel, formatEuro } from "@/data/cheeses";
+import { unitPriceLabel, unitWord, packPriceLabel, packQuantityLabel, packQuantity, formatEuro } from "@/data/cheeses";
 import { checkTotals, computeItemsTotal } from "@/lib/order-total";
 import { placeOrder, getOrderPdf } from "@/lib/orders.functions";
 import { useHasSession } from "@/hooks/use-session";
