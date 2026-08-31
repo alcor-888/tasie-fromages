@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getCategoryImage, piecePrice, formatEuro, packSize, packPriceLabel, type Cheese } from "@/data/cheeses";
+import { getCategoryImage, unitPrice, unitWord, formatEuro, packQuantityLabel, packPriceLabel, type Cheese } from "@/data/cheeses";
 import { getProductById, listProducts } from "@/lib/products.functions";
 import { CheeseCard } from "@/components/cheese-card";
 import { useCart } from "@/lib/cart-store";
@@ -203,32 +203,36 @@ function CheeseDetail() {
             {cheese.fabriquant && <StatRow icon={Building2} label="Fabriquant" value={cheese.fabriquant} />}
             {origin && <StatRow icon={MapPin} label="Origine" value={origin} />}
             {cheese.season && <StatRow icon={Leaf} label="Saisonnalité" value={cheese.season} />}
-            {cheese.colissage != null && (
+            {packQuantityLabel(cheese) && (
               <StatRow
                 icon={Hash}
-                label="Pièces par colis"
-                value={`${cheese.colissage} pièce${cheese.colissage > 1 ? "s" : ""}`}
+                label={unitWord(cheese) === "kg" ? "Poids du colis" : "Pièces par colis"}
+                value={packQuantityLabel(cheese)!}
               />
             )}
+
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 sm:mt-8 sm:p-5">
             <div className="space-y-1">
               {cheese.pricePerKg > 0 && (
                 <p className="font-display text-2xl font-semibold sm:text-3xl">
-                  {formatEuro(piecePrice(cheese))}{" "}
-                  <span className="text-sm font-normal text-muted-foreground">à la pièce (unité)</span>
+                  {formatEuro(unitPrice(cheese))}{" "}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {unitWord(cheese) === "kg" ? "au kilo" : "à la pièce (unité)"}
+                  </span>
                 </p>
               )}
               <p className="font-display text-2xl font-bold sm:text-3xl">
                 {formatEuro(cheese.pricePerKg)}{" "}
                 <span className="text-sm font-normal text-muted-foreground">
-                  {packSize(cheese) ? `le colis de ${packSize(cheese)} pièces` : "l'article"}
+                  {packQuantityLabel(cheese) ? `le colis de ${packQuantityLabel(cheese)}` : "l'article"}
                 </span>
               </p>
               <p className="text-xs text-muted-foreground">
-                Facturation au {packSize(cheese) ? "colis" : "article"} · {packPriceLabel(cheese)}
+                Facturation au {packQuantityLabel(cheese) ? "colis" : "article"} · {packPriceLabel(cheese)}
               </p>
+
             </div>
             <Button
               size="lg"
@@ -283,16 +287,17 @@ function CheeseDetail() {
           <div className="leading-tight">
             {cheese.pricePerKg > 0 && (
               <p className="font-display text-base font-semibold">
-                {formatEuro(piecePrice(cheese))}{" "}
-                <span className="text-[10px] font-normal text-muted-foreground">la pièce</span>
+                {formatEuro(unitPrice(cheese))}{" "}
+                <span className="text-[10px] font-normal text-muted-foreground">le {unitWord(cheese)}</span>
               </p>
             )}
             <p className="font-display text-base font-bold">
               {formatEuro(cheese.pricePerKg)}{" "}
               <span className="text-[10px] font-normal text-muted-foreground">
-                {packSize(cheese) ? `le colis de ${packSize(cheese)}` : "l'article"}
+                {packQuantityLabel(cheese) ? `le colis de ${packQuantityLabel(cheese)}` : "l'article"}
               </span>
             </p>
+
           </div>
           <Button
             size="lg"

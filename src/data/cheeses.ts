@@ -40,36 +40,84 @@ const FALLBACK_IMG = presseImg;
 
 /**
  * pricePerKg (colonne N des fichiers Excel) contient le PRIX DU COLIS (article).
- * Le prix à la pièce = prix du colis / nombre de pièces par colis (colonne P).
+ * Selon la colonne O ("Nbre ou Poids"), le produit est vendu à la pièce ou au kilo.
+ * Le prix unitaire = prix du colis / quantité du colis (nb de pièces ou nb de kg).
  */
-export function piecePrice(cheese: Pick<Cheese, "pricePerKg" | "colissage">): number {
-  const pack = cheese.colissage ?? 0;
-  if (pack > 1) return cheese.pricePerKg / pack;
-  return cheese.pricePerKg;
+type PriceInfo = Pick<Cheese, "pricePerKg" | "colissage" | "nombrePoidsReel" | "packagingUnit">;
+
+/** true si le produit est tarifé au poids (kg) plutôt qu'à la pièce. */
+export function isWeightPriced(cheese: Pick<Cheese, "packagingUnit">): boolean {
+  const u = (cheese.packagingUnit ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+  return u.startsWith("kg");
+}
+
+/** Mot de l'unité de vente : "kg" ou "pièce". */
+export function unitWord(cheese: Pick<Cheese, "packagingUnit">): "kg" | "pièce" {
+  return isWeightPriced(cheese) ? "kg" : "pièce";
+}
+
+function formatQty(v: number): string {
+  return Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/0+$/, "").replace(/\.$/, "").replace(".", ",");
+}
+
+/** Quantité contenue dans le colis / l'article (nombre de pièces ou nombre de kg). */
+export function packQuantity(cheese: PriceInfo): number {
+  const weight = isWeightPriced(cheese);
+  const primary = weight ? cheese.nombrePoidsReel : cheese.colissage;
+  const fallback = weight ? cheese.colissage : cheese.nombrePoidsReel;
+  const q = primary ?? fallback ?? 1;
+  return q > 0 ? q : 1;
+}
+
+/** Prix unitaire : au kilo ou à la pièce selon le produit. */
+export function unitPrice(cheese: PriceInfo): number {
+  return cheese.pricePerKg / packQuantity(cheese);
+}
+
+/** Alias historique : prix unitaire (pièce ou kg). */
+export function piecePrice(cheese: PriceInfo): number {
+  return unitPrice(cheese);
 }
 
 export function formatEuro(v: number): string {
   return `${v.toFixed(2).replace(".", ",")} €`;
 }
 
-/** Nombre de pièces par colis, uniquement si le colis regroupe plusieurs pièces. */
-export function packSize(cheese: Pick<Cheese, "colissage">): number | null {
-  const pack = cheese.colissage ?? 0;
-  return pack > 1 ? pack : null;
+/** Quantité du colis, uniquement si le colis regroupe plusieurs unités. */
+export function packSize(cheese: PriceInfo): number | null {
+  const q = packQuantity(cheese);
+  return q > 1 ? q : null;
+}
+
+/** Libellé de la quantité du colis, ex. "8 pièces" ou "3 kg". */
+export function packQuantityLabel(cheese: PriceInfo): string | null {
+  const q = packSize(cheese);
+  if (!q) return null;
+  return isWeightPriced(cheese) ? `${formatQty(q)} kg` : `${formatQty(q)} pièce${q > 1 ? "s" : ""}`;
 }
 
 /** Libellé du prix du colis / de l'article (prix facturé). */
-export function packPriceLabel(cheese: Pick<Cheese, "pricePerKg" | "colissage">): string {
-  const pack = packSize(cheese);
-  return pack
-    ? `${formatEuro(cheese.pricePerKg)} / colis de ${pack} pièces`
+export function packPriceLabel(cheese: PriceInfo): string {
+  const q = packQuantityLabel(cheese);
+  return q
+    ? `${formatEuro(cheese.pricePerKg)} / colis de ${q}`
     : `${formatEuro(cheese.pricePerKg)} / article`;
 }
 
-/** Libellé du prix unitaire (à la pièce). */
-export function piecePriceLabel(cheese: Pick<Cheese, "pricePerKg" | "colissage">): string {
-  return `${formatEuro(piecePrice(cheese))} / pièce`;
+/** Libellé du prix unitaire (à la pièce ou au kilo). */
+export function unitPriceLabel(cheese: PriceInfo): string {
+  return `${formatEuro(unitPrice(cheese))} / ${unitWord(cheese)}`;
 }
+
+/** Alias historique. */
+export function piecePriceLabel(cheese: PriceInfo): string {
+  return unitPriceLabel(cheese);
+}
+
 
 export function getCategoryImage(category?: string, milk?: string): string {
   const c = (category ?? "").toLowerCase();

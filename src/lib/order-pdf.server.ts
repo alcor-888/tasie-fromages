@@ -160,9 +160,10 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   for (const item of data.items) {
     const nameLines = wrap(item.cheeseName, regular, 10, colQty - M - 12);
     const packLine = item.piecesPerPack && item.piecesPerPack > 1
-      ? `Prix a la piece ${money(item.unitPrice / item.piecesPerPack)} - colis de ${item.piecesPerPack} pieces - prix du colis ${money(item.unitPrice)}`
-      // unitPrice = prix facturé de l'article/colis ; le prix pièce est informatif.
+      ? `Prix ${/kg/i.test(item.unitLabel ?? "") ? "au kilo" : "a la piece"} ${money(item.unitPrice / item.piecesPerPack)} - ${sanitize(item.unitLabel ?? "")} - prix du colis ${money(item.unitPrice)}`
+      // unitPrice = prix facturé de l'article/colis ; le prix unitaire est informatif.
       : `Prix a l'article ${money(item.unitPrice)}`;
+
     const rowHeight = Math.max(nameLines.length * 12 + (packLine ? 12 : 0), 14) + 6;
     if (y - rowHeight < M + 60) {
       newPage();

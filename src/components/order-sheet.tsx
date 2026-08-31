@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart-store";
-import { piecePriceLabel, packPriceLabel, packSize, formatEuro } from "@/data/cheeses";
+import { unitPriceLabel, unitWord, packPriceLabel, packQuantityLabel, packQuantity, formatEuro } from "@/data/cheeses";
 import { checkTotals, computeItemsTotal } from "@/lib/order-total";
 import { placeOrder, getOrderPdf } from "@/lib/orders.functions";
 import { useHasSession } from "@/hooks/use-session";
@@ -172,10 +172,11 @@ export function OrderSheet() {
         cheeseId: i.cheese.id,
         cheeseName: i.cheese.name,
         unitPrice: i.cheese.pricePerKg,
-        unitLabel: i.cheese.unit,
-        piecesPerPack: i.cheese.colissage ?? undefined,
+        unitLabel: packQuantityLabel(i.cheese) ? `colis de ${packQuantityLabel(i.cheese)}` : "article",
+        piecesPerPack: packQuantity(i.cheese),
         quantity: i.quantity,
       })),
+
     });
   };
 
@@ -213,7 +214,7 @@ export function OrderSheet() {
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
-                        <p className="text-xs text-muted-foreground">{piecePriceLabel(i.cheese)}</p>
+                        <p className="text-xs text-muted-foreground">{unitPriceLabel(i.cheese)}</p>
                         <p className="text-xs font-medium text-foreground/80">{packPriceLabel(i.cheese)}</p>
                         <div className="mt-auto flex items-center justify-between pt-2">
                           <div className="flex items-center gap-1">
@@ -297,15 +298,17 @@ export function OrderSheet() {
               <p className="mb-2 text-sm font-semibold">Récapitulatif de votre commande</p>
               <ul className="space-y-2">
                 {items.map((i) => {
-                  const pack = packSize(i.cheese);
+                  const pack = packQuantityLabel(i.cheese);
                   const articlePrice = i.cheese.pricePerKg;
                   return (
                     <li key={i.cheese.id} className="flex justify-between gap-2 text-sm">
                       <div className="flex-1">
                         <p className="font-medium leading-tight">{i.cheese.name}</p>
-                        <p className="text-xs text-muted-foreground">Prix à la pièce : {piecePriceLabel(i.cheese)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Prix {unitWord(i.cheese) === "kg" ? "au kilo" : "à la pièce"} : {unitPriceLabel(i.cheese)}
+                        </p>
                         <p className="text-xs font-medium text-foreground/80">
-                          Prix facturé : {formatEuro(articlePrice)} {pack ? `le colis de ${pack} pièces` : "l'article"}
+                          Prix facturé : {formatEuro(articlePrice)} {pack ? `le colis de ${pack}` : "l'article"}
                         </p>
                       </div>
                       <div className="text-right">
@@ -317,6 +320,7 @@ export function OrderSheet() {
                 })}
               </ul>
             </div>
+
 
             <div className="mt-auto flex flex-col gap-2 border-t pt-4">
               <div className="flex items-baseline justify-between">

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PromoBadge } from "@/components/promo-badge";
 import { useCart } from "@/lib/cart-store";
-import { getCategoryImage, formatEuro, packSize, piecePriceLabel, type Cheese } from "@/data/cheeses";
+import { getCategoryImage, formatEuro, packQuantityLabel, unitPriceLabel, type Cheese } from "@/data/cheeses";
 
 export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index: number; promotion?: boolean }) {
   const { add, setOpen } = useCart();
@@ -70,16 +70,17 @@ export function CheeseCard({ cheese, index, promotion }: { cheese: Cheese; index
           <div className="font-display leading-tight">
             {cheese.pricePerKg > 0 && (
               <p className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-                {piecePriceLabel(cheese)}
+                {unitPriceLabel(cheese)}
               </p>
             )}
             <p className="text-base font-bold sm:text-lg">
               {formatEuro(cheese.pricePerKg)}
               <span className="ml-1 text-[9px] font-normal text-muted-foreground sm:text-[10px]">
-                {packSize(cheese) ? `le colis de ${packSize(cheese)}` : "l'article"}
+                {packQuantityLabel(cheese) ? `le colis de ${packQuantityLabel(cheese)}` : "l'article"}
               </span>
             </p>
           </div>
+
           <Button
             size="sm"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); add(cheese); setOpen(true); }}
