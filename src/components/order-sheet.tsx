@@ -213,7 +213,7 @@ export function OrderSheet() {
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
-                        <p className="text-xs text-muted-foreground">{piecePriceLabel(i.cheese)}</p>
+                        <p className="text-xs text-muted-foreground">{unitPriceLabel(i.cheese)}</p>
                         <p className="text-xs font-medium text-foreground/80">{packPriceLabel(i.cheese)}</p>
                         <div className="mt-auto flex items-center justify-between pt-2">
                           <div className="flex items-center gap-1">
