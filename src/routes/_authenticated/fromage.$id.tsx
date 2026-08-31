@@ -283,16 +283,17 @@ function CheeseDetail() {
           <div className="leading-tight">
             {cheese.pricePerKg > 0 && (
               <p className="font-display text-base font-semibold">
-                {formatEuro(piecePrice(cheese))}{" "}
-                <span className="text-[10px] font-normal text-muted-foreground">la pièce</span>
+                {formatEuro(unitPrice(cheese))}{" "}
+                <span className="text-[10px] font-normal text-muted-foreground">le {unitWord(cheese)}</span>
               </p>
             )}
             <p className="font-display text-base font-bold">
               {formatEuro(cheese.pricePerKg)}{" "}
               <span className="text-[10px] font-normal text-muted-foreground">
-                {packSize(cheese) ? `le colis de ${packSize(cheese)}` : "l'article"}
+                {packQuantityLabel(cheese) ? `le colis de ${packQuantityLabel(cheese)}` : "l'article"}
               </span>
             </p>
+
           </div>
           <Button
             size="lg"
