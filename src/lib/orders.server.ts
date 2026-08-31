@@ -45,9 +45,10 @@ function renderHtml(p: NotifyPayload) {
       (i) => `<tr>
         <td style="padding:6px 10px;border-bottom:1px solid #eee">${escape(i.cheeseName)}${
           i.piecesPerPack && i.piecesPerPack > 1
-            ? `<br/><span style="font-size:12px;color:#666">Prix à la pièce ${(i.unitPrice / i.piecesPerPack).toFixed(2)} € · colis de ${i.piecesPerPack} pièces · <strong>prix du colis ${i.unitPrice.toFixed(2)} €</strong></span>`
+            ? `<br/><span style="font-size:12px;color:#666">Prix ${/kg/i.test(i.unitLabel ?? "") ? "au kilo" : "à la pièce"} ${(i.unitPrice / i.piecesPerPack).toFixed(2)} € · ${escape(i.unitLabel ?? "")} · <strong>prix du colis ${i.unitPrice.toFixed(2)} €</strong></span>`
             : `<br/><span style="font-size:12px;color:#666"><strong>Prix à l'article ${i.unitPrice.toFixed(2)} €</strong></span>`
         }</td>
+
         <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center">${i.quantity} ${escape(i.unitLabel ?? "")}</td>
         <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right">${(i.unitPrice * i.quantity).toFixed(2)} €</td>
       </tr>`,
