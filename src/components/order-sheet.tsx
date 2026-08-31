@@ -172,10 +172,11 @@ export function OrderSheet() {
         cheeseId: i.cheese.id,
         cheeseName: i.cheese.name,
         unitPrice: i.cheese.pricePerKg,
-        unitLabel: i.cheese.unit,
-        piecesPerPack: i.cheese.colissage ?? undefined,
+        unitLabel: packQuantityLabel(i.cheese) ? `colis de ${packQuantityLabel(i.cheese)}` : "article",
+        piecesPerPack: packQuantity(i.cheese),
         quantity: i.quantity,
       })),
+
     });
   };
 
