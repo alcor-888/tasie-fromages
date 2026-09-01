@@ -206,24 +206,35 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
     return;
   }
 
-  const res = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": RESEND_API_KEY,
-    },
-    body: JSON.stringify({
-      from: "Tasie Fromages <onboarding@resend.dev>",
-      to: ADMIN_EMAILS,
-      reply_to: payload.customerEmail || undefined,
-      subject,
-      html,
-      attachments,
-    }),
-  });
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Resend ${res.status}: ${txt}`);
+  // Envoi destinataire par destinataire : en mode test Resend refuse les
+  // adresses non vérifiées, un échec ne doit pas bloquer les autres envois.
+  const failures: string[] = [];
+  for (const admin of ADMIN_EMAILS) {
+    const res = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "X-Connection-Api-Key": RESEND_API_KEY,
+      },
+      body: JSON.stringify({
+        from: "Tasie Fromages <onboarding@resend.dev>",
+        to: [admin],
+        reply_to: payload.customerEmail || undefined,
+        subject,
+        html,
+        attachments,
+      }),
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error(`[orders] Resend send failed for ${admin} [${res.status}]: ${txt}`);
+      failures.push(`${admin} (${res.status})`);
+    } else {
+      console.log(`[orders] Resend email sent to ${admin} for order ${ref}`);
+    }
+  }
+  if (failures.length === ADMIN_EMAILS.length) {
+    throw new Error(`Resend: échec pour ${failures.join(", ")}`);
   }
 }
