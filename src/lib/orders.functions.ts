@@ -103,7 +103,9 @@ export const placeOrder = createServerFn({ method: "POST" })
 
 export const getOrderPdf = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ orderId: z.string().uuid() }).parse(input))
+  .inputValidator((input) =>
+    z.object({ orderId: z.string().uuid(), format: z.enum(["pdf", "csv"]).optional() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: order, error } = await supabaseAdmin
@@ -123,10 +125,7 @@ export const getOrderPdf = createServerFn({ method: "POST" })
       await assertAdmin(context.userId);
     }
 
-
-
-    const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
-    const bytes = await buildOrderPdf({
+    const payload = {
       orderId: order.id,
       orderNumber: order.order_number,
       createdAt: order.created_at,
@@ -146,10 +145,26 @@ export const getOrderPdf = createServerFn({ method: "POST" })
         unitLabel: i.unit_label,
         piecesPerPack: i.pieces_per_pack == null ? null : Number(i.pieces_per_pack),
       })),
-    });
+    };
+
+    const base = `bon-de-commande-${order.order_number ?? order.id.slice(0, 8)}`;
+
+    if (data.format === "csv") {
+      const { buildOrderCsv, csvToBase64 } = await import("./order-csv.server");
+      return {
+        filename: `${base}.csv`,
+        mimeType: "text/csv;charset=utf-8",
+        base64: csvToBase64(buildOrderCsv(payload)),
+      };
+    }
+
+    const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
+    const bytes = await buildOrderPdf(payload);
 
     return {
-      filename: `bon-de-commande-${order.order_number ?? order.id.slice(0, 8)}.pdf`,
+      filename: `${base}.pdf`,
+      mimeType: "application/pdf",
       base64: toBase64(bytes),
     };
   });
+

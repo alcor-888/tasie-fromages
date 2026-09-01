@@ -73,7 +73,7 @@ export function OrderSheet() {
   const getOrderPdfFn = useServerFn(getOrderPdf);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   const [lastOrderRef, setLastOrderRef] = useState<{ number: string; createdAt: string } | null>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<"pdf" | "csv" | null>(null);
   const fetchProfile = useServerFn(getMyProfile);
   const hasSession = useHasSession();
   const { data: profile } = useQuery({
@@ -111,15 +111,15 @@ export function OrderSheet() {
     onError: (e: Error) => toast.error(e.message || "Envoi impossible, réessayez."),
   });
 
-  const downloadPdf = async () => {
+  const downloadOrder = async (format: "pdf" | "csv") => {
     if (!lastOrderId) return;
-    setDownloading(true);
+    setDownloading(format);
     try {
-      const res = await getOrderPdfFn({ data: { orderId: lastOrderId } });
+      const res = await getOrderPdfFn({ data: { orderId: lastOrderId, format } });
       const binary = atob(res.base64);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+      const url = URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
       const a = document.createElement("a");
       a.href = url;
       a.download = res.filename;
@@ -130,9 +130,10 @@ export function OrderSheet() {
     } catch (e) {
       toast.error((e as Error).message || "Téléchargement impossible.");
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
+
 
   // Contrôle de cohérence : une quantité commandée correspond à un article
   // ou colis complet, donc chaque ligne utilise son prix article/colis.
@@ -373,10 +374,15 @@ export function OrderSheet() {
             )}
             <p className="text-muted-foreground">Nous vous contactons sous 24h pour confirmer.</p>
             <div className="flex w-full flex-col gap-2 px-4">
-              <Button type="button" variant="outline" onClick={downloadPdf} disabled={downloading || !lastOrderId}>
+              <Button type="button" variant="outline" onClick={() => downloadOrder("pdf")} disabled={downloading !== null || !lastOrderId}>
                 <FileDown className="mr-2 h-4 w-4" />
-                {downloading ? "Préparation…" : "Télécharger le bon de commande (PDF)"}
+                {downloading === "pdf" ? "Préparation…" : "Télécharger le bon de commande (PDF)"}
               </Button>
+              <Button type="button" variant="outline" onClick={() => downloadOrder("csv")} disabled={downloading !== null || !lastOrderId}>
+                <FileDown className="mr-2 h-4 w-4" />
+                {downloading === "csv" ? "Préparation…" : "Télécharger pour facturation / comptabilité (CSV)"}
+              </Button>
+
               <Button type="button" onClick={finishOrder}>Fermer</Button>
             </div>
           </div>

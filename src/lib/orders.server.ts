@@ -86,25 +86,26 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
   const html = renderHtml(payload);
   const subject = `Bon de commande n° ${ref} — ${payload.customerName} (${payload.totalEstimate.toFixed(2)}€)`;
 
-  // Build the PDF attachment (shared by Brevo and Resend fallbacks)
+  // Pièces jointes : PDF (lecture humaine) + CSV (import en facturation/compta)
   let attachments: { filename: string; content: string }[] | undefined;
+  const pdfData = {
+    orderId: payload.orderId,
+    orderNumber: payload.orderNumber ?? null,
+    createdAt: payload.createdAt,
+    customerName: payload.customerName,
+    customerPhone: payload.customerPhone,
+    customerEmail: payload.customerEmail,
+    customerCompany: payload.customerCompany ?? null,
+    customerAddress: payload.customerAddress ?? null,
+    customerWebsite: payload.customerWebsite ?? null,
+    pickupDate: payload.pickupDate,
+    notes: payload.notes,
+    totalEstimate: payload.totalEstimate,
+    items: payload.items,
+  };
   try {
     const { buildOrderPdf, toBase64 } = await import("./order-pdf.server");
-    const bytes = await buildOrderPdf({
-      orderId: payload.orderId,
-      orderNumber: payload.orderNumber ?? null,
-      createdAt: payload.createdAt,
-      customerName: payload.customerName,
-      customerPhone: payload.customerPhone,
-      customerEmail: payload.customerEmail,
-      customerCompany: payload.customerCompany ?? null,
-      customerAddress: payload.customerAddress ?? null,
-      customerWebsite: payload.customerWebsite ?? null,
-      pickupDate: payload.pickupDate,
-      notes: payload.notes,
-      totalEstimate: payload.totalEstimate,
-      items: payload.items,
-    });
+    const bytes = await buildOrderPdf(pdfData);
     attachments = [
       {
         filename: `bon-de-commande-${ref}.pdf`,
@@ -114,6 +115,19 @@ export async function notifyAdminsOfOrder(payload: NotifyPayload) {
   } catch (e) {
     console.error("[orders] PDF generation failed:", e);
   }
+  try {
+    const { buildOrderCsv, csvToBase64 } = await import("./order-csv.server");
+    attachments = [
+      ...(attachments ?? []),
+      {
+        filename: `bon-de-commande-${ref}.csv`,
+        content: csvToBase64(buildOrderCsv(pdfData)),
+      },
+    ];
+  } catch (e) {
+    console.error("[orders] CSV generation failed:", e);
+  }
+
 
   // Primary path: Brevo transactional email (sender must be a validated
   // sender in the Brevo account; override with BREVO_SENDER_EMAIL secret).
