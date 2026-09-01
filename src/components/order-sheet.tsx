@@ -374,10 +374,15 @@ export function OrderSheet() {
             )}
             <p className="text-muted-foreground">Nous vous contactons sous 24h pour confirmer.</p>
             <div className="flex w-full flex-col gap-2 px-4">
-              <Button type="button" variant="outline" onClick={downloadPdf} disabled={downloading || !lastOrderId}>
+              <Button type="button" variant="outline" onClick={() => downloadOrder("pdf")} disabled={downloading !== null || !lastOrderId}>
                 <FileDown className="mr-2 h-4 w-4" />
-                {downloading ? "Préparation…" : "Télécharger le bon de commande (PDF)"}
+                {downloading === "pdf" ? "Préparation…" : "Télécharger le bon de commande (PDF)"}
               </Button>
+              <Button type="button" variant="outline" onClick={() => downloadOrder("csv")} disabled={downloading !== null || !lastOrderId}>
+                <FileDown className="mr-2 h-4 w-4" />
+                {downloading === "csv" ? "Préparation…" : "Télécharger pour facturation / comptabilité (CSV)"}
+              </Button>
+
               <Button type="button" onClick={finishOrder}>Fermer</Button>
             </div>
           </div>
