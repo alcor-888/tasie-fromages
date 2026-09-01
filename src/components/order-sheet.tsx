@@ -73,7 +73,7 @@ export function OrderSheet() {
   const getOrderPdfFn = useServerFn(getOrderPdf);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   const [lastOrderRef, setLastOrderRef] = useState<{ number: string; createdAt: string } | null>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<"pdf" | "csv" | null>(null);
   const fetchProfile = useServerFn(getMyProfile);
   const hasSession = useHasSession();
   const { data: profile } = useQuery({
