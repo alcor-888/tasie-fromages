@@ -188,7 +188,9 @@ export function OrderSheet() {
             {step === "done" ? "Merci !" : step === "form" ? "Vos coordonnées" : "Votre commande"}
           </SheetTitle>
           <SheetDescription>
-            {step === "done" ? "Votre demande a bien été transmise." : "Votre bon de commande"}
+            {step === "done"
+              ? "Votre demande a bien été transmise."
+              : "Les montants indiqués pour chaque pièce ou colis seront ajustés avec précision sur votre facture, en fonction du poids réel de chaque pièce ou produit. Fabrication artisanale oblige, de légères variations de poids et de forme peuvent être constatées."}
           </SheetDescription>
         </SheetHeader>
 
@@ -308,7 +310,7 @@ export function OrderSheet() {
                           Prix {unitWord(i.cheese) === "kg" ? "au kilo" : "à la pièce"} : {unitPriceLabel(i.cheese)}
                         </p>
                         <p className="text-xs font-medium text-foreground/80">
-                          Prix facturé : {formatEuro(articlePrice)} {pack ? `le colis de ${pack}` : "l'article"}
+                          Prix estimé : {formatEuro(articlePrice)} {pack ? `le colis de ${pack}` : "l'article"}
                         </p>
                       </div>
                       <div className="text-right">
