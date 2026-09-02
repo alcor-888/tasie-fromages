@@ -74,42 +74,29 @@ export interface TestSendResult {
 }
 
 export async function runNotificationTest(): Promise<TestSendResult[]> {
-  const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
   const stamp = new Date().toISOString();
-  const results: TestSendResult[] = [];
-  for (const admin of ADMIN_NOTIFICATION_EMAILS) {
-    try {
-      const r = await sendTemplateEmail("order-notification", admin, {
-        templateData: {
-          orderRef: "TEST-DIAGNOSTIC",
-          emittedAt: new Date().toLocaleString("fr-FR"),
-          customerName: "Test diagnostic",
-          customerPhone: "—",
-          customerEmail: null,
-          notes: "Email de test envoyé depuis le back office.",
-          totalEstimate: 0,
-          items: [{ name: "Test", quantity: 1, unitLabel: "pièce", lineTotal: 0 }],
-        },
-        idempotencyKey: `diagnostic-${stamp}-${admin}`,
-      });
-      results.push({
-        recipient: admin,
-        sent: r.sent,
-        at: new Date().toISOString(),
-        code: r.sent ? null : r.reason,
-        message: r.sent ? null : "Destinataire bloqué (désabonnement/rebond).",
-      });
-    } catch (error) {
-      results.push({
-        recipient: admin,
-        sent: false,
-        at: new Date().toISOString(),
-        code: error instanceof EmailAPIError ? error.code ?? null : null,
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+  try {
+    const { sendBrevoOrderEmail } = await import("@/lib/orders.server");
+    await sendBrevoOrderEmail({
+      subject: `Test notifications Tasie Fromages — ${stamp}`,
+      html: "<p>Test de la configuration Brevo des bons de commande.</p>",
+    });
+    return ADMIN_NOTIFICATION_EMAILS.map((recipient) => ({
+      recipient,
+      sent: true,
+      at: new Date().toISOString(),
+      code: null,
+      message: null,
+    }));
+  } catch (error) {
+    return ADMIN_NOTIFICATION_EMAILS.map((recipient) => ({
+      recipient,
+      sent: false,
+      at: new Date().toISOString(),
+      code: error instanceof EmailAPIError ? error.code ?? null : "brevo_error",
+      message: error instanceof Error ? error.message : String(error),
+    }));
   }
-  return results;
 }
 
 export interface DnsRecordCheck {
