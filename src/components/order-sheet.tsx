@@ -105,7 +105,11 @@ export function OrderSheet() {
         number: res.orderNumber ?? `BC-${res.id.slice(0, 8).toUpperCase()}`,
         createdAt: res.createdAt,
       });
-      toast.success("Bon de commande envoyé — nous vous rappelons rapidement.");
+      if (res.notificationSent) {
+        toast.success("Bon de commande envoyé — nous vous rappelons rapidement.");
+      } else {
+        toast.error("Commande enregistrée, mais l’email aux administrateurs a échoué.");
+      }
       setStep("done");
     },
     onError: (e: Error) => toast.error(e.message || "Envoi impossible, réessayez."),
