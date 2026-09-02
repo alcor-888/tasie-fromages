@@ -77,6 +77,8 @@ export const placeOrder = createServerFn({ method: "POST" })
     );
     if (itemsErr) throw new Error(itemsErr.message);
 
+    let notificationSent = true;
+    let notificationError: string | null = null;
     try {
       const { notifyAdminsOfOrder } = await import("./orders.server");
       await notifyAdminsOfOrder({
@@ -95,10 +97,19 @@ export const placeOrder = createServerFn({ method: "POST" })
         items: data.items,
       });
     } catch (e) {
+      notificationSent = false;
+      notificationError = e instanceof Error ? e.message : String(e);
       console.error("[orders] admin notification failed:", e);
     }
 
-    return { id: order.id, orderNumber: order.order_number, createdAt: order.created_at, totalEstimate };
+    return {
+      id: order.id,
+      orderNumber: order.order_number,
+      createdAt: order.created_at,
+      totalEstimate,
+      notificationSent,
+      notificationError,
+    };
   });
 
 export const getOrderPdf = createServerFn({ method: "POST" })
