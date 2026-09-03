@@ -23,8 +23,15 @@ describe("configuration d’envoi des bons de commande", () => {
 
     expect(request).toHaveBeenCalledOnce();
     expect(request).toHaveBeenCalledWith(
-      ORDER_EMAIL_CONFIG.gatewayUrl,
-      expect.objectContaining({ method: "POST" }),
+      "https://connector-gateway.lovable.dev/brevo/smtp/email",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+          Authorization: "Bearer lovable-key",
+          "X-Connection-Api-Key": "connection-key",
+        }),
+      }),
     );
     const options = request.mock.calls[0]?.[1] as RequestInit;
     const body = JSON.parse(String(options.body));
@@ -36,6 +43,23 @@ describe("configuration d’envoi des bons de commande", () => {
     expect(body.attachment).toEqual([
       { name: "bon-de-commande-BC-TEST.pdf", content: "cGRm" },
     ]);
+  });
+
+  it("verrouille les constantes d’envoi (URL, expéditeur, destinataires)", () => {
+    expect(ORDER_EMAIL_CONFIG.gatewayUrl).toBe(
+      "https://connector-gateway.lovable.dev/brevo/smtp/email",
+    );
+    expect(ORDER_EMAIL_CONFIG.sender).toEqual({
+      name: "Tasie Fromages",
+      email: "bardet.rodolphe@gmail.com",
+    });
+    expect([...ORDER_EMAIL_CONFIG.recipients]).toEqual([
+      "alaincorrente@gmail.com",
+      "bardet.rodolphe@gmail.com",
+    ]);
+    expect(Object.isFrozen(ORDER_EMAIL_CONFIG)).toBe(true);
+    expect(Object.isFrozen(ORDER_EMAIL_CONFIG.sender)).toBe(true);
+    expect(Object.isFrozen(ORDER_EMAIL_CONFIG.recipients)).toBe(true);
   });
 
   it("remonte un refus Brevo au lieu de déclarer l’envoi réussi", async () => {

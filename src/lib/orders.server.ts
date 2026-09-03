@@ -1,18 +1,23 @@
 // Server-only helper to notify admins of new orders.
-// This is the Brevo configuration validated on 30 August 2026. Keep order
-// notifications on this single channel so a broken fallback cannot mask a
-// failed Brevo delivery.
+//
+// ⚠️ CONFIGURATION VERROUILLÉE — NE PAS MODIFIER ⚠️
+// Configuration d'envoi validée en production le 3 septembre 2026 :
+// bon de commande reçu avec succès par alaincorrente@gmail.com ET
+// bardet.rodolphe@gmail.com. Canal unique Brevo, aucun fallback.
+// Toute modification de ce bloc (URL passerelle, expéditeur, destinataires,
+// en-têtes) casse les tests src/lib/__tests__/order-email.test.ts — c'est
+// voulu : ces tests sont le verrou qui protège l'envoi des bons de commande.
 
-const ADMIN_EMAILS = [
+const ADMIN_EMAILS = Object.freeze([
   "alaincorrente@gmail.com",
   "bardet.rodolphe@gmail.com",
-];
+] as const);
 
-export const ORDER_EMAIL_CONFIG = {
+export const ORDER_EMAIL_CONFIG = Object.freeze({
   gatewayUrl: "https://connector-gateway.lovable.dev/brevo/smtp/email",
-  sender: { name: "Tasie Fromages", email: "bardet.rodolphe@gmail.com" },
+  sender: Object.freeze({ name: "Tasie Fromages", email: "bardet.rodolphe@gmail.com" }),
   recipients: ADMIN_EMAILS,
-} as const;
+} as const);
 
 interface NotifyPayload {
   orderId: string;
