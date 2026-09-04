@@ -222,7 +222,7 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
 
   y -= 12;
   ensure(40);
-  const totalLabel = "Estimation totale";
+  const totalLabel = isInvoice ? "Total facturé" : "Estimation totale";
   const totalValue = sanitize(money(data.totalEstimate));
   page.drawText(sanitize(totalLabel), { x: colQty, y, size: 12, font: bold, color: brand });
   page.drawText(totalValue, { x: colTotal - bold.widthOfTextAtSize(totalValue, 12), y, size: 12, font: bold, color: brand });
