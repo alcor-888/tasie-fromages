@@ -3,6 +3,10 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf
 export interface OrderPdfData {
   orderId: string;
   orderNumber?: string | null;
+  /** "order" = bon de commande (défaut), "invoice" = facture finale au poids réel. */
+  docKind?: "order" | "invoice";
+  invoiceNumber?: string | null;
+  invoicedAt?: string | null;
   createdAt: string;
   customerName: string;
   customerPhone: string;
@@ -19,8 +23,18 @@ export interface OrderPdfData {
     unitPrice: number;
     unitLabel?: string | null;
     piecesPerPack?: number | null;
+    /** Facture : quantité initialement commandée, avant ajustement au poids réel. */
+    orderedQuantity?: number | null;
   }[];
 }
+
+/** Référence affichée : n° de facture pour une facture, n° de bon sinon. */
+export function documentRef(data: OrderPdfData): string {
+  return data.docKind === "invoice"
+    ? data.invoiceNumber || `FA-${data.orderId.slice(0, 8).toUpperCase()}`
+    : data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
+}
+
 
 // pdf-lib standard fonts encode WinAnsi (Latin-1). Replace anything outside it.
 const WINANSI_EXTRA = "\u20AC\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\u017D\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\u017E\u0178";
