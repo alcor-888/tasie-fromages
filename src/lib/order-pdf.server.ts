@@ -245,7 +245,7 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   const pages = pdf.getPages();
   pages.forEach((p, idx) => {
     const footer = sanitize(
-      `La Cave Tasie Fromages — Bon de commande n° ${ref} — page ${idx + 1}/${pages.length}`,
+      `La Cave Tasie Fromages — ${docTitle} n° ${ref} — page ${idx + 1}/${pages.length}`,
     );
     p.drawText(footer, { x: M, y: M - 18, size: 8, font: regular, color: muted });
   });
