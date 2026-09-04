@@ -175,7 +175,10 @@ function AdminPage() {
                   </li>
                 ))}
               </ul>
+
+              <AdminInvoice order={o} />
             </article>
+
           ))}
         </div>
           </TabsContent>
