@@ -113,17 +113,25 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   };
 
   // Header
+  const isInvoice = data.docKind === "invoice";
+  const docTitle = isInvoice ? "Facture" : "Bon de commande";
   text("TASIE FROMAGES", { size: 20, font: bold, color: brand });
   y -= 18;
-  text("Bon de commande", { size: 13, font: bold });
+  text(docTitle, { size: 13, font: bold });
   y -= 16;
-  const ref = data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
-  text(`Bon de commande n° ${ref}`, { size: 11, font: bold, color: brand });
+  const ref = documentRef(data);
+  text(`${docTitle} n° ${ref}`, { size: 11, font: bold, color: brand });
   y -= 14;
-  const created = new Date(data.createdAt);
+  const created = new Date(isInvoice ? (data.invoicedAt ?? data.createdAt) : data.createdAt);
   const dateStr = created.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
   const timeStr = created.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   text(`Émis le ${dateStr} à ${timeStr}`, { size: 9, color: muted });
+  if (isInvoice) {
+    y -= 12;
+    const orderRef = data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
+    text(`Bon de commande n° ${orderRef} — quantités ajustées au poids réel`, { size: 9, color: muted });
+  }
+
   y -= 20;
   page.drawLine({ start: { x: M, y }, end: { x: M + width, y }, thickness: 1, color: brand });
   y -= 24;
