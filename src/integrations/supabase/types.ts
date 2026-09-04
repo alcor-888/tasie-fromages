@@ -91,6 +91,7 @@ export type Database = {
           cheese_id: string
           cheese_name: string
           created_at: string
+          final_quantity: number | null
           id: string
           line_total: number
           order_id: string
@@ -103,6 +104,7 @@ export type Database = {
           cheese_id: string
           cheese_name: string
           created_at?: string
+          final_quantity?: number | null
           id?: string
           line_total?: number
           order_id: string
@@ -115,6 +117,7 @@ export type Database = {
           cheese_id?: string
           cheese_name?: string
           created_at?: string
+          final_quantity?: number | null
           id?: string
           line_total?: number
           order_id?: string
@@ -143,6 +146,9 @@ export type Database = {
           customer_phone: string
           customer_website: string | null
           id: string
+          invoice_number: string | null
+          invoice_total: number | null
+          invoiced_at: string | null
           notes: string | null
           order_number: string | null
           pickup_date: string | null
@@ -160,6 +166,9 @@ export type Database = {
           customer_phone: string
           customer_website?: string | null
           id?: string
+          invoice_number?: string | null
+          invoice_total?: number | null
+          invoiced_at?: string | null
           notes?: string | null
           order_number?: string | null
           pickup_date?: string | null
@@ -177,6 +186,9 @@ export type Database = {
           customer_phone?: string
           customer_website?: string | null
           id?: string
+          invoice_number?: string | null
+          invoice_total?: number | null
+          invoiced_at?: string | null
           notes?: string | null
           order_number?: string | null
           pickup_date?: string | null
