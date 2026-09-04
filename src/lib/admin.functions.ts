@@ -176,14 +176,20 @@ export const saveInvoiceAdjustments = createServerFn({ method: "POST" })
     const payload = await loadInvoicePayload(data.orderId);
     let invoiceNumber = payload.invoiceNumber;
     if (!invoiceNumber) {
+      // Numérotation continue par année : FA-2026-00001, FA-2026-00002, …
       const year = new Date().getFullYear();
-      const { data: seq, error: seqErr } = await supabaseAdmin.rpc("nextval" as never, {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as never);
-      void seqErr;
-      const counter = (seq as unknown as number) ?? null;
-      invoiceNumber = `FA-${year}-${String(counter ?? Date.now() % 100000).padStart(5, "0")}`;
+      const prefix = `FA-${year}-`;
+      const { data: last } = await supabaseAdmin
+        .from("orders")
+        .select("invoice_number")
+        .like("invoice_number", `${prefix}%`)
+        .order("invoice_number", { ascending: false })
+        .limit(1);
+      const lastNumber = (last as unknown as { invoice_number: string | null }[] | null)?.[0]?.invoice_number;
+      const next = lastNumber ? Number(lastNumber.slice(prefix.length)) + 1 : 1;
+      invoiceNumber = `${prefix}${String(next).padStart(5, "0")}`;
     }
+
 
     const { error: updErr } = await supabaseAdmin
       .from("orders")
