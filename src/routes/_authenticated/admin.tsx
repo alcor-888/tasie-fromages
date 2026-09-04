@@ -12,6 +12,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AdminImport } from "@/components/admin-import";
 import { AdminPassword } from "@/components/admin-password";
+import { AdminInvoice } from "@/components/admin-invoice";
+
 import { AdminClients } from "@/components/admin-clients";
 import { AdminEmailStatus } from "@/components/admin-email-status";
 import { toast } from "sonner";
@@ -175,7 +177,10 @@ function AdminPage() {
                   </li>
                 ))}
               </ul>
+
+              <AdminInvoice order={o} />
             </article>
+
           ))}
         </div>
           </TabsContent>

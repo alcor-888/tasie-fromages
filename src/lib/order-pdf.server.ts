@@ -3,6 +3,10 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf
 export interface OrderPdfData {
   orderId: string;
   orderNumber?: string | null;
+  /** "order" = bon de commande (défaut), "invoice" = facture finale au poids réel. */
+  docKind?: "order" | "invoice";
+  invoiceNumber?: string | null;
+  invoicedAt?: string | null;
   createdAt: string;
   customerName: string;
   customerPhone: string;
@@ -19,8 +23,18 @@ export interface OrderPdfData {
     unitPrice: number;
     unitLabel?: string | null;
     piecesPerPack?: number | null;
+    /** Facture : quantité initialement commandée, avant ajustement au poids réel. */
+    orderedQuantity?: number | null;
   }[];
 }
+
+/** Référence affichée : n° de facture pour une facture, n° de bon sinon. */
+export function documentRef(data: OrderPdfData): string {
+  return data.docKind === "invoice"
+    ? data.invoiceNumber || `FA-${data.orderId.slice(0, 8).toUpperCase()}`
+    : data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
+}
+
 
 // pdf-lib standard fonts encode WinAnsi (Latin-1). Replace anything outside it.
 const WINANSI_EXTRA = "\u20AC\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\u017D\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\u017E\u0178";
@@ -99,17 +113,25 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   };
 
   // Header
+  const isInvoice = data.docKind === "invoice";
+  const docTitle = isInvoice ? "Facture" : "Bon de commande";
   text("TASIE FROMAGES", { size: 20, font: bold, color: brand });
   y -= 18;
-  text("Bon de commande", { size: 13, font: bold });
+  text(docTitle, { size: 13, font: bold });
   y -= 16;
-  const ref = data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
-  text(`Bon de commande n° ${ref}`, { size: 11, font: bold, color: brand });
+  const ref = documentRef(data);
+  text(`${docTitle} n° ${ref}`, { size: 11, font: bold, color: brand });
   y -= 14;
-  const created = new Date(data.createdAt);
+  const created = new Date(isInvoice ? (data.invoicedAt ?? data.createdAt) : data.createdAt);
   const dateStr = created.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
   const timeStr = created.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   text(`Émis le ${dateStr} à ${timeStr}`, { size: 9, color: muted });
+  if (isInvoice) {
+    y -= 12;
+    const orderRef = data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
+    text(`Bon de commande n° ${orderRef} — quantités ajustées au poids réel`, { size: 9, color: muted });
+  }
+
   y -= 20;
   page.drawLine({ start: { x: M, y }, end: { x: M + width, y }, thickness: 1, color: brand });
   y -= 24;
@@ -159,10 +181,16 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
 
   for (const item of data.items) {
     const nameLines = wrap(item.cheeseName, regular, 10, colQty - M - 12);
-    const packLine = item.piecesPerPack && item.piecesPerPack > 1
+    const pricePart = item.piecesPerPack && item.piecesPerPack > 1
       ? `Prix ${/kg/i.test(item.unitLabel ?? "") ? "au kilo" : "a la piece"} ${money(item.unitPrice / item.piecesPerPack)} - ${sanitize(item.unitLabel ?? "")} - prix du colis ${money(item.unitPrice)}`
       // unitPrice = prix facturé de l'article/colis ; le prix unitaire est informatif.
       : `Prix a l'article ${money(item.unitPrice)}`;
+    const adjusted =
+      isInvoice && item.orderedQuantity != null && item.orderedQuantity !== item.quantity
+        ? ` - commande : ${item.orderedQuantity}${item.unitLabel ? ` ${sanitize(item.unitLabel)}` : ""} - ajuste au poids reel`
+        : "";
+    const packLine = `${pricePart}${adjusted}`;
+
 
     const rowHeight = Math.max(nameLines.length * 12 + (packLine ? 12 : 0), 14) + 6;
     if (y - rowHeight < M + 60) {
@@ -194,7 +222,7 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
 
   y -= 12;
   ensure(40);
-  const totalLabel = "Estimation totale";
+  const totalLabel = isInvoice ? "Total facturé" : "Estimation totale";
   const totalValue = sanitize(money(data.totalEstimate));
   page.drawText(sanitize(totalLabel), { x: colQty, y, size: 12, font: bold, color: brand });
   page.drawText(totalValue, { x: colTotal - bold.widthOfTextAtSize(totalValue, 12), y, size: 12, font: bold, color: brand });
@@ -217,7 +245,7 @@ export async function buildOrderPdf(data: OrderPdfData): Promise<Uint8Array> {
   const pages = pdf.getPages();
   pages.forEach((p, idx) => {
     const footer = sanitize(
-      `La Cave Tasie Fromages — Bon de commande n° ${ref} — page ${idx + 1}/${pages.length}`,
+      `La Cave Tasie Fromages — ${docTitle} n° ${ref} — page ${idx + 1}/${pages.length}`,
     );
     p.drawText(footer, { x: M, y: M - 18, size: 8, font: regular, color: muted });
   });

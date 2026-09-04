@@ -37,10 +37,14 @@ const HEADERS = [
 ];
 
 export function buildOrderCsv(data: OrderPdfData): string {
-  const ref = data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
-  const created = new Date(data.createdAt);
+  const isInvoice = data.docKind === "invoice";
+  const ref = isInvoice
+    ? data.invoiceNumber || `FA-${data.orderId.slice(0, 8).toUpperCase()}`
+    : data.orderNumber || `BC-${data.orderId.slice(0, 8).toUpperCase()}`;
+  const created = new Date(isInvoice ? (data.invoicedAt ?? data.createdAt) : data.createdAt);
   const date = created.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
   const time = created.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
 
   const rows = data.items.map((item, idx) =>
     [
