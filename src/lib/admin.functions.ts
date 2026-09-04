@@ -23,7 +23,7 @@ export const listOrders = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: orders, error } = await supabaseAdmin
       .from("orders")
-      .select("id, customer_name, customer_phone, customer_email, pickup_date, notes, total_estimate, status, created_at, order_items(cheese_name, quantity, unit_price, unit_label, line_total)")
+      .select("id, customer_name, customer_phone, customer_email, pickup_date, notes, total_estimate, status, created_at, invoice_number, invoiced_at, invoice_total, order_items(id, cheese_name, quantity, final_quantity, unit_price, unit_label, pieces_per_pack, line_total)")
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
