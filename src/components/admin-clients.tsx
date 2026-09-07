@@ -29,6 +29,20 @@ function randomKey() {
   return "TF-" + Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadFile(content: string, filename: string, mime: string) {
+  downloadBlob(new Blob([content], { type: mime }), filename);
+}
+
+
 export function AdminClients() {
   const fetchClients = useServerFn(listClients);
   const createFn = useServerFn(createClient);
