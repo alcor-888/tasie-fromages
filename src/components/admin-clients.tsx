@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as XLSX from "xlsx";
-import { Trash2, UserPlus, Upload, Save, KeyRound, CheckCircle2, AlertCircle } from "lucide-react";
+import { Trash2, UserPlus, Upload, Save, KeyRound, CheckCircle2, AlertCircle, Download } from "lucide-react";
 import {
   listClients,
   createClient,
