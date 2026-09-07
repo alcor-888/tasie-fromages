@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as XLSX from "xlsx";
-import { Trash2, UserPlus, Upload, Save, KeyRound, CheckCircle2, AlertCircle } from "lucide-react";
+import { Trash2, UserPlus, Upload, Save, KeyRound, CheckCircle2, AlertCircle, Download } from "lucide-react";
 import {
   listClients,
   createClient,
@@ -28,6 +28,20 @@ const EMPTY_PROFILE: ProfileForm = {
 function randomKey() {
   return "TF-" + Math.random().toString(36).slice(2, 8).toUpperCase();
 }
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadFile(content: string, filename: string, mime: string) {
+  downloadBlob(new Blob([content], { type: mime }), filename);
+}
+
 
 export function AdminClients() {
   const fetchClients = useServerFn(listClients);
@@ -110,8 +124,73 @@ export function AdminClients() {
     }
   }
 
+  const clientRows = (data ?? []).filter((u: ClientUser) => !u.roles.includes("admin") && u.profile);
+
+  function exportKeys(format: "xlsx" | "csv") {
+    const rows = clientRows.map((u: ClientUser) => ({
+      Nom: u.profile?.last_name ?? "",
+      Prenom: u.profile?.first_name ?? "",
+      Entreprise: u.profile?.company ?? "",
+      Email: u.email,
+      "Cle d'activation": u.profile?.activation_key ?? "",
+      Statut: u.profile?.activated ? "Activé" : "En attente",
+    }));
+    if (!rows.length) { toast.error("Aucun client à exporter"); return; }
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const date = new Date().toISOString().slice(0, 10);
+    if (format === "csv") {
+      const csv = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+      downloadFile("\uFEFF" + csv, `cles-activation-clients-${date}.csv`, "text/csv;charset=utf-8");
+    } else {
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Clés clients");
+      const out = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+      downloadBlob(new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `cles-activation-clients-${date}.xlsx`);
+    }
+    toast.success("Fichier généré");
+  }
+
   return (
     <div className="grid gap-8">
+      {/* Activation keys export */}
+      <div className="rounded-lg border border-border bg-card p-6">
+        <h3 className="font-display text-xl font-semibold">Fichier des clés d'activation</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Liste de tous les clients (nom, prénom, entreprise, email et clé d'activation) à conserver et à
+          transmettre individuellement à chaque client pour sa première connexion.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button className="gap-2" onClick={() => exportKeys("xlsx")}>
+            <Download className="h-4 w-4" /> Télécharger en Excel
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => exportKeys("csv")}>
+            <Download className="h-4 w-4" /> Télécharger en CSV
+          </Button>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs uppercase text-muted-foreground">
+                <th className="py-2 pr-4">Client</th>
+                <th className="py-2 pr-4">Entreprise</th>
+                <th className="py-2 pr-4">Email</th>
+                <th className="py-2 pr-4">Clé d'activation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clientRows.map((u: ClientUser) => (
+                <tr key={u.id} className="border-t border-border">
+                  <td className="py-2 pr-4">{[u.profile?.first_name, u.profile?.last_name].filter(Boolean).join(" ") || "—"}</td>
+                  <td className="py-2 pr-4">{u.profile?.company || "—"}</td>
+                  <td className="py-2 pr-4">{u.email}</td>
+                  <td className="py-2 pr-4 font-mono">{u.profile?.activation_key}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Bulk import */}
       <div className="rounded-lg border border-border bg-card p-6">
         <h3 className="font-display text-xl font-semibold">Import Excel de la base clients</h3>
@@ -133,6 +212,7 @@ export function AdminClients() {
           </p>
         )}
       </div>
+
 
       {/* Manual create */}
       <div className="rounded-lg border border-border bg-card p-6">
