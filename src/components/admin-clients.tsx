@@ -69,29 +69,35 @@ export function AdminClients() {
       const wb = XLSX.read(buf, { type: "array" });
       const sheet = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
+      const norm = (s: string) =>
+        s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
       const mapped = rows
         .map((r) => {
           const g = (keys: string[]) => {
-            for (const k of keys) {
-              const found = Object.keys(r).find((x) => x.trim().toLowerCase() === k.toLowerCase());
-              if (found && String(r[found]).trim()) return String(r[found]).trim();
+            const wanted = keys.map(norm);
+            for (const [k, v] of Object.entries(r)) {
+              if (wanted.includes(norm(k)) && String(v).trim()) return String(v).trim();
             }
             return "";
           };
           return {
-            email: g(["Email", "E-mail", "Mail"]),
-            password: g(["MotDePasse", "Mot de passe", "Password"]),
-            activationKey: g(["CleActivation", "Clé d'activation", "Clé", "ActivationKey"]) || randomKey(),
+            email: g(["Email", "E-mail", "Mail", "Adresse mail", "Adresse email", "Courriel"]),
+            password: g(["MotDePasse", "Mot de passe", "Password", "MDP"]),
+            activationKey: g(["CleActivation", "Clé d'activation", "Cle d'activation", "Clé", "Cle", "ActivationKey", "Code", "Code d'activation"]) || randomKey(),
             firstName: g(["Prenom", "Prénom", "FirstName"]),
-            lastName: g(["Nom", "LastName"]),
-            company: g(["Entreprise", "Société", "Company"]),
-            deliveryAddress: g(["AdresseLivraison", "Adresse", "Address"]),
-            phone: g(["Telephone", "Téléphone", "Phone"]),
-            website: g(["SiteWeb", "Site", "Website"]),
+            lastName: g(["Nom", "LastName", "Nom de famille"]),
+            company: g(["Entreprise", "Société", "Societe", "Company", "Raison sociale", "Client"]),
+            deliveryAddress: g(["AdresseLivraison", "Adresse de livraison", "Adresse", "Address"]),
+            phone: g(["Telephone", "Téléphone", "Tel", "Tél", "Phone", "Portable", "Mobile"]),
+            website: g(["SiteWeb", "Site web", "Site", "Website"]),
           };
         })
-        .filter((r) => r.email && r.password);
-      if (!mapped.length) { setImportStatus("Aucune ligne valide (email + mot de passe requis)"); return; }
+        .filter((r) => r.email);
+      if (!mapped.length) {
+        const headers = rows[0] ? Object.keys(rows[0]).join(", ") : "(aucune colonne détectée)";
+        setImportStatus(`Aucune ligne valide : la colonne email est introuvable. Colonnes détectées : ${headers}`);
+        return;
+      }
       setImportStatus(`Import de ${mapped.length} client(s)…`);
       const res = await bulkFn({ data: { rows: mapped } });
       setImportStatus(`✓ ${res.created} créé(s), ${res.updated} mis à jour, ${res.failed} en échec`);
