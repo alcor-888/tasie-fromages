@@ -183,7 +183,10 @@ export const bulkImportClients = createServerFn({ method: "POST" })
     z.object({
       rows: z.array(profileFields.extend({
         email: z.string().trim().email().max(255),
-        password: z.string().min(6).max(72).optional(),
+        password: z.string().max(72).optional().transform((v) => {
+          const t = (v ?? "").trim();
+          return t.length >= 6 ? t : undefined;
+        }),
         activationKey: z.string().trim().min(3).max(80),
       })).min(1).max(500),
     }).parse(input),
